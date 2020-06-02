@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/24/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_IMBALANCEDTREEIMPROVER_H
 #define ALGORITHMSPROJECT_IMBALANCEDTREEIMPROVER_H

@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 8/28/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/matching/MaxMatchBipartite.h>
 #include <graphs/VertexCover/VCUtils.h>

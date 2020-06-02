@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 4/4/20.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include "CONTESTS/PACE20/separatorminimizers/FlowMinimizer.h"
 #include "CONTESTS/PACE20/separatorminimizers/GreedyNodeEdgeMinimizer.h"
 #include "CONTESTS/PACE20/separatorminimizers/LargestComponentsVCMinimizer.h"

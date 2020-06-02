@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/2/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_CENTROIDDECOMPOSITION_H
 #define ALGORITHMSPROJECT_CENTROIDDECOMPOSITION_H

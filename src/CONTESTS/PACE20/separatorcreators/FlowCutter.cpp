@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/19/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/separatorcreators/FlowCutter.h>
 #include <CONTESTS/PACE20/separatorcreators/ComponentExpansionSeparatorCreator.h>

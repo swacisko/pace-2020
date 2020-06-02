@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 8/12/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <graphs/flow/MaxFlow.h>
 
 #include "graphs/flow/MaxFlow.h"

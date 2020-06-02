@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 8/27/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #ifndef ALGORITHMSPROJECT_RANDOMGENERATORS_H
 #define ALGORITHMSPROJECT_RANDOMGENERATORS_H
 

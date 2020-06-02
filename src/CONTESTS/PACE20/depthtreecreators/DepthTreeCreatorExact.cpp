@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 5/9/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/depthtreecreators/DepthTreeCreatorExact.h>
 #include <CONTESTS/PACE20/depthtreecreators/DepthTreeCreatorLarge.h>

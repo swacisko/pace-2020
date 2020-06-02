@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 8/14/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <frameworks/ForbiddenStates.h>
 #include <numbertheory/NumberTheoryUtils.h>
 

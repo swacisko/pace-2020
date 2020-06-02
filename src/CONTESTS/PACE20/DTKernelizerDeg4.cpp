@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 5/4/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include "CONTESTS/PACE20/DTKernelizerDeg4.h"
 #include <graphs/GraphReader.h>

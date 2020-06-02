@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/20/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_BRIDGESANDARTPOINTS_H
 #define ALGORITHMSPROJECT_BRIDGESANDARTPOINTS_H

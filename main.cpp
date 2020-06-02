@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
+
 #include "CONTESTS/PACE20/Pace20.h"
 
 int main( int argc, char **argv  ) {

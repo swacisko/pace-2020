@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 3/16/20.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #ifndef ALGORITHMSPROJECT_PACE20PARAMS_H
 #define ALGORITHMSPROJECT_PACE20PARAMS_H
 

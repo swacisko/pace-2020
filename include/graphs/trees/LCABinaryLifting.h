@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 10/15/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #ifndef ALGORITHMSPROJECT_LCABINARYLIFTING_H
 #define ALGORITHMSPROJECT_LCABINARYLIFTING_H
 

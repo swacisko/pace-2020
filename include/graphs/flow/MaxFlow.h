@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 8/12/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_MAXFLOW_H
 #define ALGORITHMSPROJECT_MAXFLOW_H

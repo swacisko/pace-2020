@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 9/2/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_SMALLHALLVIOLATORFINDER_H
 #define ALGORITHMSPROJECT_SMALLHALLVIOLATORFINDER_H

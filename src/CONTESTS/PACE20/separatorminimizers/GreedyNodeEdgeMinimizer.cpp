@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/17/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 
 #include <CONTESTS/PACE20/separatorminimizers/GreedyNodeEdgeMinimizer.h>

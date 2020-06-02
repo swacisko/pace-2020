@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 5/13/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_TOTALPIVOTMAKER_H
 #define ALGORITHMSPROJECT_TOTALPIVOTMAKER_H

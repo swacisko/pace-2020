@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/5/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_TOTALMINIMIZER_H
 #define ALGORITHMSPROJECT_TOTALMINIMIZER_H

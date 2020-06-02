@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/10/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/separatorminimizers/ExpansionMinimizer.h>
 #include "CONTESTS/PACE20/separatorcreators/ComponentExpansionSeparatorCreator.h"

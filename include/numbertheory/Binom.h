@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 10/3/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #ifndef ALGORITHMSPROJECT_BINOM_H
 #define ALGORITHMSPROJECT_BINOM_H
 

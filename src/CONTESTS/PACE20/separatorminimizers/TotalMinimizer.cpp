@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/5/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/separatorminimizers/TotalMinimizer.h>
 #include <CONTESTS/PACE20/Pace20Params.h>

@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/13/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_DEPTHTREEIRRELEVANTNODESHIFTER_H
 #define ALGORITHMSPROJECT_DEPTHTREEIRRELEVANTNODESHIFTER_H

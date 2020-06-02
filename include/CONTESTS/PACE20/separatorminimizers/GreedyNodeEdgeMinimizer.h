@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/17/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_GREEDYNODEMINIMIZER_H
 #define ALGORITHMSPROJECT_GREEDYNODEMINIMIZER_H

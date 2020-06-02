@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/29/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_LARGESTCOMPONENTSVCMINIMIZER_H
 #define ALGORITHMSPROJECT_LARGESTCOMPONENTSVCMINIMIZER_H

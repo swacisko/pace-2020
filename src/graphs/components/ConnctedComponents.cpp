@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/16/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/GraphUtils.h>
 #include <graphs/components/ConnectedComponents.h>

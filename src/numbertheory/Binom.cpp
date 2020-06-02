@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 10/3/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <numbertheory/NumberTheoryUtils.h>
 #include <numbertheory/Binom.h>

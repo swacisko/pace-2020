@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/25/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/cliques/CliqueExtension.h>
 

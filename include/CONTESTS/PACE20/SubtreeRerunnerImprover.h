@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 5/8/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_SUBTREERERUNNERIMPROVER_H
 #define ALGORITHMSPROJECT_SUBTREERERUNNERIMPROVER_H

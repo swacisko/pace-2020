@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/21/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/flow/DisjointPaths.h>
 #include <graphs/flow/UnitFlow.h>

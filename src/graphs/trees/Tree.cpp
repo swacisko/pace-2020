@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 8/26/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <graphs/trees/Tree.h>
 #include <functional>
 #include <graphs/graphtraversals/DFS.h>

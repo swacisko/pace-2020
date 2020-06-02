@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/21/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_UNITFLOW_H
 #define ALGORITHMSPROJECT_UNITFLOW_H

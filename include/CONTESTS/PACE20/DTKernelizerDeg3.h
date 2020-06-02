@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/17/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_DTKERNELIZERDEG3_H
 #define ALGORITHMSPROJECT_DTKERNELIZERDEG3_H

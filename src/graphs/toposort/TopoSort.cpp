@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 8/13/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/toposort/TopoSort.h>
 #include <Constants.h>

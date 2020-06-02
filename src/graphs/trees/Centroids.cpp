@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 4/2/20.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include "graphs/trees/Centroids.h"
 #include "graphs/GraphReader.h"
 #include "graphs/GraphUtils.h"

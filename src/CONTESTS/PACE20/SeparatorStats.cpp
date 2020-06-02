@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/16/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include "CONTESTS/PACE20/SeparatorStats.h"
 #include "CONTESTS/PACE20/SeparatorEvaluators.h"

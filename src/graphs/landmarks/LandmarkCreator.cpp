@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 3/23/20.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <graphs/landmarks/LandmarkCreator.h>
 #include <graphs/graphtraversals/BFS.h>
 

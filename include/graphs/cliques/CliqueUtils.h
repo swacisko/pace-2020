@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 3/25/20.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #ifndef ALGORITHMSPROJECT_CLIQUEUTILS_H
 #define ALGORITHMSPROJECT_CLIQUEUTILS_H
 

@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/22/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/separatorcreators/FlowSeparatorCreator.h>
 #include <graphs/GraphReader.h>

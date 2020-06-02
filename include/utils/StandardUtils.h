@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 9/6/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_STANDARDUTILS_H
 #define ALGORITHMSPROJECT_STANDARDUTILS_H

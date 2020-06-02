@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/3/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/separatorminimizers/SnapToNonpathNodesMinimizer.h>
 #include <graphs/GraphUtils.h>

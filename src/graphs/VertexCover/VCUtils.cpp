@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 8/8/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <graphs/VertexCover/VCUtils.h>
 #include <Constants.h>
 

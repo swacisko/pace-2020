@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/24/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_SEPARATORMINIMIZER_H
 #define ALGORITHMSPROJECT_SEPARATORMINIMIZER_H

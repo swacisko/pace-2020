@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/16/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <utils/TimeMeasurer.h>
 #include <graphs/graphtraversals/BFS.h>
@@ -77,46 +77,12 @@ namespace Pace20{
 
 
     void run( int argc, char **argv  ){
-        TimeMeasurer::stopMeasurement("PACE20");
+        TimeMeasurer::startMeasurement("PACE20");
 
 
         addSigtermCheck();
         increaseStack();
 
-//        TotalPivotMaker::test();
-//        DepthTreeCreatorExact::test();
-//        DepthTreePivotMaker::test();
-//        SubtreeRerunnerImprover::test();
-//        DepthTreeCreatorLarge::test();
-//        ImbalancedTreeImprover::test();
-//        DepthTreeFromTreeWidth::test();
-//        FlowCutterMinimizer::test();
-//        FlowCutter::test();
-//        DTKernelizerDeg3::test();
-//        DTKernelizerDeg4::test();
-//        TreewidthSeparatorCreator::test();
-//        DepthTreeIrrelevantNodeShifter::test();
-//        BFSMinimizer::test();
-//        ExpansionMinimizer::test();
-//        CliqueSeparatorCreator::test();
-//        TotalMinimizer::test();
-//        ComponentExpansionSeparatorCreator::test();
-//        NodeAddOrderSeparatorCreator::test();
-//        FlowMinimizer::test();
-//        SnapToNonpathNodesMinimizer::test();
-//        DTKernelizer::test();
-//        GreedyNodeEdgeMinimizer::test();
-//        FlowSeparatorCreator::test();
-//        ComponentTreeMerger::test();
-//        RemovalOrderSeparatorCreator::test();
-//        ArtPointSeparatorCreator::test();
-//        NeighborhoodVCMinimizer::test();
-//        DepthTree::test();
-//        LargestComponentsVCMinimizer::test();
-
-//        string filename = "heur_101.gr";
-//        fstream str(filename);
-//        VVI V = GraphReader::readGraphDIMACSWunweighed(str,false);
 
         VVI V = GraphReader::readGraphDIMACSWunweighed(cin,false);
 
@@ -139,16 +105,6 @@ namespace Pace20{
 
 
 
-
-
-
-
-
-
-
-
-
-
         int reps = 50;
         DepthTree bestTree(V);
         bestTree.height = V.size();
@@ -159,30 +115,23 @@ namespace Pace20{
         if( V.size() < 500 ) {
             reps = 10'000;
             Pace20Params::maxSources = 10;
-//            Pace20Params::maxBestSepsForMinimizers = 15;
         }
         if( V.size() < 1'000 ){
             reps = 10'000;
             Pace20Params::maxSources = 10;
-//            Pace20Params::maxBestSepsForMinimizers = 15;
         }else if( V.size() < 10'000 ){
             reps = 2'000;
-//            Pace20Params::maxBestSepsForMinimizers = 10;
         }else if( V.size() < 100'000 ){
             reps = 500;
         }
         else if( V.size() < 300'000 ){
             Pace20Params::maxSources = 4;
             Pace20Params::maxBestSepsForMinimizers = 5;
-//            Pace20Params::balance = 0.9;
-//            Pace20Params::maxSeparatorSizeForGNEMinimizer = 350; // #TEST
             reps = 100;
         }
         else /*if( V.size() >= 300'000 )*/{
             Pace20Params::maxSources = 4;
             Pace20Params::maxBestSepsForMinimizers = 5;
-//            Pace20Params::balance = 0.9;
-//            Pace20Params::maxSeparatorSizeForGNEMinimizer = 350; // #TEST
             reps = 20;
         }
 
@@ -193,11 +142,6 @@ namespace Pace20{
 
 
 //        reps = 10;
-
-//            Pace20Params::maxSources = 30;
-//            Pace20Params::maxBestSepsForMinimizers = 2;
-//            Pace20Params::minGraphSizeForKernelization = 1e9;
-
 
         for(int r=0; r<reps; r++){
 

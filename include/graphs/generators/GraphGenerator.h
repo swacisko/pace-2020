@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 8/8/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_GRAPHGENERATOR_H
 #define ALGORITHMSPROJECT_GRAPHGENERATOR_H

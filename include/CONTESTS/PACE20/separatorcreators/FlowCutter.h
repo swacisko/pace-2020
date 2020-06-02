@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/19/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_FLOWCUTTER_H
 #define ALGORITHMSPROJECT_FLOWCUTTER_H

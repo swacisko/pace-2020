@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 9/2/19.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <graphs/VertexCover/approximation/PartitionSVC.h>
 //#include <graphs/VertexCover/approximation/NuMVC/numvc.h>
 #include <graphs/VertexCover/approximation/SwapVC.h>

@@ -1,7 +1,6 @@
-//
-// Created by sylwester on 5/13/20.
-//
-
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <CONTESTS/PACE20/TotalPivotMaker.h>
 #include <utils/StandardUtils.h>
 #include <graphs/components/ConnectedComponents.h>

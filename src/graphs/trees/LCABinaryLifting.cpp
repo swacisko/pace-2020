@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 10/15/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 
 #include <graphs/trees/LCABinaryLifting.h>

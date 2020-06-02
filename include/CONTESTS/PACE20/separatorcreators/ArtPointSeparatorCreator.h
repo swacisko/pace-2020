@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/27/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #ifndef ALGORITHMSPROJECT_ARTPOINTSEPARATORCREATOR_H
 #define ALGORITHMSPROJECT_ARTPOINTSEPARATORCREATOR_H

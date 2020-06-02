@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/27/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include "graphs/VertexCover/BipartiteGraphVertexCover.h"
 

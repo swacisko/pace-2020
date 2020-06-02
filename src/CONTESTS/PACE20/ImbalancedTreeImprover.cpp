@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 4/24/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <CONTESTS/PACE20/ImbalancedTreeImprover.h>
 #include <CONTESTS/PACE20/depthtreecreators/DepthTreeCreatorLarge.h>

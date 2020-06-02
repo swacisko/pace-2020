@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 8/8/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/generators/GraphGenerator.h>
 #include <combinatorics/CombinatoricUtils.h>

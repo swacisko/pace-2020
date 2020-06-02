@@ -1,10 +1,6 @@
-//
-// Created by sylwester on 5/1/20.
-//
-
-//
-// Created by sylwester on 3/21/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <graphs/flow/UnitFlow2.h>
 #include <graphs/flow/MaxFlow.h>

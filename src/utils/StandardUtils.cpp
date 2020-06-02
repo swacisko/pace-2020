@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 9/6/19.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 
 #include <utils/StandardUtils.h>
 

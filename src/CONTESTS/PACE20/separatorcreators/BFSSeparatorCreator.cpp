@@ -1,6 +1,6 @@
-//
-// Created by sylwester on 3/16/20.
-//
+/*
+ * Copyright (c) 2020, Sylwester Swat
+*/
 #include <CONTESTS/PACE20/separatorcreators/BFSSeparatorCreator.h>
 #include <CONTESTS/PACE20/separatorminimizers/GreedyNodeEdgeMinimizer.h>
 #include <graphs/graphtraversals/BFS.h>
