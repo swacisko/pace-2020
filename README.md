@@ -26,7 +26,7 @@ cd build<br>
 cmake ..<br>
 make
 
-After this, the executable file name "ExTREEm" should be in the "build" directory
+After this, the executable file named "ExTREEm" should be in the "build" directory
 
 <br>
 
