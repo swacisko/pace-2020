@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2020, Sylwester Swat
+ * This file is a part of ExTREEm - heuristic solver for treedepth problem, written as an entry to the PACE 2020 challenge.
+ * Copyright (c) 2020 Sylwester Swat
+ * ExTREEm is free software, under GPL3 license. See the GNU General Public License for more details.
 */
 
 #include <CONTESTS/PACE20/Pace20Params.h>
@@ -17,6 +19,8 @@ namespace Pace20Params{
     int inputGraphEdges;
 
     bool quickAndWeakTreeCreation = true;
+
+    const bool useExactTrack = false;
 
     bool useOnlyArtPoints = false;
     bool useKernelization = true;
@@ -60,6 +64,8 @@ namespace Pace20Params{
         if( Pace20::globalBestTree != nullptr ){
             outputWriterLock.lock();
             Pace20::globalBestTree->write();
+
+            if( useExactTrack && Pace20::globalBestTree->height >= 20 ) while(1); // #TEST EXACT TRACK TRICK - do not output decomposition with height >= 20 :D
 
             DEBUG( Pace20::globalBestTree->height );
             TimeMeasurer::stopMeasurement("PACE20");

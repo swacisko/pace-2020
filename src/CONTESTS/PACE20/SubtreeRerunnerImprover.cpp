@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2020, Sylwester Swat
+ * This file is a part of ExTREEm - heuristic solver for treedepth problem, written as an entry to the PACE 2020 challenge.
+ * Copyright (c) 2020 Sylwester Swat
+ * ExTREEm is free software, under GPL3 license. See the GNU General Public License for more details.
 */
 
 #include <CONTESTS/PACE20/SubtreeRerunnerImprover.h>
@@ -88,49 +90,56 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
 
     assert( GraphUtils::isConnected(g.V) );
 
-    cerr << "assertion GraphUtils::isConnected(g.V) in SubtreeRerunnerImprover may fail, please consider each connected sugraph separately";
-    exit(2);
 
-    DepthTreeCreatorLarge dtcl(g.V,0);
-    DepthTree dtree = dtcl.getDepthTree();
 
-    auto newDt = dt;
+//    cerr << "assertion GraphUtils::isConnected(g.V) in SubtreeRerunnerImprover may fail, please consider each connected sugraph separately";
+//    exit(2);
 
-    int prevHeight = 0;
-    for( int i=0; i<T; i++ ) for( int d : data[i].sepNodes ) if( d == root ){ prevHeight = data[i].height; }
+    if( GraphUtils::isConnected(g.V) == false ){
+        cerr << "Subgraph g.V is not connected" << endl;
+        return dt;
+    }
+    else {
 
-    if( dtree.height < prevHeight ){
-        cerr << endl << "SubtreeRerunnerImprover found better subtree!" << endl;
-        DEBUG(prevHeight);
-        DEBUG(dtree);
-        ENDL(1);
+        DepthTreeCreatorLarge dtcl(g.V, 0);
+        DepthTree dtree = dtcl.getDepthTree();
 
-        for( PII p : dtree.par ){
-            int a = g.nodes[ p.first ];
-            int b = p.second;
-            if( b == -1 ) b = par;
-            else b = g.nodes[b];
+        auto newDt = dt;
 
-            newDt.par[a] = b;
+        int prevHeight = 0;
+        for (int i = 0; i < T; i++) for (int d : data[i].sepNodes) if (d == root) { prevHeight = data[i].height; }
+
+        if (dtree.height < prevHeight) {
+//            cerr << endl << "SubtreeRerunnerImprover found better subtree!" << endl;
+//            DEBUG(prevHeight);
+//            DEBUG(dtree);
+//            ENDL(1);
+
+            for (PII p : dtree.par) {
+                int a = g.nodes[p.first];
+                int b = p.second;
+                if (b == -1) b = par;
+                else b = g.nodes[b];
+
+                newDt.par[a] = b;
+            }
+
+            newDt.height = newDt.calculateHeight();
+
+            newDt = DepthTreePivotMaker::makeAllPivots(newDt);
+
+            assert(newDt.isCorrect());
+
+//            DEBUG(dt);
+//            DEBUG(newDt);
+
+//            cerr << "Improving again!" << endl;
+            newDt = improve(newDt, balance);
         }
 
-        newDt.height = newDt.calculateHeight();
-
-        newDt = DepthTreePivotMaker::makeAllPivots(newDt);
-
-        assert( newDt.isCorrect() );
-
-        DEBUG(dt);
-        DEBUG(newDt);
-
-        cerr << "Improving again!" << endl;
-        newDt = improve( newDt, balance );
+        if( newDt.height < dt.height ) return newDt;
+        else return dt;
     }
-
-//    exit(1);
-
-    if( newDt.height < dt.height ) return newDt;
-    else return dt;
 }
 
 void SubtreeRerunnerImprover::test() {

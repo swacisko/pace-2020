@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2020, Sylwester Swat
+ * This file is a part of ExTREEm - heuristic solver for treedepth problem, written as an entry to the PACE 2020 challenge.
+ * Copyright (c) 2020 Sylwester Swat
+ * ExTREEm is free software, under GPL3 license. See the GNU General Public License for more details.
 */
 
 #include <utils/TimeMeasurer.h>
@@ -141,6 +143,15 @@ namespace Pace20{
         else if( GraphUtils::countEdges(V) < 3'000 ) Pace20Params::maxBestSepsForRecursion = 4;
 
 
+        bool exactTrack = Pace20Params::useExactTrack; // #TEST EXACT
+        if(exactTrack){
+            reps = 5'000;
+            int L = 16;
+            Pace20Params::maxBestSepsForRecursion = L;
+            Pace20Params::maxBestSepsForMinimizers = L;
+            Pace20Params::maxSources = 10;
+        }
+
 //        reps = 10;
 
         for(int r=0; r<reps; r++){
@@ -210,7 +221,7 @@ namespace Pace20{
             }
 
             if(Pace20Params::tle) break;
-            if( r > 0 && V.size() < 5'000 && dtree.height < bestTree.height + 3 ){
+            if( !exactTrack && r > 0 && V.size() < 5'000 && dtree.height < bestTree.height + 3 ){
                 ImbalancedTreeImprover improver;  cerr << "improving imbalanced tree if possible" << endl;
                 SeparatorEvaluators::nodeScaleFactor = 0.4; SeparatorEvaluators::edgeScaleFactor = 0.6; Pace20Params::minimizeNodesIteration = false;
                 auto impDt = improver.improve(dtree);  DEBUG(impDt.height);
@@ -237,21 +248,33 @@ namespace Pace20{
 
             }*/
 
-           /* if( !Pace20Params::quickAndWeakTreeCreation ){
-                ENDL(5);
-                SubtreeRerunnerImprover improver;
-                auto impDt = improver.improve( dtree,0.2 );
-                DEBUG(impDt.height);
+
+            if( !Pace20Params::quickAndWeakTreeCreation && exactTrack ){
+//                ENDL(5);
+                VD balances = {};
+
+                if( exactTrack ){ balances.clear(); for(double d = 0.9; d >= 0.1; d -= 0.1) balances.push_back(d); }
+//                if( Pace20Params::inputGraphEdges <= 500'000 ){ balances = {0.5}; }
+
+                for( double balance : balances ) {
+                    SubtreeRerunnerImprover improver;
+//                    cerr << "SubtreeRerunnerImprover with balance = " << balance << endl;
+                    auto impDt = improver.improve(dtree, balance);
+//                    DEBUG(impDt.height);
 //                while( impDt.height < bestTree.height ){
-                if( impDt.height < bestTree.height ){
-                    Pace20Params::outputWriterLock.lock();
-                    auto temp = impDt; swap( bestTree, temp ); globalBestTree = &bestTree;
-                    Pace20Params::outputWriterLock.unlock();
+                    if (impDt.height < bestTree.height) {
+                        Pace20Params::outputWriterLock.lock();
+                        auto temp = impDt;
+                        swap(bestTree, temp);
+                        globalBestTree = &bestTree;
+                        Pace20Params::outputWriterLock.unlock();
 //                    impDt = improver.improve( dtree,0.3 ); // version with while, but repetitive improvement is already in improver.improve()
+                    }
+//                    cerr << "After improvements, iteration tree height: " << impDt.height << endl;
+                    if (impDt.height < dtree.height) swap(dtree, impDt);
                 }
-                cerr << "After improvements, iteration tree height: " << impDt.height << endl;
-                ENDL(5);
-            }*/
+//                ENDL(5);
+            }
 
 
             cerr << endl << endl << "  Iteration tree height after improvements: " << dtree.height << endl << endl << endl;
@@ -273,6 +296,9 @@ namespace Pace20{
 
         { // write answer - this section probabyl will no be reached, since answer will be written in teminate() function after receiving SIGTERM
             Pace20Params::outputWriterLock.lock();
+
+            if(exactTrack && bestTree.height >= 20) while(1);
+
             bestTree.write();
 //            Pace20Params::outputWriterLock.unlock(); // if we wrote an answer we do not release the lock
         }
