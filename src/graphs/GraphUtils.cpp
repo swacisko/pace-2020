@@ -1,21 +1,25 @@
-/*
- * This file is a part of ExTREEm - heuristic solver for treedepth problem, written as an entry to the PACE 2020 challenge.
- * Copyright (c) 2020 Sylwester Swat
- * ExTREEm is free software, under GPL3 license. See the GNU General Public License for more details.
-*/
+//
+// Created by sylwester on 8/8/19.
+//
 
 
-#include <graphs/GraphUtils.h>
-#include <graphs/trees/Tree.h>
-#include <graphs/components/ConnectedComponents.h>
+#include "../../include/graphs/GraphUtils.h"
+#include "graphs/trees/Tree.h"
+#include "graphs/components/ConnectedComponents.h"
 
-#include "graphs/GraphUtils.h"
 #include "combinatorics/CombinatoricUtils.h"
-#include <graphs/VertexCover/approximation/PartitionSVC.h>
-#include <graphs/VertexCover/SolutionVC.h>
-#include <utils/StandardUtils.h>
+#include "graphs/vertex_cover/approximation/PartitionSVC.h"
+#include "graphs/vertex_cover/SolutionVC.h"
+#include "../../include/utils/StandardUtils.h"
+// #include <CONTESTS/PACE22/Utils.h>
+// #include <graphs/treewidth/pace.h>
+#include "contests/pace20/SeparatorEvaluators.h"
+#include "contests/pace20/Pace20Params.h"
 #include "graphs/cliques/CliqueExtension.h"
 #include "graphs/components/BridgesAndArtPoints.h"
+#include "contests/pace20/separatorcreators/FlowCutter.h"
+#include "contests/pace20/separatorcreators/ComponentExpansionSeparatorCreator.h"
+
 
 VI GraphUtils::getComplimentaryNodes( VVI & V, VI & nodes ){
     VB inNodes( V.size(),false );
@@ -25,6 +29,66 @@ VI GraphUtils::getComplimentaryNodes( VVI & V, VI & nodes ){
         if( !inNodes[i] ) res.push_back(i);
     }
     return res;
+}
+
+bool GraphUtils::isBipartite(VVI &V) {
+    int N = V.size();
+    constexpr int inf = 1e9;
+    VI dst(N,inf);
+
+    auto bfs = [&](int beg) {
+        deque<int> que;
+        que.push_back(beg);
+        dst[beg] = 0;
+        while(!que.empty()) {
+            int v = que.front();
+            que.pop_front();
+            for(int d : V[v]) {
+                if(dst[d] == dst[v]) return false;
+                if(dst[d] == inf) {
+                    dst[d] = dst[v]+1;
+                    que.push_back(d);
+                }
+            }
+        }
+        return true;
+    };
+
+    for( int i=0; i<N; i++ ) if(dst[i] == inf) if( !bfs(i) ) return false;
+    return true;
+}
+
+bool GraphUtils::isCycle(VVI& V) {
+    int u = 0;
+    int beg = u;
+    if ( V[u].size() != 2 ) return false;
+    int v = V[u][0];
+    int visited = 1;
+
+    while ( v != beg && V[v].size() == 2 ) {
+        visited++;
+        int w = ( V[v][0] == u ? V[v][1] : V[v][0] );
+        u = v;
+        v = w;
+    }
+
+    return (v == beg) && (visited == V.size());
+}
+
+bool GraphUtils::hasCycle(VVI &V) {
+    int N = V.size();
+    VB was(N);
+    function<bool(int,int)> dfs = [&](int num, int par) {
+        was[num] = true;
+        for ( int d : V[num] ) if (d != par && was[d]) return true;
+        // we can mark all neighbors as visited, because if at some point a neighbor of a node on path is reachable,
+        // then that node on a path is also reachable, hence we will have a cycle
+        for ( int d : V[num] ) was[d] = true;
+        for ( int d : V[num] ) if ( d != par && dfs(d,num) ) return true;
+        return false;
+    };
+    for ( int i=0; i<N; i++ ) if ( !was[i] ) if ( dfs(i,i) ) return true;
+    return false;
 }
 
 VI GraphUtils::getRandomColoring( VVI & V ){
@@ -56,12 +120,25 @@ VI GraphUtils::getRandomColoring( VVI & V ){
     return color;
 }
 
-VPII GraphUtils::getGraphEdges( VVI & V ){
+VPII GraphUtils::getGraphEdges( VVI & V, bool directed ){
+    if(directed) return getDirectedGraphEdges(V);
+
     VPII res;
     res.reserve( countEdges(V) );
     for( int i=0; i<V.size(); i++ ){
         for( int d : V[i] ){
             if(d>i) res.push_back( {i,d} );
+        }
+    }
+    return res;
+}
+
+VPII GraphUtils::getDirectedGraphEdges( VVI & V ){
+    VPII res;
+    res.reserve( countEdges(V) );
+    for( int i=0; i<V.size(); i++ ){
+        for( int d : V[i] ){
+            res.push_back( {i,d} );
         }
     }
     return res;
@@ -136,24 +213,20 @@ VVI GraphUtils::transposeGraph(VVI &v) {
     return g;
 }
 
-bool GraphUtils::isMaximalIndependentSet(VVI &V, VI &mis) {
-    VB was(V.size(),false);
-    for( int d : mis ){
-        was[d] = true;
-        for(int p : V[d]) was[p] = true;
-    }
-
-    for( int i=0; i<V.size(); i++ ){
-        if( !was[i] ){
-            return false;
-        }
-    }
-    return true;
-}
 
 void GraphUtils::addEdge(VVI &V, int a, int b, bool directed) {
     V[a].push_back(b);
     if( !directed ) V[b].push_back(a);
+}
+
+bool GraphUtils::addEdgeSafe(VVI &V, int a, int b, bool directed) {
+    auto exists = StandardUtils::find(V[a],b);
+    if(!exists) V[a].push_back(b);
+
+    bool x = false;
+    if( !directed ) x = addEdgeSafe( V, b,a,true );
+
+    return (!exists || x);
 }
 
 void GraphUtils::removeEdge(VVI &V, int a, int b, bool directed) {
@@ -199,23 +272,49 @@ bool GraphUtils::containsEdge(VVI &V, int a, int b) {
     return find( ALL(V[a]),b ) != V[a].end();
 }
 
-int GraphUtils::countEdges(VVI &V) {
+int GraphUtils::countEdges(VVI &V, const bool directed) {
     int res = 0;
     for(auto& v : V) res += v.size();
-    return res >> 1;
+    if(!directed) return res >> 1;
+    else return res;
 }
 
 VVI GraphUtils::sortNodeNeighborhoods( VVI & V ){
     VVI V2(V.size());
     for(int i=0; i<V.size(); i++) V2[i].reserve(V[i].size());
     for( int i=0; i<V.size(); i++ ){
-    for( int d : V[i] ) V2[d].push_back(i);
+        for( int d : V[i] ) V2[d].push_back(i);
     }
     return V2;
 }
 
 
+VVI GraphUtils::getComplimentaryGraph(VVI &V) {
+    VVI V2(V.size());
+    for( int i=0; i<V.size(); i++ ){
+        VI tmp = V[i];
+        tmp.push_back(i);
+        sort(ALL(tmp));
+        V2[i] = getComplimentaryNodes( V,tmp );
+    }
 
+    bool correct = true;
+    for( int i=0; i<V.size(); i++ ){
+        VB was(V.size(),false);
+        for( int d : V[i] ) was[d] = true;
+        for(int d : V2[i]) was[d] = true;
+        if( V[i].size() + V2[i].size() != V.size() -1 ) correct = false;
+        for(int k=0; k<V.size(); k++) if( k != i && !was[k]) correct = false;
+    }
+
+    assert(correct);
+
+    return V2;
+
+
+//    VVI V2 = V;
+//    return makeCompliment(V2, CombinatoricUtils::getRandomPermutation(V.size()) );
+}
 
 void GraphUtils::removeNodesFromGraph(VVI &V, VI nodes) {
 
@@ -259,13 +358,13 @@ void GraphUtils::removeNodesFromGraph(VVI &V, VVI &W, VI nodes) {
 }
 
 void GraphUtils::writeGraphHumanReadable(VVI &V) {
-    cerr << "****" << endl;
+    clog << "****" << endl;
     for( int i=0; i<V.size(); i++ ){
-        cerr << i << ": ";
+        clog << i << ": ";
         VI neigh = V[i];
         sort(ALL(neigh));
-        for(int d : neigh) cerr << d << "  ";
-        cerr << endl;
+        for(int d : neigh) clog << d << "  ";
+        clog << endl;
     }
 }
 
@@ -310,41 +409,121 @@ void GraphUtils::contractEdge(VVI &V, int a, int b) {
     mergeNodeToNode(V,a,b);
 }
 
+#ifndef QUICK_BUILD
 void GraphUtils::writeBasicGraphStatistics(VVI &V) {
-    cerr << "V.size(): " << V.size() << endl;
-    cerr << "|E(V)|: " << countEdges(V) << endl;
-    cerr << "average degree: " << ( (double)2 * countEdges(V) ) / V.size() << endl;
-    int m = min( (int)V.size()-1,5 );
-    VI degs(V.size(),0);
-    for( VI& v : V ) degs[v.size()]++;
-    for(int i=0; i<=m; i++) cerr << "nodes with deg " << i << ": " << degs[i] << endl;
-    cerr << endl;
-
-    cerr << "isTree: " << Tree::isTree(V) << endl;
-
-    auto artsAndBridges = BridgesAndArtPoints::getBridgesAndArtPoints(V);
-    cerr << "There are " << artsAndBridges.first.size() << " articulation points and " << artsAndBridges.second.size() << " bridges" << endl;
-    cerr << endl;
+    clog << "V.size(): " << V.size() << endl;
+    clog << "|E(V)|: " << countEdges(V) << endl;
+    clog << "average degree: " << ( (double)2 * countEdges(V) ) / V.size() << endl;
+    clog << "largest degree: " << max_element( ALL(V), []( VI& v, VI& w ){ return v.size() < w.size(); } )->size() << endl;
+    int m = min( (int)V.size()-1,3 );
 
     VVI comps = ConnectedComponents::getConnectedComponents(V);
-    cerr << "There are " << comps.size() << " connected components" << endl;
+    clog << "There are " << comps.size() << " connected components" << endl;
     sort( ALL(comps), [](VI& v1, VI& v2){ return v1.size() > v2.size(); } );
     m = min( (int)comps.size(),7 );
-    cerr << "first " << m << " largest component sizes: "; for( int i=0; i<m; i++ ) cerr << comps[i].size() << " "; cerr << endl;
-    cerr << "first " << m << " smallest component sizes: "; for( int i=(int)comps.size()-m; i< comps.size(); i++ ) cerr << comps[i].size() << " "; cerr << endl;
+    clog << "first " << m << " largest component sizes: "; for( int i=0; i<m; i++ ) clog << comps[i].size() << " "; clog << endl;
+    clog << "first " << m << " smallest component sizes: "; for( int i=(int)comps.size()-m; i< comps.size(); i++ ) clog << comps[i].size() << " "; clog << endl;
 
-    VI clq = CliqueExtension::findMaximalNodeCliqueExtension(V);
-    cerr << "maximal clique found via greedy extension: " << clq.size() << endl;
+    m = min((int)V.size(),11);
+    VI degs(V.size(),0);
+    for( VI& v : V ) degs[v.size()]++;
+    for(int i=0; i<m; i++) clog << "nodes with deg " << i << ": " << degs[i] << endl;
+    clog << endl;
 
-    PartitionSVC vcCreator(V);
-    vcCreator.setSupressAllLogs(true); vcCreator.setMaxIterations( 200 ); vcCreator.setMaxRunTime(5'000);vcCreator.getSvcParams().alpha = 0.5;
-    vcCreator.getSvcParams().iterationsPerSubgraph = 200;vcCreator.getSvcParams().setInitialSolutionForSubgraph = false;vcCreator.setTakeFirstBestSolution(false);
-    vcCreator.getSvcParams().initialSolutionIterations = 1;vcCreator.run();
-    VI vc = ((SolutionVC*) vcCreator.getBestSolution())->getVC();
-    cerr << "Quickly found vertex cover size: " << vc.size() << "  and corresponding independent set size: " << V.size() - vc.size() << endl;
+//    cerr << "isTree: " << Tree::isTree(V) << endl;
+
+    // auto artsAndBridges = BridgesAndArtPoints::getBridgesAndArtPoints(V);
+    // clog << "There are " << artsAndBridges.first.size() << " articulation points and " << artsAndBridges.second.size() << " bridges" << endl;
+    // clog << endl;
+
+    bool is_bipartite = isBipartite(V);
+    DEBUG(is_bipartite);
 
 
+//    { // clique size by greedy extension
+//        ENDL(1);
+//        if(V.size() < 3'000){
+//            VVI compV = getComplimentaryGraph(V);
+//            VI vc = Utils::getUpperBoundByVCOnSuperPIGraph(compV, 3000);
+//            VI compVmis = CombinatoricUtils::getFullSetDifference( V.size(), vc );
+//            VI clq = compVmis;
+//            clog << "maximal clique found using FastVC on complimentary graph: " << clq.size() << endl;
+//        }else{
+//            VI clq = CliqueExtension::findMaximalNodeCliqueExtension(V, true);
+//            clog << "maximal clique found via sparse greedy extension: " << clq.size() << endl;
+//        }
+//    }
 
+//    { // VC and MIS sizes
+//        ENDL(1);
+//        VI vc = Utils::getUpperBoundByVCOnSuperPIGraph(V, 3000);
+//        clog << "Estimated VC size (run FastVC for 3s): " << vc.size() << "  ->  mis: " << V.size() - vc.size() << endl;
+//    }
+
+//    { // treewidth
+//        TREEWIDTH trw;
+//        int max_cnt = 8;
+//        volatile sig_atomic_t tle = 0;
+//        TreewidthDecomposition decomp = trw.main( V, max_cnt, tle );
+//        ENDL(1);
+//        clog << "Found treewidth decomposition of size: " << decomp.getWidth() << endl;
+//    }
+//
+//    { // separator
+//        ENDL(5);
+////
+//        VVI comps = ConnectedComponents::getConnectedComponents(V);
+//        VI cmp = *max_element(ALL(comps), [](auto & a, auto & b){ return a.size() < b.size(); });
+//        InducedGraph g = GraphInducer::induce(V,cmp);
+//        DEBUG(g.V.size());
+//        DEBUG(GraphUtils::countEdges(g.V));
+//
+//        FlowCutter fc( SeparatorEvaluators::sepEvalToUse );
+//        fc.setBalanceParameter(5);
+//        vector<Separator> separators = fc.createSeparators(g.V, 5);
+//        clog << "Separators found using 5 iterations of FlowCutter:" << endl;
+//        for(auto sep : separators){
+//            DEBUG(sep.stats);
+//            InducedGraph g = GraphInducer::induce(V, sep.nodes);
+//            clog << "\tGraph induced by sep has " << countEdges(g.V) << " edges" << endl;
+//        }
+//
+////        ComponentExpansionSeparatorCreator exp(SeparatorEvaluators::sepEvalToUse);
+////        vector<Separator> separators = exp.createSeparators(g.V,5);
+////        clog << "Separators found using 5 iterations of ComponentExpansionSeparatorCreator:" << endl;
+////        for(auto sep : separators) DEBUG(sep.stats);
+//    }
+
+}
+#endif // QUICKBUILD
+
+void GraphUtils::removeEdges(VVI &V, VPII &edges, VB & helper, bool directed) {
+    int N = V.size();
+
+    auto job = [&]() {
+        sort(ALL(edges));
+        int p = 0;
+        while(p < N) {
+            int q = p+1;
+            while(q < N && edges[p].first == edges[q].first) q++;
+            {
+                int a = edges[p].first;
+                for( int j=p; j<q; j++ ) helper[ edges[j].second ] = true;
+                REMCVAL( helper, V[a] );
+                for( int j=p; j<q; j++ ) helper[ edges[j].second ] = false;
+            }
+            p = q;
+        }
+    };
+
+    job();
+
+    if(!directed) {
+        for( auto & [a,b] : edges ) swap(a,b);
+        job();
+    }
+
+    assert(false && "This version of GraphUtils::removeEdges was not tested yet");
 }
 
 void GraphUtils::removeEdges(VVI &V, VPII &edges, bool directed) {
@@ -382,15 +561,115 @@ void GraphUtils::removeEdges(VVI &V, VPII &edges, bool directed) {
 }
 
 bool GraphUtils::isConnected(VVI &V) {
-//    cerr << "isConnected not tested yet!" << endl; exit(1);
-    VB was(V.size(),false);
+    // VB was(V.size(),false);
+    // int cnt = 0;
+    // function< void(int) > dfs = [&V,&was, &dfs, &cnt](int num){
+    //     was[num] = true;
+    //     cnt++;
+    //     for( int d : V[num] ) if( !was[d] ) dfs(d);
+    // };
+    // dfs(0);
+    // return (cnt == V.size());
+
+    // below is the equivalent to the code above, but does not use recursion (and hence has no issues with small
+    // stack size in IDE connected to WSL).
+    int N = V.size();
+    VB was(N);
+    VI neigh; neigh.reserve(N);
+    neigh.push_back(0);
+    was[0] = true;
     int cnt = 0;
-    function< void(int) > dfs = [&V,&was, &dfs, &cnt](int num){
-        was[num] = true;
+    for (int i=0; i<neigh.size(); i++) {
+        int v = neigh[i];
         cnt++;
-        for( int d : V[num] ) if( !was[d] ) dfs(d);
-    };
-    dfs(0);
-    return (cnt == V.size());
+        for ( int d : V[v] ) if ( !was[d] ) {
+            was[d] = true;
+            neigh.push_back(d);
+        }
+    }
+    return cnt == N;
 }
+
+VI GraphUtils::getNeighborhoodExclusive(VVI &V, VI &A, VB &helper) {
+    VI res;
+    for( int a : A ) helper[a] = true;
+    for( int a : A ){
+        for( int w : V[a] ){
+            if(!helper[w]){
+                res.push_back(w);
+                helper[w] = true;
+            }
+        }
+    }
+
+    for( int a : A ) helper[a] = false;
+    for(int d : res) helper[d] = false;
+    return res;
+}
+
+int GraphUtils::regularity(VVI V) {
+    int k = V[0].size();
+    for(int i=1; i<V.size(); i++) if( V[i].size() != k ) return -1;
+    return k;
+}
+
+VVI GraphUtils::makeSimple(VVI V) {
+    for( int i=0; i<V.size(); i++ ){
+        sort(ALL(V[i]));
+        V[i].resize(unique(ALL(V[i])) - V[i].begin()); // removing parallel edges
+
+        for( int j=(int)V[i].size()-1; j>=0; j--){ // removing loops
+            if( V[i][j] == i ){
+                swap(V[i][j], V[i].back());
+                V[i].pop_back();
+            }
+        }
+    }
+    return V;
+}
+
+VVI GraphUtils::getGraphForEdges(VPII edges, bool directed) {
+    int N = 0;
+    for(auto & [a,b] : edges) N = max(N, max(a,b));
+    VVI V(N+1);
+    for( auto & [a,b] : edges ) addEdge(V,a,b,directed);
+    return V;
+}
+
+VVI GraphUtils::remapGraph(VVI V, VI perm) {
+    int N = V.size();
+    VVI H(N);
+    for( int i=0; i<N; i++ ){
+        H[perm[i]].reserve(V[i].size());
+        for(int d : V[i]) H[perm[i]].push_back(perm[d]);
+    }
+
+    return H;
+}
+
+bool GraphUtils::isSimple(VVI V) {
+     int N = V.size();
+     VB helper(N,false);
+
+     for( int i=0; i<N; i++ ){
+         for( int d : V[i] ){
+             if( (d == i) || helper[d] ) return false;
+             helper[d] = true;
+         }
+
+         for(int d : V[i]) helper[d] = false;
+     }
+
+     return true;
+}
+
+double GraphUtils::density(VVI &V, bool directed) {
+    LL denom = V.size();
+    denom *= denom-1;
+    denom >>= 1;
+
+    double density = countEdges(V, directed);
+    return density / denom;
+}
+
 

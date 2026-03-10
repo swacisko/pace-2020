@@ -1,15 +1,14 @@
-/*
- * This file is a part of ExTREEm - heuristic solver for treedepth problem, written as an entry to the PACE 2020 challenge.
- * Copyright (c) 2020 Sylwester Swat
- * ExTREEm is free software, under GPL3 license. See the GNU General Public License for more details.
-*/
+//
+// Created by sylwester on 8/8/19.
+//
+
+#include "../../include/graphs/GraphInducer.h"
 
 #include <graphs/GraphInducer.h>
 
 #include "graphs/GraphInducer.h"
 
 InducedGraph GraphInducer::induce( VVI & V, VI & nodes ){
-
     InducedGraph g;
     g.nodes = nodes;
     g.par = &V;
@@ -29,10 +28,86 @@ InducedGraph GraphInducer::induce( VVI & V, VI & nodes ){
             }
         }
     }
+    return g;
+}
+
+ostream& operator<<(ostream& str, InducedGraph& g){
+    str << "Par: " << *g.par << endl
+        << "Nodes: " << g.nodes << endl
+        << "Perm: " << g.perm << endl
+        << "V: " << g.V << endl;
+    return str;
+}
+
+InducedGraphPI GraphInducer::induce(VVPII &V, VI &nodes) {
+    InducedGraphPI g;
+    g.nodes = nodes;
+    g.par = &V;
+    int N = SIZE(nodes);
+
+    g.perm = unordered_map<int,int>();
+    g.perm.reserve( nodes.size() * 2 );
+    for(int i=0; i<N; i++) g.perm[ nodes[i] ] = i;
+
+    g.V = VVPII(nodes.size() );
+    for( int i=0; i<nodes.size(); i++ ){
+        for( auto pr : V[ nodes[i] ] ){
+            int d = pr.first;
+            int w = pr.second;
+            auto it = g.perm.find(d);
+            if( it != g.perm.end() ){
+                int indD = it->second;
+                g.V[ i ].push_back({indD,w} );
+            }
+        }
+    }
+    return g;
+}
+
+
+InducedGraphPI GraphInducer::induceNoPerm(VVPII &V, VI &nodes, VI &helper) {
+    InducedGraphPI g;
+    g.nodes = nodes;
+    g.par = &V;
+    int N = SIZE(nodes);
+
+    int M = 0;
+    if( !nodes.empty() ) M = *max_element(ALL(nodes));
+    if( helper.size() <= M ) helper.resize(M+1,-1);
+
+    for(int i=0; i<N; i++) helper[ nodes[i] ] = i;
+
+    g.V = VVPII(nodes.size() );
+    for( int i=0; i<nodes.size(); i++ ){
+        for( auto pr : V[ nodes[i] ] ){
+            int d = pr.first;
+            int w = pr.second;
+
+            while( helper.size() <= d ) helper.push_back(-1);
+
+            int indD = helper[d];
+            if( indD >= 0 ){
+                g.V[ i ].push_back({indD,w} );
+            }
+        }
+    }
+
+    for(int i=0; i<N; i++) helper[ nodes[i] ] = -1; // clearing array
 
     return g;
-
 }
+
+
+
+
+ostream& operator<<(ostream& str, InducedGraphPI& g){
+    str << "Par: " << *g.par << endl
+        << "Nodes: " << g.nodes << endl
+        << "Perm: " << g.perm << endl
+        << "V: " << g.V << endl;
+    return str;
+}
+
 
 
 vector<InducedGraph> GraphInducer::induceGraphs(VVI &V, VI &colors, const int WILDCARD_COLOR) {
@@ -122,6 +197,8 @@ vector<InducedGraph> GraphInducer::induceGraphs(VVI &V, VI &colors, const int WI
         }
     }
 
+    clog << "CAUTION! induceGraphs function not tested, not even sure if the implementation was finished!!" << endl;
+    return graphs;
 }
 
 InducedGraph GraphInducer::induce( VVI & V, VPII & edges, bool directed ){
@@ -180,4 +257,15 @@ InducedGraph GraphInducer::induce( VVI & V, VPII & edges, bool directed ){
     return g;
 }
 
+InducedGraph GraphInducer::induceByNonisolatedNodes(VVI &V) {
+    VI nodes;
+    VI degs(V.size(),0);
+    for( int i=0; i<V.size(); i++ ){
+        degs[i] += V[i].size();
+        for(int d : V[i]) degs[d]++;
+    }
 
+    for( int i=0; i<V.size(); i++ ) if(degs[i]) nodes.push_back(i);
+
+    return GraphInducer::induce(V,nodes);
+}

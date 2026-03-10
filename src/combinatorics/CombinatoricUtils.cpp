@@ -6,6 +6,9 @@
 #include <utils/RandomNumberGenerators.h>
 #include <combinatorics/CombinatoricUtils.h>
 
+#include "utils/IntGenerator.h"
+#include "utils/StandardUtils.h"
+
 
 namespace CombinatoricUtils{
 
@@ -13,7 +16,9 @@ namespace CombinatoricUtils{
     VI getRandomPermutation(int N){
         VI perm(N);
         iota(ALL(perm),0);
-        random_shuffle(ALL(perm));
+        // random_shuffle(ALL(perm));
+        IntGenerator rnd;
+        StandardUtils::shuffle(perm,rnd);
         return perm;
     }
 

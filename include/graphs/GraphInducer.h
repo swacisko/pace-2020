@@ -1,8 +1,6 @@
-/*
- * This file is a part of ExTREEm - heuristic solver for treedepth problem, written as an entry to the PACE 2020 challenge.
- * Copyright (c) 2020 Sylwester Swat
- * ExTREEm is free software, under GPL3 license. See the GNU General Public License for more details.
-*/
+//
+// Created by sylwester on 8/8/19.
+//
 
 #ifndef ALGORITHMSPROJECT_GRAPHINDUCER_H
 #define ALGORITHMSPROJECT_GRAPHINDUCER_H
@@ -21,6 +19,8 @@ struct InducedGraph{
     VPII edges; // this is a vector of edges that induce a graph. It may be empty if the graph is induced by nodes
     VVI V; // induced graph
 
+    friend ostream& operator<<(ostream& str, InducedGraph& g);
+
     void write(){
         cerr << "Graph induced by: " << flush; WRITE(nodes);
         if( !edges.empty() ){
@@ -30,6 +30,29 @@ struct InducedGraph{
         WRITE_ALL( V, "Graph structure",0 );
 
     }
+
+    /**
+     * Remaps nodes using mapping: a -> nodes[a].
+     * @param nds
+     */
+    void remapNodes(VI & nds){ for( int & d : nds ) d = nodes[d]; }
+};
+
+/**
+ * For weighted graphs on structure VVPII
+ */
+struct InducedGraphPI{
+    VVPII *par; // parent graph;
+    VI nodes; // this is a vector of vertices that induce the graph.
+    // vertex with number nodes[i] has in induced graph number i.
+
+    unordered_map<int,int> perm; // perm[t] is the number d such that nodes[d] = t; E.g. if graph is induced by [2,8,5] then perm[8] = 1.  So perm[ nodes[i] ] = i for i in [ 0,SIZE(V) ) and
+    // nodes[ perm[i] ] = i for i in {nodes[0], nodes[1], ..., nodes.back() }
+
+    VPII edges; // this is a vector of edges that induce a graph. It may be empty if the graph is induced by nodes
+    VVPII V; // induced graph
+
+    friend ostream& operator<<(ostream& str, InducedGraphPI& g);
 };
 
 
@@ -39,9 +62,32 @@ public:
     // return graph induced by given nodes. Works for directed graphs as well (V can be directed).
     static InducedGraph induce( VVI & V, VI & nodes );
 
+    /**
+     * For weighted graphs on structure VVPII
+     */
+    static InducedGraphPI induce(VVPII & V, VI & nodes );
+
+    /**
+     * The same as [static InducedGraphPI induce(VVPII & V, VI & nodes )], but DOES NOT CREATE [PERM] MAP.
+     * If perm map is not necessary, then this function can be used to induce graphs faster, using helper array
+     * instead of a map.
+     * @param V
+     * @param nodes
+     * @helper helper array. Must be of size at least V.size(), with all entries < 0
+     * @return
+     */
+    static InducedGraphPI induceNoPerm(VVPII & V, VI & nodes, VI & helper );
+
     // returns graph induced by given edges. Works for directed graphs (V can be directed) as welll
     // if directed == true then each edge in edges will be treated as directed edge. Otherwise it will be treated as undirected, bidirectional edge.
     static InducedGraph induce( VVI & V, VPII & edges, bool directed = false );
+
+    /**
+     * Creates and returns a graph induced by all nonisolated nodes in graph [V].
+     * Works for directed graphs.
+     * @return induced graph
+     */
+    static InducedGraph induceByNonisolatedNodes( VVI & V );
 
     /**
      * Function induces many graphs at once. if colors[i] = k, then node i will be in k-th induced graph.

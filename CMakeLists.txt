@@ -1,30 +1,53 @@
-cmake_minimum_required(VERSION 3.10.2)
+cmake_minimum_required(VERSION 3.20)
 project(ExTREEm)
 
-#add_definitions(-std=gnu++0x)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-#SET(CMAKE_CXX_FLAGS "-D_GLIBCXX_DEBUG -static -pthread -std=c++14 -O0") # compilation for debugging
-#SET(CMAKE_CXX_FLAGS " -static -pthread -std=c++14 -O0") # compilation for profiling
-
-#SET(CMAKE_CXX_FLAGS "-static -pthread -std=c++14 -lm -O2") # compilation for faster execution -O2 uses compiler optimizations, -O0 uses no optimizations at all
-#SET(CMAKE_CXX_FLAGS "-static -pthread -std=c++14 -lm -O2 -DNDEBUG") # compilation for faster execution -O2 uses compiler optimizations, -O0 uses no optimizations at all
-
-#remove -pthread
-#SET(CMAKE_CXX_FLAGS "-static -std=c++14 -lm -O3") # turbo fast
-SET(CMAKE_CXX_FLAGS "-static -std=c++14 -lm -O3 -DNDEBUG") # turbo fast - disabling assertions
+SET(CMAKE_CXX_FLAGS "-std=c++23 -lm -O3") # turbo fast
 
 #set(SOURCES main.cpp)
-include_directories(include include/* include/*/* include/*/*/* include/*/*/*/* )
+include_directories(include
+        include/combinatorics
+        include/datastructures
+        include/frameworks
+        include/graphs
+        include/graphs
+        include/graphs/*
+        include/graphs/*/*
+        include/graphs/*/*/*
+        include/numbertheory
+        include/utils
 
-file(GLOB SOURCES main.cpp #[[./*.cpp]] src/* src/*/* src/*/*/* src/*/*/*/* src/*/*/*/*/* src/*/*/*/*/*/* src/*/*/*/*/*/*/*)
-add_executable(ExTREEm ${SOURCES})
+        include/contests/PACE20
+        include/contests/PACE20/depthtreecreators
+        include/contests/PACE20/separatorcreators
+        include/contests/PACE20/separatorminimizers
+        include/CONTESTS/experiments
+)
 
-#add_subdirectory(algorithms)
-#add_subdirectory(algorithms_tests)
+file(GLOB SOURCES
+        src/combinatorics/CombinatoricUtils.cpp
+        src/combinatorics/sequences/combinations/Combinations.cpp
+        src/datastructures/*.cpp
+        src/frameworks/*.cpp
+        src/graphs/*.cpp
+        src/graphs/*/*.cpp
+        src/graphs/*/*/*.cpp
+        src/numbertheory/*.cpp
+        src/utils/*.cpp
+
+        src/contests/PACE20/*.cpp
+        src/contests/PACE20/depthtreecreators/*.cpp
+        src/contests/PACE20/separatorcreators/*.cpp
+        src/contests/PACE20/separatorminimizers/*.cpp
+        src/CONTESTS/experiments/*.cpp
+)
+
+#add_executable(ExTREEm ${SOURCES}  main.cpp )
 
 
-
-#target_link_libraries(AlgorithmsProject_run algorithms)
-
-
+add_executable(exp1 ${SOURCES}
+        include/contests/experiments/Exp1.h
+        src/CONTESTS/experiments/Exp1.cpp
+)
