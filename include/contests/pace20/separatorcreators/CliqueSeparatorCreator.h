@@ -12,6 +12,7 @@
 class CliqueSeparatorCreator : public SeparatorCreator{
 public:
 
+    CliqueSeparatorCreator(VVI& V, Config c) : SeparatorCreator(c){}
     vector<Separator> createSeparators(VVI& V, int repeats = 1);
 
 

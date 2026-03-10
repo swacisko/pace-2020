@@ -13,14 +13,14 @@
 
 namespace Pace20Params{
 
-    int temp = 0;
+    // int temp = 0;
 
     int inputGraphSize;
     int inputGraphEdges;
 
     bool quickAndWeakTreeCreation = true;
 
-    const bool useExactTrack = false;
+    // const bool useExactTrack = false;
 
     bool useOnlyArtPoints = false;
     bool useKernelization = true;
@@ -56,53 +56,49 @@ namespace Pace20Params{
     int maxBestSepsForRecursion = 1;
     int maxRecDepthForBestSeps = 0;
 
-    volatile sig_atomic_t tle = 0;
-    mutex outputWriterLock;
+    // volatile sig_atomic_t tle = 0;
 
-    void terminate(int signum) {
-        tle = 1;
-        if( Pace20::globalBestTree != nullptr ){
-            outputWriterLock.lock();
-            Pace20::globalBestTree->write();
-
-            if( useExactTrack && Pace20::globalBestTree->height >= 20 ) while(1); // #TEST EXACT TRACK TRICK - do not output decomposition with height >= 20 :D
-
-            DEBUG( Pace20::globalBestTree->height );
-            TimeMeasurer::stopMeasurement("PACE20");
-            TimeMeasurer::writeAllMeasurements();
-//            outputWriterLock.unlock(); // if we wrote an answer we do not release the lock
-            exit(0);
-        }
-    }
-
-    void setExtensiveRecursionParameters() {
-        balance = 0.9;
-        CTMergerSmallSize = 4;
-        maxSeparatorSizeForGNEMinimizer = 350;
-//        maxSeparatorSizeForGNEMinimizer = 500;
-        maxSources = 5;
-        maxBestSepsForRecursion = 15;
-        maxRecDepthForBestSeps = 2;
-    }
-
-    void setNonextensiveRecursionParameters(){
-        balance = 0.9;
-        CTMergerSmallSize = 4;
-        maxSeparatorSizeForGNEMinimizer = 500;
-//        maxSources = 10;
-        maxSources = 5;
-        maxBestSepsForRecursion = 1;
-        maxRecDepthForBestSeps = 0;
-    }
-
-
-    void setTerminationParameters(){
-        maxSources = 1;
-        maxSeparatorSizeForGNEMinimizer = 0;
-        maxBestSepsForRecursion = 1;
-        maxRecDepthForBestSeps = 0;
-        CTMergerSmallSize = 0;
-    }
+//     void terminate(int signum) {
+//         tle = 1;
+//         if( Pace20::globalBestTree != nullptr ){
+//             outputWriterLock.lock();
+//             Pace20::globalBestTree->write();
+//
+//             DEBUG( Pace20::globalBestTree->height );
+//             TimeMeasurer::stopMeasurement("PACE20");
+//             TimeMeasurer::writeAllMeasurements();
+//             exit(0);
+//         }
+//     }
+//
+//     void setExtensiveRecursionParameters() {
+//         balance = 0.9;
+//         CTMergerSmallSize = 4;
+//         maxSeparatorSizeForGNEMinimizer = 350;
+// //        maxSeparatorSizeForGNEMinimizer = 500;
+//         maxSources = 5;
+//         maxBestSepsForRecursion = 15;
+//         maxRecDepthForBestSeps = 2;
+//     }
+//
+//     void setNonextensiveRecursionParameters(){
+//         balance = 0.9;
+//         CTMergerSmallSize = 4;
+//         maxSeparatorSizeForGNEMinimizer = 500;
+// //        maxSources = 10;
+//         maxSources = 5;
+//         maxBestSepsForRecursion = 1;
+//         maxRecDepthForBestSeps = 0;
+//     }
+//
+//
+//     void setTerminationParameters(){
+//         maxSources = 1;
+//         maxSeparatorSizeForGNEMinimizer = 0;
+//         maxBestSepsForRecursion = 1;
+//         maxRecDepthForBestSeps = 0;
+//         CTMergerSmallSize = 0;
+//     }
 
 }
 

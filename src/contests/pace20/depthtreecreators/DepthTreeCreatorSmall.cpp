@@ -6,7 +6,7 @@
 #include "contests/pace20/depthtreecreators/DepthTreeCreatorSmall.h"
 
 
-DepthTreeCreatorSmall::DepthTreeCreatorSmall(VVI &V,int depth) : DepthTreeCreator(V,depth) {
+DepthTreeCreatorSmall::DepthTreeCreatorSmall(VVI &V,int depth,Config c) : DepthTreeCreator(V,depth,c) {
 
 }
 

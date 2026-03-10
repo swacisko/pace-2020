@@ -15,7 +15,7 @@ class FlowSeparatorCreator : public SeparatorCreator{
 
 
 public:
-    FlowSeparatorCreator( SeparatorMinimizer* minimizer = nullptr );
+    FlowSeparatorCreator(Config c, SeparatorMinimizer* minimizer = nullptr );
 
 
     vector<Separator> createSeparators(VVI& V, int reapeats = 1);

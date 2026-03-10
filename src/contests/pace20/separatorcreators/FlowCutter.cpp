@@ -21,7 +21,7 @@
 #include "graphs/vertex_cover/BipartiteGraphVertexCover.h"
 
 
-FlowCutter::FlowCutter(SeparatorEvaluator eval) {
+FlowCutter::FlowCutter(SeparatorEvaluator eval,Config c) : SeparatorCreator(c){
     sepEval = eval;
 }
 

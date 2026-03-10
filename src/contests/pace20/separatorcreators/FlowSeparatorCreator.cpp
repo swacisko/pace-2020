@@ -17,7 +17,7 @@
 #include "utils/TimeMeasurer.h"
 
 
-FlowSeparatorCreator::FlowSeparatorCreator(SeparatorMinimizer *minimizer) {
+FlowSeparatorCreator::FlowSeparatorCreator(Config c, SeparatorMinimizer *minimizer) : SeparatorCreator(c) {
     this->minimizer = minimizer;
 }
 

@@ -20,7 +20,8 @@
 #include "combinatorics/CombinatoricUtils.h"
 
 
-ComponentExpansionSeparatorCreator::ComponentExpansionSeparatorCreator(function<bool(const Separator &, const Separator &)> eval) {
+ComponentExpansionSeparatorCreator::ComponentExpansionSeparatorCreator(
+    function<bool(const Separator &, const Separator &)> eval, Config c) : SeparatorCreator(c) {
     sepEval = eval;
 }
 

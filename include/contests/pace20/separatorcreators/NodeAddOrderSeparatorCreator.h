@@ -14,6 +14,7 @@
  */
 class NodeAddOrderSeparatorCreator : public SeparatorCreator{
 public:
+    NodeAddOrderSeparatorCreator(Config c) : SeparatorCreator(c) {}
 
     vector<Separator> createSeparators(VVI& V, int repeats=1);
 

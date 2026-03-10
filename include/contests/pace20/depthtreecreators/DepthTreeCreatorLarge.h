@@ -11,7 +11,7 @@
 
 class DepthTreeCreatorLarge : public DepthTreeCreator{
 public:
-    DepthTreeCreatorLarge(VVI & V, int recurrenceDepth, bool randomSepEval = false);
+    DepthTreeCreatorLarge(VVI & V, int recurrenceDepth, Config c, bool randomSepEval = false);
 
     DepthTree getDepthTree();
 

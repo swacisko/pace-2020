@@ -11,7 +11,7 @@
 
 class DepthTreeCreatorExact : public DepthTreeCreator{
 public:
-    DepthTreeCreatorExact( VVI & V, int k, int recDpth );
+    DepthTreeCreatorExact( VVI & V, int k, int recDpth, Config c );
 
     /**
      *

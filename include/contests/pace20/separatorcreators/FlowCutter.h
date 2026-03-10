@@ -15,7 +15,7 @@ class FlowCutter : public SeparatorCreator{
 
 public:
 
-    FlowCutter( SeparatorEvaluator eval );
+    FlowCutter( SeparatorEvaluator eval,Config c );
 
     ~FlowCutter(){ if( uf != nullptr ) delete uf; }
 

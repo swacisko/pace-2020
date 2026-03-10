@@ -16,9 +16,9 @@ namespace Pace20Params{
     extern int inputGraphSize;
     extern int inputGraphEdges;
 
-    extern int temp;
+    // extern int temp;
 
-    extern const bool useExactTrack;
+    // extern const bool useExactTrack;
 
     extern bool useOnlyArtPoints;
     extern bool useKernelization;
@@ -47,22 +47,23 @@ namespace Pace20Params{
 
     extern int maxSources;
 
-    extern std::mutex outputWriterLock;
-
-    extern volatile sig_atomic_t tle;
-
-    extern void terminate(int signum);
-
     extern int maxBestSepsForMinimizers;
 
     extern int maxBestSepsForRecursion;
     extern int maxRecDepthForBestSeps;
 
+    // extern std::mutex outputWriterLock;
 
-    extern void setExtensiveRecursionParameters();
-    extern void setNonextensiveRecursionParameters();
+    // extern volatile sig_atomic_t tle;
 
-    extern void setTerminationParameters();
+    // extern void terminate(int signum);
+
+
+
+    // extern void setExtensiveRecursionParameters();
+    // extern void setNonextensiveRecursionParameters();
+    //
+    // extern void setTerminationParameters();
 }
 
 #endif //ALGORITHMSPROJECT_PACE20PARAMS_H

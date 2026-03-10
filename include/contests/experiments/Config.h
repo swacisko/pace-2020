@@ -9,7 +9,7 @@
 
 
 enum SepCr {
-    ArtPointCr,
+    ArtPointCr = 1,
     ComponentExpansionCr,
     FlowCr,
     NodeAddOrderCr,
@@ -17,7 +17,7 @@ enum SepCr {
 };
 
 enum SepMinim {
-    BfsMinim,
+    BfsMinim = 1,
     ExpansionMinim,
     FlowCutterMinim,
     FlowMinim,
@@ -26,47 +26,80 @@ enum SepMinim {
     TotalMinim
 };
 
+enum Prepr {
+    AllPrepr = 1,
+    ArtPoints,
+    IndSet3,
+    IndSet4,
+    PathCompression,
+    CactusMerging,
+};
+
 enum Pivots {
-    BlockPivots,
+    BlockPivots = 1,
     HallSetPivots,
     AllPivots,
 };
 
 class Config {
 public:
+    static constexpr int inf = 1e9+1;
 
     string metadata_filepath = "";
-    int max_time_millis = 1e9;
+    int max_time_millis = inf;
+
+
+
+    int min_graph_size_for_kernelization = 1'000;
+    bool minimize_nodes_iteration = false;
+
+
+    double ct_merger_small_size = 4;
+
+
+    int max_best_seps_for_recursion = 1;
+    int max_rec_depth_for_best_seps = 0;
+
+
+    //************************** General config
+
+    bool quick_and_weak_tree_creation = false;
+    bool require_balanced_separators = true;
+
+
 
 
     //************************** Separator evaluation config
 
+    double sep_eval_balance = 0.97;
 
 
 
 
     //************************** Separator creators config
 
-    SepCr sep_cr_to_use = SepCr::FullCr;
+    int sep_cr_to_use_mask = SepCr::FullCr;
     VI sep_cr_iters = {7,5}; // default of 10 iterations for each separator creator
-
+    int sep_cr_max_sources = 7;
 
 
     //************************** Separator Minimizers config
 
-    SepMinim sep_minim_to_use = SepMinim::TotalMinim;
-
+    int sep_minim_to_use_mask = SepMinim::TotalMinim;
+    int max_separator_size_for_GNE_minimizer = inf;
+    int max_separator_size_for_flow_minimizer = inf;
+    int max_best_seps_for_minimizers = 5;
 
 
     //************************** Preprocessing config
 
-
-
+    bool preprocessing_to_use_mask = Prepr::AllPrepr;
+    bool use_preprocessing = (preprocessing_to_use_mask != 0);
 
 
     //************************** Pivots config
 
-    Pivots pivots_to_use = Pivots::AllPivots;
+    int pivots_to_use_mask = Pivots::AllPivots;
 
 
 

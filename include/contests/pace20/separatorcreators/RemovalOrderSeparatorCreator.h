@@ -9,12 +9,13 @@
 
 #include "Makros.h"
 #include "../Separator.h"
+#include "contests/experiments/Config.h"
 
 class RemovalOrderSeparatorCreator{
 
 public:
 
-    RemovalOrderSeparatorCreator( VVI& V );
+    RemovalOrderSeparatorCreator( VVI& V, Config c );
 
     /**
      * We remove from V nodes in given order, order[0], order[1], ....
@@ -52,7 +53,7 @@ private:
 
     function< bool(Separator&, Separator&) > sepEval;
     VVI V;
-
+    Config cnf;
 
 };
 

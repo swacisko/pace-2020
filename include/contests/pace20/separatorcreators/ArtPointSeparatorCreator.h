@@ -14,7 +14,8 @@
 class ArtPointSeparatorCreator : public SeparatorCreator{
 
 public:
-
+    ArtPointSeparatorCreator(Config c) : SeparatorCreator(c), n(0), N(0) {
+    }
 
     vector<Separator> createSeparators(VVI& V, int repeats);
 

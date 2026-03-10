@@ -17,7 +17,7 @@
 #include "combinatorics/CombinatoricUtils.h"
 
 
-BFSSeparatorCreator::BFSSeparatorCreator(VVI &V) {
+BFSSeparatorCreator::BFSSeparatorCreator(VVI &V, Config c) : SeparatorCreator(c) {
     this->V = V;
 }
 

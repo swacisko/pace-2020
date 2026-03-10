@@ -9,15 +9,18 @@
 
 #include <contests/pace20/separatorminimizers/SeparatorMinimizer.h>
 #include "Makros.h"
+#include "contests/experiments/Config.h"
 
 class SeparatorCreator{
 public:
+    virtual ~SeparatorCreator() = default;
 
+    SeparatorCreator(Config c) : cnf(c){}
 
     virtual vector<Separator> createSeparators(VVI& V, int repeats=1) = 0;
 
     
-
+    Config cnf;
 };
 
 #endif //ALGORITHMSPROJECT_SEPARATORCREATOR_H

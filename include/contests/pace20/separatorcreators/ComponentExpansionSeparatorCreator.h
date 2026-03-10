@@ -24,7 +24,7 @@ class ComponentExpansionSeparatorCreator : public SeparatorCreator{
 public:
 
 //    ComponentExpansionSeparatorCreator( function< bool(const Separator&, const Separator&) > eval );
-    ComponentExpansionSeparatorCreator( SeparatorEvaluator eval );
+    ComponentExpansionSeparatorCreator( SeparatorEvaluator eval, Config c );
 
     vector<Separator> createSeparators(VVI& V, int repeats);
 

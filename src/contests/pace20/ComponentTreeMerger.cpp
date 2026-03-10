@@ -133,7 +133,9 @@ DepthTree ComponentTreeMerger::mergeForOrder(VI mergeOrder) {
     int prev = -1;
 
 
-    auto it = max_element( ALL(mergeOrder), [=]( int a, int b ){ return (*subtrees)[a-sep->nodes.size()].par.size() < (*subtrees)[b-sep->nodes.size()].par.size(); } );
+    auto it = max_element( ALL(mergeOrder), [=]( int a, int b ) {
+        return (*subtrees)[a-sep->nodes.size()].par.size() < (*subtrees)[b-sep->nodes.size()].par.size();
+    } );
 
     int maxSizeInd = it - mergeOrder.begin();
 

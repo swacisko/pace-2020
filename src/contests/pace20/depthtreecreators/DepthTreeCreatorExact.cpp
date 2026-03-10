@@ -24,7 +24,7 @@ queue<LL> DepthTreeCreatorExact::fSQueue;
 unordered_map<LL,int> DepthTreeCreatorExact::fS;
 VLL DepthTreeCreatorExact::origHashes;
 
-DepthTreeCreatorExact::DepthTreeCreatorExact(VVI &V, int k, int recDpth) : DepthTreeCreator(V, recDpth), bestTree( DepthTree(V) ) {
+DepthTreeCreatorExact::DepthTreeCreatorExact(VVI &V, int k, int recDpth, Config c) : DepthTreeCreator(V, recDpth,c), bestTree( DepthTree(V) ) {
     preprocessDegreeLowerBound();
     K = k;
     bestTree.root = -1;

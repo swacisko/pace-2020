@@ -11,12 +11,13 @@
 #include <contests/pace20/DepthTree.h>
 #include <contests/pace20/Separator.h>
 #include "Makros.h"
+#include "contests/experiments/Config.h"
 
 class DepthTreeCreator{
 public:
     virtual ~DepthTreeCreator() = default;
 
-    DepthTreeCreator(VVI & V, int recurrenceDepth){
+    DepthTreeCreator(VVI & V, int recurrenceDepth, Config c) : cnf(c){
         this->V = &V;
         recDepth = recurrenceDepth;
     }
@@ -42,6 +43,7 @@ public:
     VVI * V;
 
     int recDepth;
+    Config cnf;
 };
 
 #endif //ALGORITHMSPROJECT_DEPTHTREECREATOR_H

@@ -12,7 +12,7 @@
 
 class BFSSeparatorCreator : public SeparatorCreator{
 public:
-    BFSSeparatorCreator(VVI & V);
+    BFSSeparatorCreator(VVI & V, Config c);
 
     vector<Separator> createSeparators(VVI& V, int maxSources=1);
 

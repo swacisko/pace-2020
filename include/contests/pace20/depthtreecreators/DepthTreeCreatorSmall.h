@@ -13,7 +13,7 @@
 
 class DepthTreeCreatorSmall : public DepthTreeCreator{
 public:
-    DepthTreeCreatorSmall(VVI & V,int depth);
+    DepthTreeCreatorSmall(VVI & V,int depth,Config c);
 
     DepthTree getDepthTree();
 

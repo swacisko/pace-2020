@@ -13,7 +13,7 @@
 #include <contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h>
 
 
-RemovalOrderSeparatorCreator::RemovalOrderSeparatorCreator(VVI &V) {
+RemovalOrderSeparatorCreator::RemovalOrderSeparatorCreator(VVI &V, Config c) : cnf(c) {
     this->V = V;
 }
 

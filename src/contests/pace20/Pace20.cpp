@@ -143,7 +143,7 @@ namespace Pace20{
         else if( GraphUtils::countEdges(V) < 3'000 ) Pace20Params::maxBestSepsForRecursion = 4;
 
 
-        bool exactTrack = Pace20Params::useExactTrack; // #TEST EXACT
+        constexpr bool exactTrack = false;
         if(exactTrack){
             reps = 5'000;
             int L = 16;

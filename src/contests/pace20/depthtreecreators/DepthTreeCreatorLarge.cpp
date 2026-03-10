@@ -46,7 +46,7 @@
 #include "graphs/flow/DisjointPaths.h"
 #include "graphs/flow/UnitFlow.h"
 
-DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, bool randomSepEval) : DepthTreeCreator(V,recurrenceDepth) {
+DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config c, bool randomSepEval) : DepthTreeCreator(V,recurrenceDepth,c) {
     this->randomSepEval = randomSepEval;
 }
 
