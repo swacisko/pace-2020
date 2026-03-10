@@ -8,9 +8,11 @@
 #define ALGORITHMSPROJECT_IMBALANCEDTREEIMPROVER_H
 
 #include "DepthTree.h"
+#include "contests/experiments/Config.h"
 
 class ImbalancedTreeImprover{
 public:
+    ImbalancedTreeImprover(Config c, DepthTree* dt_ = nullptr) : dt(dt_), cnf(c){}
 
     /**
      *
@@ -36,6 +38,8 @@ public:
     static const int SEPARATOR_CLIQUE = 1;
 
     int IMPROVEMENT_MODE = 1;
+
+    Config cnf;
 
 private:
     DepthTree* dt;

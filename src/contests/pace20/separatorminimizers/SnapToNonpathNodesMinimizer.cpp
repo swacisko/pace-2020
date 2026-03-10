@@ -19,31 +19,19 @@ Separator SnapToNonpathNodesMinimizer::minimizeSeparator(Separator sep) {
     if( Tree::isTree(*V) ) return sep;
 
     VVI paths = findPaths( *V );
-//    DEBUG(paths);
 
     VPII pathEnds(N,{-1,-1}); // pathEnds[i] is a pair containing ends of a path on which i lies, or {-1,-1} is i does not lie on a path
-//    unordered_set<int> pathEndNodes;
     for( VI& path : paths ){
 
         for( int i=1; i<path.size(); i++ ){
             pathEnds[ path[i] ] = { path[0], path.back() };
-
-//            pathEndNodes.insert( path[0] );
-//            pathEndNodes.insert( path.back() );
         }
     }
 
-//    DEBUG(pathEnds);
-//    DEBUG(pathEndNodes);
-
     // now we will find greedily dominating set of a graph - each node on a path must belong to some non-deg2 neighbor
-
-//    VI endNodes(ALL(pathEndNodes));
-//    int n = endNodes.size();
 
     VI deg2InSepNodes;
     for( int t : sep.nodes ) if( (*V)[t].size() == 2 ) deg2InSepNodes.push_back(t);
-//    DEBUG(deg2InSepNodes);
 
     int c = deg2InSepNodes.size();
 
@@ -54,7 +42,6 @@ Separator SnapToNonpathNodesMinimizer::minimizeSeparator(Separator sep) {
         dominationGraph[ pathEnds[p].second ].insert(p);
     }
 
-//    DEBUG(dominationGraph);
 
     VVI comps = ConnectedComponents::getConnectedComponents(*V,sep.nodes);
     VI componentEdges(N,0); // componentEdges[i] is the number of edges in the component of the graph V \ sep.nodes, that contains i
@@ -73,17 +60,11 @@ Separator SnapToNonpathNodesMinimizer::minimizeSeparator(Separator sep) {
             componentEdges[p] = edges;
         }
 
-//        DEBUG(cmp);
-//        DEBUG(edges);
     }
-
-//    DEBUG(componentEdges);
-
 
     VI dominatingSet;
 
     auto removeDominant = [&dominatingSet, &dominationGraph, &pathEnds](int dom){
-//        cerr << "adding " << dom << " to dominating set" << endl;
         dominatingSet.push_back(dom);
         for( int p : dominationGraph[dom] ){
             int a = pathEnds[p].first;
@@ -123,8 +104,6 @@ Separator SnapToNonpathNodesMinimizer::minimizeSeparator(Separator sep) {
         int v = selectBestDominant();
         removeDominant(v);
 
-//        cerr << "adding best dominant: " << v << endl;
-//        DEBUG(dominationGraph);
     }
 
 
@@ -134,16 +113,13 @@ Separator SnapToNonpathNodesMinimizer::minimizeSeparator(Separator sep) {
     VI nodes( ALL(resNodes) );
 
 
-//    exit(1);
     sep.stats.originalGraphSize = V->size();
     sep.stats.originalGraphEdges = GraphUtils::countEdges(*V);
     sep.updatePointers(*V);
 
     sep.createSeparatorStats();
-//    DEBUG(sep);
     Separator resSep( *sep.V, nodes );
     resSep.createSeparatorStats();
-//    DEBUG(resSep);
 
     return resSep;
 }
@@ -217,8 +193,6 @@ VVI SnapToNonpathNodesMinimizer::findPaths(VVI &V) {
 
                 path.push_back(next);
 
-//                DEBUG(path);
-
                 res.push_back(path);
             }
         }
@@ -245,17 +219,11 @@ VVI SnapToNonpathNodesMinimizer::findPaths(VVI &V) {
             }
             cycle.push_back(next);
 
-//            DEBUG(cycle);
-
             res.push_back(cycle);
 
         }
     }
 
-
-//    DEBUG(res);
-
-//    exit(1);
     return res;
 }
 
@@ -267,7 +235,8 @@ void SnapToNonpathNodesMinimizer::test() {
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
-    SnapToNonpathNodesMinimizer minim;
+    Config cnf{};
+    SnapToNonpathNodesMinimizer minim(cnf);
     minim.findPaths(V);
 
     VI nodes = {1};

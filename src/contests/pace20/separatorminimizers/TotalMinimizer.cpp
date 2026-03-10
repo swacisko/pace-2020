@@ -18,8 +18,8 @@
 #include <graphs/components/ConnectedComponents.h>
 #include <utils/StandardUtils.h>
 
-TotalMinimizer::TotalMinimizer(SeparatorEvaluator eval) {
-    sepEval = &eval;
+TotalMinimizer::TotalMinimizer(SeparatorEvaluator *eval,  Config c) : SeparatorMinimizer(c) {
+    sepEval = eval;
 }
 
 

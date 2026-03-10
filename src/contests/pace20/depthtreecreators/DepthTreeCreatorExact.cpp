@@ -513,7 +513,7 @@ DepthTree DepthTreeCreatorExact::getDTCLLowerBound() {
             SeparatorEvaluators::nodeScaleFactor = 0.5; SeparatorEvaluators::edgeScaleFactor = 0.5;
         }
 
-        DepthTreeCreatorLarge dtcl(*V, 1); // recDepth is set to 1 just to disable logs
+        DepthTreeCreatorLarge dtcl(*V, 1,cnf); // recDepth is set to 1 just to disable logs
         dtcl.MINIMIZE_SEPARATORS = false;
         dtcl.USE_KERNELIZATION = false;
         dtcl.SEPARATOR_CREATORS_MODE = DepthTreeCreatorLarge::COMP_EXP_CREATOR;
@@ -609,14 +609,14 @@ DepthTree DepthTreeCreatorExact::getDepthTree() {
     int K = V->size();
     DepthTree bestTree(*V);
 
-    DepthTreeCreatorExact creator(*V,K,0);
+    DepthTreeCreatorExact creator(*V,K,0,cnf);
     while( creator.existsDepthTree() ){
         bestTree = creator.getBestTree();
 
         cerr << "Found tree of height " << bestTree.height << " <= " << K << ",  now looking for height " << bestTree.height-1 << endl;
 
         K = bestTree.height-1;
-        creator = DepthTreeCreatorExact(*V,K,0);
+        creator = DepthTreeCreatorExact(*V,K,0,cnf);
         creator.addDtree(bestTree);
 
         fS.clear();
@@ -730,9 +730,6 @@ void DepthTreeCreatorExact::test(){
     Pace20Params::quickAndWeakTreeCreation = false;
 
     VVI V = GraphReader::readGraphDIMACSWunweighed(cin);
-//    string filename = "exact_101.gr";
-//    fstream str(filename);
-//    VVI V = GraphReader::readGraphDIMACSWunweighed(str,false);
 
     Pace20Params::inputGraphSize = V.size();
     Pace20Params::inputGraphEdges = GraphUtils::countEdges(V);
@@ -740,21 +737,13 @@ void DepthTreeCreatorExact::test(){
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
+    Config cnf{};
     int K = V.size();
-    DepthTreeCreatorExact dtce(V,K,0);
-
-//    dtce.checkLowerBounds();
-//    dtce.createBranchingNodes();
-//    dtce.createMinimalSubsets();
+    DepthTreeCreatorExact dtce(V,K,0,cnf);
 
     auto bestTree = dtce.getDepthTree();
 
 
-//    if( dtce.existsDepthTree() ){
-//        cerr << "Tree of height " << K << " exists: " << dtce.getBestTree() << endl;
-//    }else{
-//        cerr << "Tree of height " << K << " does not (most probably) exist" << endl;
-//    }
     cerr << "FINISHED" << endl;
     DEBUG(bestTree);
 

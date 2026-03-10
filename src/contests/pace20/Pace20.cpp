@@ -48,12 +48,12 @@ namespace Pace20{
     DepthTree *volatile globalBestTree = nullptr;
 
 
-    void addSigtermCheck(){
-        struct sigaction action;
-        memset(&action, 0, sizeof(struct sigaction));
-        action.sa_handler = Pace20Params::terminate;
-        sigaction(SIGTERM, &action, NULL);
-    }
+    // void addSigtermCheck(){
+    //     struct sigaction action;
+    //     memset(&action, 0, sizeof(struct sigaction));
+    //     action.sa_handler = Pace20Params::terminate;
+    //     sigaction(SIGTERM, &action, NULL);
+    // }
 
     void increaseStack(){
 //        const rlim_t kStackSize = 256L * 1024L * 1024L;   // min stack size = 64 Mb
@@ -94,9 +94,10 @@ namespace Pace20{
         Pace20Params::inputGraphSize = V.size();
         Pace20Params::inputGraphEdges = GraphUtils::countEdges(V);
 
+        Config cnf;
 
         VVI initKernV; // this is initially kernelized V - V after subgraph kernelization, before deg3 kernelization, since deg3 kernelization may yield different results depending on nodes in IS
-        DTKernelizer initKernelizer(V);
+        DTKernelizer initKernelizer(V,cnf);
         bool useInitialKernelization = true;
 
         if(useInitialKernelization){
@@ -190,9 +191,9 @@ namespace Pace20{
 
             useInitialKernelization = ( Pace20Params::useKernelization && V.size() >= Pace20Params::minGraphSizeForKernelization );
             DepthTreeCreatorLarge *creator = nullptr;
-            if( useInitialKernelization ) creator = new DepthTreeCreatorLarge( initKernV ,0 );
+            if( useInitialKernelization ) creator = new DepthTreeCreatorLarge( initKernV ,0, cnf );
             else{
-                creator = new DepthTreeCreatorLarge( V ,0 );
+                creator = new DepthTreeCreatorLarge( V ,0, cnf );
             }
 
             if( Pace20Params::quickAndWeakTreeCreation ){
@@ -213,67 +214,39 @@ namespace Pace20{
 
 
             if( dtree.height < bestTree.height ){
-                Pace20Params::outputWriterLock.lock();
                 auto temp = dtree;
                 swap( bestTree, temp );
                 globalBestTree = &bestTree;
-                Pace20Params::outputWriterLock.unlock();
             }
 
             if(Pace20Params::tle) break;
             if( !exactTrack && r > 0 && V.size() < 5'000 && dtree.height < bestTree.height + 3 ){
-                ImbalancedTreeImprover improver;  cerr << "improving imbalanced tree if possible" << endl;
+                ImbalancedTreeImprover improver(cnf);  cerr << "improving imbalanced tree if possible" << endl;
                 SeparatorEvaluators::nodeScaleFactor = 0.4; SeparatorEvaluators::edgeScaleFactor = 0.6; Pace20Params::minimizeNodesIteration = false;
                 auto impDt = improver.improve(dtree);  DEBUG(impDt.height);
                 if( impDt.height < bestTree.height ) {
-                    Pace20Params::outputWriterLock.lock();
                     auto temp = impDt; swap( bestTree, temp ); globalBestTree = &bestTree;
-                    Pace20Params::outputWriterLock.unlock();
                 }
 
                 if( impDt.height < dtree.height ) swap( dtree, impDt );
             }
 
-           /* {// TOTAL PIVOT MAKER SECTION, so far it fails some assertions assert( dt.isCorrect() )
-                TotalPivotMaker totMaker(dtree,0); cerr << "totalPivotMAker in action" << endl;
-                auto impDt = totMaker.makePivots();
-                assert( impDt.height <= dtree.height );
-                if( impDt.height < bestTree.height ) {
-                    cerr << "Total pivot maker makes still better, impDt.height = " << impDt.height << " < " << dtree.height << " = dtree.height" << endl;
-                    Pace20Params::outputWriterLock.lock();
-                    auto temp = impDt; swap( bestTree, temp ); globalBestTree = &bestTree;
-                    Pace20Params::outputWriterLock.unlock();
-                }
-                if( impDt.height < dtree.height ) swap( dtree, impDt );
-
-            }*/
-
 
             if( !Pace20Params::quickAndWeakTreeCreation && exactTrack ){
-//                ENDL(5);
                 VD balances = {};
 
                 if( exactTrack ){ balances.clear(); for(double d = 0.9; d >= 0.1; d -= 0.1) balances.push_back(d); }
-//                if( Pace20Params::inputGraphEdges <= 500'000 ){ balances = {0.5}; }
 
                 for( double balance : balances ) {
-                    SubtreeRerunnerImprover improver;
-//                    cerr << "SubtreeRerunnerImprover with balance = " << balance << endl;
+                    SubtreeRerunnerImprover improver(cnf);
                     auto impDt = improver.improve(dtree, balance);
-//                    DEBUG(impDt.height);
-//                while( impDt.height < bestTree.height ){
                     if (impDt.height < bestTree.height) {
-                        Pace20Params::outputWriterLock.lock();
                         auto temp = impDt;
                         swap(bestTree, temp);
                         globalBestTree = &bestTree;
-                        Pace20Params::outputWriterLock.unlock();
-//                    impDt = improver.improve( dtree,0.3 ); // version with while, but repetitive improvement is already in improver.improve()
                     }
-//                    cerr << "After improvements, iteration tree height: " << impDt.height << endl;
                     if (impDt.height < dtree.height) swap(dtree, impDt);
                 }
-//                ENDL(5);
             }
 
 
@@ -281,7 +254,7 @@ namespace Pace20{
             if( creator != nullptr ){ delete creator; creator = nullptr;}
 
 
-            if(Pace20Params::tle) break;
+            if(cnf.sw.tle("main")) break;
 
             for( VI& v : V ) random_shuffle(ALL(v));
 
@@ -295,12 +268,8 @@ namespace Pace20{
         DEBUG(bestTree.height);
 
         { // write answer - this section probabyl will no be reached, since answer will be written in teminate() function after receiving SIGTERM
-            Pace20Params::outputWriterLock.lock();
-
             if(exactTrack && bestTree.height >= 20) while(1);
-
             bestTree.write();
-//            Pace20Params::outputWriterLock.unlock(); // if we wrote an answer we do not release the lock
         }
 
         DEBUG(bestTree.height);

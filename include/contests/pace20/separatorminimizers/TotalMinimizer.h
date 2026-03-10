@@ -13,7 +13,7 @@
 class TotalMinimizer : public SeparatorMinimizer{
 public:
 
-    TotalMinimizer( SeparatorEvaluator eval );
+    TotalMinimizer( SeparatorEvaluator *eval,  Config c );
 
     Separator minimizeSeparator(Separator sep);
 

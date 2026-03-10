@@ -22,34 +22,16 @@ FlowSeparatorCreator::FlowSeparatorCreator(Config c, SeparatorMinimizer *minimiz
 }
 
 vector<Separator> FlowSeparatorCreator::createSeparators(VVI &V, int repeats) {
-
     if( V.size() < 30 ) return vector<Separator>();
-//    if( V.size() < 50 ) return vector<Separator>();
 
-//    GreedyNodeEdgeMinimizer minim(GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
     LandmarkCreator lcr;
     int LANDMARKS = min( (int)V.size()-1, 30);
-//    int LANDMARKS = min( (int)V.size()-1, 50);
-
-
-
 
     VI landmarks = lcr.getLandmarks( V, 0, LANDMARKS, 10 );
-//    cerr << "landmarks created" << endl;
-
-//    LANDMARKS = 29; // here adding some random landmarks
-//    while( landmarks.size() < LANDMARKS ){
-//        int a = rand() % V.size();
-//        if( find( ALL(landmarks),a ) == landmarks.end() ) landmarks.push_back(a);
-//    }
-
 
     vector<Separator> res;
     for( int i=0; i < min( repeats, LANDMARKS * (LANDMARKS-1) / 2 ); i++ ){
-        if( Pace20Params::tle ) break;
-//        VI s = CombinatoricUtils::getRandomSubset( LANDMARKS-1,2 );
-//        s[0] = landmarks[s[0]];  s[1] = landmarks[s[1]];
-
+        if( cnf.sw.tle("main") ) break;
         VI s = CombinatoricUtils::getRandomSubset( LANDMARKS-1,4 );
         random_shuffle(ALL(s));
         for( int& d : s ) d = landmarks[d];
@@ -58,7 +40,6 @@ vector<Separator> FlowSeparatorCreator::createSeparators(VVI &V, int repeats) {
         VI ends = {s[2], s[3]};
 
         int dist = (i+1) % 4;
-//        Separator sep = getSeparatorForFlow( V,{s[0]} , {s[1]}, dist );
         Separator sep = getSeparatorForFlow( V, sources , ends, dist );
         res.push_back(sep);
     }
@@ -69,20 +50,13 @@ vector<Separator> FlowSeparatorCreator::createSeparators(VVI &V, int repeats) {
 
 Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends) {
     VVI paths = DisjointPaths::getSetOfDisjointPaths( V, sources, ends, true ); // using unit flow
-//    VVI paths = DisjointPaths::getSetOfDisjointPaths( V, sources, ends, false ); // using standard flow
 
-
-//    DEBUG(sources);
-//    DEBUG(ends);
     DEBUG(paths.size());
 
     VI nodes;
     nodes.reserve( accumulate( ALL(paths), 0, []( int s, VI& pth ){ return s + pth.size(); } ) );
-//    nodes.insert(nodes.end(), ALL(sources));
-//    nodes.insert(nodes.end(), ALL(ends));
     VB was(V.size(),false);
     for( VI& v : paths ){
-//        for(int i=1; i<(int)v.size()-1; i++) nodes.push_back(v[i]);
         for(int i=0; i<(int)v.size(); i++){
             if( !was[v[i]] ){
                 nodes.push_back(v[i]);
@@ -91,14 +65,10 @@ Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends)
         }
     }
 
-
     Separator sep(V,nodes);
     sep.createSeparatorStats();
 
-
     if( minimizer != nullptr && sep.nodes.size() <= Pace20Params::maxSeparatorSizeForFlowMinimizer ) sep = minimizer->minimizeSeparator(sep);
-
-
 
     return sep;
 }
@@ -106,15 +76,10 @@ Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends)
 Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends, int dist) {
     VVI sLayer = BFS::getBfsLayers(V,sources);
 
-//    DEBUG(sources);
-//    DEBUG(ends);
-
     VI S;
     for( int i=0; i < min( dist+1, (int) sLayer.size() ); i++ ){
         S.insert( S.end(), ALL(sLayer[i]) );
     }
-
-//    DEBUG(S);
 
     VVI eLayer = BFS::getBfsLayers(V,ends);
     VI E;
@@ -130,10 +95,7 @@ Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends,
         }
     }
 
-//    DEBUG(E);
-
     if( E.empty() ){
-//        cerr << "sources contain all ends, restoring initial" << endl;
         S = sources;
         E = ends;
     }
@@ -148,26 +110,18 @@ void FlowSeparatorCreator::test() {
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
-    GreedyNodeEdgeMinimizer minim(GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
-    FlowSeparatorCreator fsc(&minim);
+    Config cnf{};
+    GreedyNodeEdgeMinimizer minim(cnf,GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
+    FlowSeparatorCreator fsc(cnf,&minim);
 
     LandmarkCreator lcr;
     int LANDMARKS = 10;
     VI landmarks = lcr.getLandmarks( V, 0, LANDMARKS, 0 );
 
-//    for( int d : VI( {15,18,21} ) ){
-//        Separator sep(V,{d});
-//        sep.createSeparatorStats();
-//        DEBUG(sep);
-//    }
-
     cerr << "landmarks created" << endl;
 
     TimeMeasurer::startMeasurement( "check" );
     for( int i=0; i < LANDMARKS * (LANDMARKS-1) / 2 ; i++ ){
-
-//        VI s = CombinatoricUtils::getRandomSubset( V.size()-1,2 );
-
         VI s = CombinatoricUtils::getRandomSubset( LANDMARKS-1,2 );
         s[0] = landmarks[s[0]];  s[1] = landmarks[s[1]];
 
@@ -177,11 +131,6 @@ void FlowSeparatorCreator::test() {
 
         int dist = (i+1) % 5;
         Separator sep = fsc.getSeparatorForFlow( V, sources , ends, dist );
-
-//        DEBUG(sep);
-
-//        ENDL(1);
-
     }
     TimeMeasurer::stopMeasurement( "check" );
     TimeMeasurer::writeAllMeasurements();

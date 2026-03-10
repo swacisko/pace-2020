@@ -11,7 +11,7 @@
 class FlowCutterMinimizer : public SeparatorMinimizer{
 public:
 
-    FlowCutterMinimizer( SeparatorEvaluator eval ){ sepEval = &eval; }
+    FlowCutterMinimizer( SeparatorEvaluator *eval, Config c ) : SeparatorMinimizer(c){ sepEval = eval; }
 
     Separator minimizeSeparator( Separator sep );
 

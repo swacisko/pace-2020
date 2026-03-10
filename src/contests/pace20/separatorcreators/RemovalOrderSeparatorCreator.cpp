@@ -178,13 +178,13 @@ void RemovalOrderSeparatorCreator::test() {
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
-    RemovalOrderSeparatorCreator roCr(V);
-//    VI order = roCr.getGreatestDegreeIterativeOrder(*V);
+    Config cnf = {};
+    RemovalOrderSeparatorCreator roCr(V,cnf);
     VI order = roCr.getGreatestDegreeOrder(V);
     Separator sep = roCr.getBestSeparatorForRemovalOrder( order, SeparatorEvaluators::estimatedDepthTreeMinNodeEdge );
 
     DEBUG(sep.stats);
-    GreedyNodeEdgeMinimizer minim(GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
+    GreedyNodeEdgeMinimizer minim(cnf,GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
     sep = minim.minimizeSeparator(sep);
     DEBUG(sep.stats);
 

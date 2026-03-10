@@ -50,21 +50,15 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
     if(debug) DEBUG(subtreeSizes);
 
     function< void(int,int) > getSubtreeNodes = [&getSubtreeNodes, &subtreeNodes, &data, &tree](int num, int par){
-//        DEBUG(num);
         StandardUtils::append( subtreeNodes, data[num].sepNodes );
         for( int d : tree[num] ) if(d != par) getSubtreeNodes(d,num);
     };
 
     function< void(int,int) > getSubtreeNodes2 = [=,&tree,&T,&data, &getSubtreeNodes2, &getSubtreeNodes, &subtreeNodes, &subtreeSizes, &balance](int num, int par){
-//        DEBUG(num);
         VI sons;
         for( int d : tree[num] ) if( d != par ) sons.push_back(d);
 
-
         int s = subtreeSizes[num];
-
-//        DEBUG(s);
-//        DEBUG((int)dt.V->size() * balance);
 
         if( sons.empty() || s < (int)dt.V->size() * balance ){
             getSubtreeNodes(num,par);
@@ -73,7 +67,6 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
             int son = sons[0];
             getSubtreeNodes2(son,num);
         }
-
     };
 
     getSubtreeNodes2(0,0);
@@ -87,13 +80,7 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
     InducedGraph g = GraphInducer::induce( *V, subtreeNodes );
 
     DEBUG(g.V.size());
-
     assert( GraphUtils::isConnected(g.V) );
-
-
-
-//    cerr << "assertion GraphUtils::isConnected(g.V) in SubtreeRerunnerImprover may fail, please consider each connected sugraph separately";
-//    exit(2);
 
     if( GraphUtils::isConnected(g.V) == false ){
         cerr << "Subgraph g.V is not connected" << endl;
@@ -101,7 +88,7 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
     }
     else {
 
-        DepthTreeCreatorLarge dtcl(g.V, 0);
+        DepthTreeCreatorLarge dtcl(g.V, 0,cnf);
         DepthTree dtree = dtcl.getDepthTree();
 
         auto newDt = dt;
@@ -192,7 +179,7 @@ void SubtreeRerunnerImprover::test() {
 
         double balance = 0.75;
 
-        SubtreeRerunnerImprover improver;
+        SubtreeRerunnerImprover improver(Config);
         improver.improve(dt, balance);
     }
 

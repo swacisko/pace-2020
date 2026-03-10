@@ -10,11 +10,11 @@
 #include <graphs/GraphInducer.h>
 #include "Separator.h"
 #include "DepthTree.h"
+#include "contests/experiments/Config.h"
 
 class DTKernelizer{
-
 public:
-    DTKernelizer(VVI &V);
+    DTKernelizer(VVI &V, Config c);
 
     /**
      *
@@ -41,7 +41,7 @@ public:
     static const int DANGLING_TREES = 1;
     static const int EDGE_COMPRESSION = 2;
 
-
+    Config cnf;
 
     VVI kernelizeDegree3Nodes( VVI& G );
     void dekernelizeDegree3Nodes( VVI& G );
@@ -77,12 +77,6 @@ private:
     VI getAttachmentPoints(VI &treeNodes);
 
     void createDanglingTrees();
-
-
-
-
-
-
 
 
     VVI removedSubgraphsNodes;

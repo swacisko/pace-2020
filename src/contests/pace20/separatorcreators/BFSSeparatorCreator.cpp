@@ -22,33 +22,21 @@ BFSSeparatorCreator::BFSSeparatorCreator(VVI &V, Config c) : SeparatorCreator(c)
 }
 
 vector<Separator> BFSSeparatorCreator::createSeparators(VVI &V, int maxSources) {
-//    const int MAX_SOURCES = min( Pace20Params::maxSources, (int)V.size()-1 );
     const int MAX_SOURCES = min( max(1,maxSources), (int)V.size()-1 );
-//    DEBUG(MAX_SOURCES);
     VI sourceQuantities(MAX_SOURCES+1);
-    for( int i=1; i <= MAX_SOURCES /*min(MAX_SOURCES,10)*/; i++ ) sourceQuantities[i] = MAX_SOURCES+1-i;
+    for( int i=1; i <= MAX_SOURCES; i++ ) sourceQuantities[i] = MAX_SOURCES+1-i;
 
-//    cerr << "TESTING LARGE SOURCE_SETS" << endl;
-//    sourceQuantities = VI(2,0 );
-//    sourceQuantities.back() = 30;
-
-
-    /*sourceQuantities = { 0, 60, 40, 20, 10, 5 };
-    if( Pace20Params::inputGraphSize > 100'000 )*/ sourceQuantities = { 0, 16, 8, 4 };
+    sourceQuantities = { 0, 16, 8, 4 };
 
     if( Pace20Params::quickAndWeakTreeCreation ) sourceQuantities = {0,1};
 
     VVI sourcesSets = getRandomSources(V.size(),sourceQuantities);
 
-
-//    DEBUG(sourcesSets.size());
-
     vector<Separator> res;
     {
         for (VI &sources : sourcesSets) {
-            if (Pace20Params::tle) break;
+            if (cnf.sw.tle("main")) break;
 
-//            sources = { 0 };
             auto layerSeps = createLayerSeparators(sources);
             auto *seps = &layerSeps;
 
@@ -76,22 +64,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
     bool debug = false;
 
-//    cerr << "Setting sources to 0,10,20,30,40" << endl;
-//    sources = {0,10,20,30,40};
-
-
-
     VVI layers = BFS::getBfsLayers(V, sources);
-
-
-//    DEBUG(layers);
-
-//    DEBUG(layers.size());
-//    cerr << "{";
-//    for( int i=0; i<layers.size(); i++ ) cerr << layers[i].size() << "  ";
-//    cerr << "}" << endl;
-//    ENDL(1);
-
 
     int N = V.size();
     int L = layers.size();
@@ -103,7 +76,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
     }
 
     assert(L > 1);
-
 
 
     /**
@@ -152,7 +124,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
         /**
          * borderNeigh[j] is the set of components {x_0, x_1, ... } in layer i-1, such j-th component in layer i have a neighbor in components x_0, ...
          */
-//        unordered_map<int,unordered_set<int>> borderNeigh;
         vector< unordered_set<int> > borderNeigh(N);
 
         // creating left borders
@@ -404,9 +375,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
             VVPII res(sep.nodes.size() + C);
 
-//        unordered_map<int, unordered_map<int,int> > W;
-
-//        unordered_map<int,int> mapper;
             int cnt = sep.nodes.size();
 
             if (i > 0) {
@@ -467,7 +435,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
         };
 
 
-        GreedyNodeEdgeMinimizer gEdgeNodeMinim(GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
+        GreedyNodeEdgeMinimizer gEdgeNodeMinim(cnf,GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
         VI separatorsToRemove;
         for(int i=0; i<L; i++){
 
@@ -498,10 +466,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
     }else {
 
-
         //***************** SECTION WITH FAST MINIMIZER
-
-
 
         auto createLargestComponentsSeparatorForLayer = [=, &edgesInCompL, &edgesInCompR, &nodesInCompL, &nodesInCompR, &compBorderL, &compBorderR]
                 (int i, VB &was, FAU &fau, bool useVC = false) {
@@ -518,12 +483,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
             };
 
             vector<Comp> comps;
-            /*if( i > 0 ){
-                for( int j=0; j<compBorderL[i-1].size(); j++ ){
-                    int repr = compBorderL[i-1][j][0];
-                    comps.emplace_back( i-1,j, edgesInCompL[repr], nodesInCompL[repr] );
-                }
-            }*/
 
             if (i < L - 1) {
                 for (int j = 0; j < compBorderR[i + 1].size(); j++) {
@@ -545,15 +504,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
             int totalEdges = accumulate(ALL(comps), 0, [](int a, Comp &c) { return a + c.edges; });
             int totalNodes = accumulate(ALL(comps), 0, [](int a, Comp &c) { return a + c.nodes; });
 
-//        DEBUG(totalEdges);
-//        DEBUG(totalNodes);
-//            cerr << "layer[i].size: " << layers[i].size() << endl;
-//            for (auto cmp : comps) {
-//                if (cmp.edges > 200)
-//                    cerr << "cmp: layer: " << cmp.layer << ", index: " << cmp.index << "   edges: " << cmp.edges
-//                         << "   nodes: " << cmp.nodes << endl;
-//            }
-
 
             vector<Comp> largestComps;
             int lcEdges = 0;
@@ -564,11 +514,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 lcNodes += comps[j].nodes;
                 if (lcEdges > (1 - Pace20Params::balance) * totalEdges) break;
             }
-
-//            cerr << "largest comps: " << endl;
-//            for (auto cmp : largestComps)
-//                cerr << "cmp: layer: " << cmp.layer << ", index: " << cmp.index << "   edges: " << cmp.edges
-//                     << "   nodes: " << cmp.nodes << endl;
 
             VI nodes;
             for (auto cmp : largestComps) {
@@ -608,7 +553,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                     }
                 }
 
-//                DEBUG(inducerSet);
 
                 InducedGraph g = GraphInducer::induce( V, inducerSet );
                 VB bipartition( g.V.size(),false );
@@ -616,23 +560,14 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 VI vc = BipartiteGraphVertexCover::getVertexCoverOfBipartiteGraph(g.V, bipartition);
 
                 for(int& d : vc) d = g.nodes[d];
-//                DEBUG(vc);
-
-//                nodes.clear();
                 nodes = vc;
                 for( int d : vc ){
                     if( inLayer[d] == i ){
-//                        nodes.push_back(d);
                         was[d] = true;
                     }
                 }
 
             }
-
-
-
-
-//            DEBUG(nodes);
 
 
             Separator sep(V, nodes);
@@ -663,8 +598,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 }
 
                 VI toMerge(ALL(toMergeSet));
-//            DEBUG(b);
-//            DEBUG(toMerge);
 
                 int p = b[0];
                 if (toMerge.empty()) {
@@ -677,11 +610,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                     edgesCnt[toMerge[0]] += (cmp.layer == i - 1) ? edgesInCompL[p] : edgesInCompR[p];
                     nodesCnt[toMerge[0]] += (cmp.layer == i - 1) ? nodesInCompL[p] : nodesInCompR[p];
 
-//                cerr << "Increasing size of " << toMerge[0] << " by size of component containing "
-//                    << p << " by " << ((cmp.layer == i-1) ? edgesInCompL[ p ] : edgesInCompR[p] ) << " edges" << endl;
-//                cerr << "Increasing size of " << toMerge[0] << " by size of component containing "
-//                     << p << " by " << ( (cmp.layer == i-1) ? nodesInCompL[ p ] : nodesInCompR[p] ) << " nodes" << endl;
-
                     for (int k = 1; k < toMerge.size(); k++) {
                         int a = toMerge[k - 1];
                         int b = toMerge[k];
@@ -690,17 +618,10 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 }
             }
 
-//        DEBUG(edgesCnt);
-//        DEBUG(nodesCnt);
-
             for (int d : layers[i]) {
                 if (was[d])continue;
                 for (int p : V[d]) if (inLayer[p] == i && !was[p]) fau.Union(d, p);
             }
-
-//        for( int d : layers[i] ){
-//            cerr << "fau.Find(" << d << ") = " << fau.Find(d) << endl;
-//        }
 
             unordered_map<int, int> sumEdges, sumNodes;
             unordered_map<int, VI> classes;
@@ -712,8 +633,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 sumNodes[x] += nodesCnt[d];
             }
 
-//        DEBUG(classes);
-
             for (pair<int, VI> c : classes) {
                 sep.stats.numberOfComponents++;
                 int x = c.first;
@@ -723,15 +642,8 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                     for (int p : V[d]) if (inLayer[p] == i && !was[p]) e++;
                 }
                 e >>= 1;
-//            DEBUG(x);
-//            DEBUG(e);
-//            DEBUG(v);
-//            DEBUG(was);
                 sumEdges[x] += e;
             }
-
-//        DEBUG(sumNodes);
-//        DEBUG(sumEdges);
 
             int maxEdges = 0, maxNodes = 0;
             for (PII p : sumEdges) maxEdges = max(maxEdges, p.second);
@@ -744,7 +656,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
 
             return sep;
-//        exit(1);
         };
 
 
@@ -756,15 +667,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
         for (int i = 0; i < L; i++) {
 
             for( int useVC = 0; useVC <= ( Pace20Params::quickAndWeakTreeCreation ? 0 : 1 )   ; useVC++ ) {
-//                DEBUG(layers[i]);
-//                DEBUG(was);
-//                for( int k=0; k<V.size(); k++ ) cerr << fau.Find(k) << " "; cerr << endl;
-
                 Separator sep = createLargestComponentsSeparatorForLayer(i, was, fau, useVC);
-
-//            Separator sep = createLargestComponentsSeparatorForLayer(i, was, fau, true);
-//                DEBUG(sep.nodes);
-//                DEBUG(sep.stats);
 
                 for (int d : layers[i]) {
                     fau.getP()[d] = -1;
@@ -775,38 +678,11 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 sep.stats.originalGraphEdges = ogEdges;
                 sep.updatePointers(V);
 
-                /*if(useVC){
-                    cerr << "\rin BFS createSeparatorStats()" << flush;
-                    sep.createSeparatorStats();
-                }*/
 
                 separators.push_back(sep);
-//                break;
             }
 
-//            ENDL(5);
-
-
-//        DEBUG( layers[i].size() );
-//            DEBUG(sep.stats);
-//            ENDL(1);
-
-
-    //        if( sep.stats.size < layers[i].size() ){
-    //            GreedyNodeEdgeMinimizer gEdgeNodeMinim( GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
-    //            VI nodeW, edgeW;
-    //            auto sepGraph = getSeparatorGraph(sep,i, nodeW, edgeW);
-    //            auto sp = gEdgeNodeMinim.minimizeSeparator( sep, sepGraph, nodeW, edgeW ); // adding minimized one as new separator
-    //            separators.push_back(sp);
-    ////            DEBUG(sp);
-    //        }
-
-
         }
-
-//    exit(1);
-
-
 
     }
     //***************** END OF SECTION WITH FAST MINIMIZER
@@ -818,8 +694,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
 vector<Separator> BFSSeparatorCreator::createInterlayerVCSeparators(VI sources) {
     VVI layers = BFS::getBfsLayers(V, sources);
-
-//    DEBUG(layers);
 
     if( layers.size() == 1 ) return vector<Separator>();
 
@@ -856,21 +730,11 @@ vector<Separator> BFSSeparatorCreator::createInterlayerVCSeparators(VI sources) 
         vertexCovers.push_back(vc);
     }
 
-//    DEBUG(vertexCovers);
-
-//    exit(1);
-//    ENDL(3);
-
-
-
     vector<Separator> res;
     for(auto v : vertexCovers){
         res.push_back( Separator(V,v) );
         res.back().createSeparatorStats(); // TEMPORARY, SO SLOW!!
     }
-
-
-
 
     return res;
 }
@@ -888,12 +752,9 @@ VVI BFSSeparatorCreator::getRandomSources(int N, VI quantities) {
         quantities[i] = min( quantities[i], (int)maxSets );
     }
 
-//    DEBUG(quantities);
-
     for(int q=1; q < min( (int)quantities.size(), (int)V.size()-1 ); q++){
 
         for( int i=0; i<quantities[q]; i++ ){
-//            VI sources = getRandomSources(q);
             VI sources = CombinatoricUtils::getRandomSubset( N-1,q );
 
             sort(ALL(sources));
@@ -908,7 +769,6 @@ VVI BFSSeparatorCreator::getRandomSources(int N, VI quantities) {
     }
 
     return res;
-
 
 }
 

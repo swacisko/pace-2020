@@ -6,6 +6,7 @@
 #define EXTREEM_CONFIG_H
 
 #include "Makros.h"
+#include "utils/Stopwatch.h"
 
 
 enum SepCr {
@@ -47,6 +48,7 @@ public:
 
     string metadata_filepath = "";
     int max_time_millis = inf;
+    Stopwatch sw;
 
 
 

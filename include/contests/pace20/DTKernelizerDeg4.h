@@ -11,14 +11,18 @@
 #include "DepthTree.h"
 #include <graphs/GraphInducer.h>
 
+#include "contests/experiments/Config.h"
+
 class DTKernelizerDeg4{
 public:
-    DTKernelizerDeg4( VVI& V ){ this->V = &V; }
+    DTKernelizerDeg4( VVI& V,Config c ) : cnf(c){ this->V = &V; }
 
     VVI kernelize();
     DepthTree dekernelize( DepthTree dt );
 
     static void test();
+
+    Config cnf;
 
 private:
     VVI* V;

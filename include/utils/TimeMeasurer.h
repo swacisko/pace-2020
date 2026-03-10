@@ -35,16 +35,16 @@ public:
     static void resetOption(string option);
 
 
-    static string INPUT_READER;
-    static string GRAPH_SIMPLIFIER;
-    static string GRAPH_CREATOR;
-    static string ALIGNMENT_CONTROLLER_CAN_ALIGN_BITMAP;
-    static string ALIGNMENT_CONTROLLER_CAN_ALIGN_LCS;
-    static string OUTPUT_WRITER;
-    static string TOTAL_TIME;
-    static string GRAPH_LCS_CHECK_BEFORE_REMOVING_PARALLEL_PATHS;
-    static string GRAPH_LCS_CHECK_AFTER_REMOVING_PARALLEL_PATHS;
-    static string KMER_BUCKETS_SORTING;
+    // static string INPUT_READER;
+    // static string GRAPH_SIMPLIFIER;
+    // static string GRAPH_CREATOR;
+    // static string ALIGNMENT_CONTROLLER_CAN_ALIGN_BITMAP;
+    // static string ALIGNMENT_CONTROLLER_CAN_ALIGN_LCS;
+    // static string OUTPUT_WRITER;
+    // static string TOTAL_TIME;
+    // static string GRAPH_LCS_CHECK_BEFORE_REMOVING_PARALLEL_PATHS;
+    // static string GRAPH_LCS_CHECK_AFTER_REMOVING_PARALLEL_PATHS;
+    // static string KMER_BUCKETS_SORTING;
 
 
 private:

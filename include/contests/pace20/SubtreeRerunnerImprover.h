@@ -8,10 +8,12 @@
 #define ALGORITHMSPROJECT_SUBTREERERUNNERIMPROVER_H
 
 #include "DepthTree.h"
+#include "contests/experiments/Config.h"
 
 
 class SubtreeRerunnerImprover{
 public:
+    SubtreeRerunnerImprover(Config cnf_) : cnf(cnf_){}
 
     /**
      * Selects heighest node on the deepest path such that subtree containing that node contains at most balance * V.size() nodes.
@@ -20,6 +22,8 @@ public:
      * @return
      */
     DepthTree improve(DepthTree& dt, double balance = 0.2);
+
+    Config cnf;
 
     static void test();
 private:

@@ -11,6 +11,7 @@
 
 class SnapToNonpathNodesMinimizer : public SeparatorMinimizer{
 public:
+    SnapToNonpathNodesMinimizer(Config c) : SeparatorMinimizer(c) {}
 
     Separator minimizeSeparator( Separator sep );
 

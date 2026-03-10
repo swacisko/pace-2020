@@ -14,7 +14,8 @@ class GreedyNodeEdgeMinimizer : public SeparatorMinimizer{
 
 public:
 
-    GreedyNodeEdgeMinimizer( int minimizationType = GreedyNodeEdgeMinimizer::MINIMIZE_EDGES ) : minimizationType(minimizationType){
+    GreedyNodeEdgeMinimizer( Config c, int minimizationType = GreedyNodeEdgeMinimizer::MINIMIZE_EDGES )
+    : SeparatorMinimizer(c), minimizationType(minimizationType){
         sepEval = nullptr;
     }
 

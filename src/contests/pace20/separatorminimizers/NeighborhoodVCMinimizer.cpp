@@ -69,7 +69,8 @@ void NeighborhoodVCMinimizer::test() {
     VI nodes = { 1,2,3,4,5 };
     Separator sep(V,nodes);
 
-    NeighborhoodVCMinimizer minim;
+    Config cnf{};
+    NeighborhoodVCMinimizer minim(cnf);
     auto newSep = minim.minimizeSeparator(sep);
     DEBUG(newSep);
 

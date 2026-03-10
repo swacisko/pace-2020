@@ -125,7 +125,7 @@ FlowCutterMinimizer::getDistanceMinimizedSeparator(VVI *V, Separator &sep, VVI &
 
     assert( ConnectedComponents::getConnectedComponents(g.V).size() );
 
-    FlowCutter fc(*sepEval);
+    FlowCutter fc(*sepEval,cnf);
     auto expV = fc.getExpansionGraph(g.V);
     for( int & e : ends ) e += n+2;
 

@@ -620,17 +620,6 @@ int ArtPointSeparatorCreator::getMostBalancedArtPoint(int num, int par, VB &was)
 }
 
 void ArtPointSeparatorCreator::test(){
-//    VVI V = GraphReader::readGraphDIMACSWunweighed(cin);
-//    DEBUG(V.size());
-//    DEBUG( GraphUtils::countEdges(V) );
-
-
-/*    VVI V =  {{1}, {0, 8, 2}, {1, 9, 5, 7, 8}, {7, 5}, {7}, {3, 8, 2}, {8}, {4, 3, 2}, {6, 5, 1, 2}, {2}};*/
-//    VVI V =  {{1, 3, 2}, {6, 8, 0}, {4, 0}, {7, 0, 9, 8}, {2, 8}, {9}, {1}, {3, 9}, {4, 1, 3}, {5, 3, 7}};
-//    ArtPointSeparatorCreator apSepCr;
-//    vector<Separator> res = apSepCr.createSeparators(V,1);
-//    exit(1);
-
 
     int REPS = 10;
     for( int i=0; i<REPS; i++ ){
@@ -663,9 +652,9 @@ void ArtPointSeparatorCreator::test(){
             V[e.second].push_back(e.first);
         }
 
+        Config cnf{};
 
-
-        ArtPointSeparatorCreator apSepCr;
+        ArtPointSeparatorCreator apSepCr(cnf);
         vector<Separator> res = apSepCr.createSeparators(V,1);
         for( auto& s : res ) s.updatePointers(V);
         Separator sep = res[0];
@@ -676,14 +665,11 @@ void ArtPointSeparatorCreator::test(){
         auto checkBestArtNaive = [&V, &bestArtPoint](){
             VI arts = BridgesAndArtPoints::getBridgesAndArtPoints(V).first;
 
-//            DEBUG(arts.size());
-
-//            SeparatorEvaluator sepEval = SeparatorEvaluators::estimatedDepthTreeEdge;
             SeparatorEvaluator sepEval = SeparatorEvaluators::sepEvalToUse;
 
             Separator bestSep( V, {bestArtPoint} );
             bestSep.createSeparatorStats();
-//            DEBUG(bestSep);
+
 
             int cnt = 0;
             for( int a : arts ){

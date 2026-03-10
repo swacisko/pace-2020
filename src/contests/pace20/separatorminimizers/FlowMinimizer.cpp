@@ -108,8 +108,8 @@ Separator FlowMinimizer::minimizeSeparator( Separator sep ){
 
 //    DEBUG(internalNodes);
 
-    GreedyNodeEdgeMinimizer gneMinim(GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
-    LargestComponentsVCMinimizer lcMinim;
+    GreedyNodeEdgeMinimizer gneMinim(cnf,GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
+    LargestComponentsVCMinimizer lcMinim(cnf);
 
 
     Separator res(*V,internalNodes);
@@ -146,7 +146,8 @@ void FlowMinimizer::test(){
     sep.createSeparatorStats();
     DEBUG(sep);
 
-    FlowMinimizer minim;
+    Config cnf{};
+    FlowMinimizer minim(cnf);
     auto newSep = minim.minimizeSeparator(sep);
     DEBUG(newSep);
 

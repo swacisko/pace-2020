@@ -16,7 +16,7 @@
 
 Separator ExpansionMinimizer::minimizeSeparator(Separator sep) {
 //    ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::estimatedDepthTreeEdge );
-    ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::sepEvalToUse );
+    ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::sepEvalToUse, cnf );
 
     ceCr.setOrdersToCreate( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
 //    ceCr.setOrdersToOptimize( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
@@ -30,7 +30,7 @@ Separator ExpansionMinimizer::minimizeSeparator(Separator sep) {
 
     Separator bestSep = sep;
     for(int i=0; i<orders.size(); i++){
-        if( Pace20Params::tle ) break;
+        if( cnf.sw.tle("main") ) break;
         Separator sep = ceCr.getBestSeparatorForExpansionOrder( *V, orders[i] );
 
         if( ceCr.sepEval( sep, bestSep ) ){
@@ -50,7 +50,8 @@ void ExpansionMinimizer::test() {
     Separator sep(V, nodes);
     sep.createSeparatorStats();
 
-    ExpansionMinimizer minim;
+    Config cnf{};
+    ExpansionMinimizer minim(cnf);
     auto res = minim.minimizeSeparator(sep);
 
     DEBUG(sep);

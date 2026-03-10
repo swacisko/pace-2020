@@ -8,9 +8,11 @@
 #define ALGORITHMSPROJECT_SEPARATORMINIMIZER_H
 
 #include "../Separator.h"
+#include "contests/experiments/Config.h"
 
 class SeparatorMinimizer{
 public:
+    SeparatorMinimizer( Config c ) : cnf(c) {}
 
     virtual Separator minimizeSeparator( Separator sep ) = 0;
 
@@ -24,6 +26,7 @@ protected:
     VVI grW; // grW[i][j] is weight of edge i -> gr[i][j], that is sepGraph[i][j].second
     VI nodeWeights; // nodeWeights[i] is number of nodes in component represented by i in sepGraph, For i < sep.nodes.size() that is 1
     VI edgeWeights; // edgeWeights[i] is number of edges in component represented by i in sepGraph. For i < sep.nodes.size() that is 0
+    Config cnf;
 };
 
 #endif //ALGORITHMSPROJECT_SEPARATORMINIMIZER_H

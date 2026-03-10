@@ -33,20 +33,11 @@ vector<Separator> ComponentExpansionSeparatorCreator::createSeparators(VVI &V, i
 
     vector<Separator> seps;
     for( int r = 0; r < repeats; r++ ){
-//        int a = rand()%N;
         int a = repeatsSources[r];
         int b = repeatsSources[ (r+1)%repeats ];
         int c = repeatsSources[ (r+2)%repeats ];
 
-//        set<int> zb;
-//        if( r % 3 == 0 ) zb = {a};
-//        else if(r%3==1) zb = {a,b};
-//        else zb = {a,b,c};
-
         set<int> zb = {a,b,c};
-
-
-
 
         bool useIterativeExpansion = false;
 
@@ -57,20 +48,18 @@ vector<Separator> ComponentExpansionSeparatorCreator::createSeparators(VVI &V, i
         else {
 
             VVI orders = getExpansionOrdersForNodes(V, VI(ALL(zb)));
-//            VVI orders = getExpansionOrdersForNode(V,a);
 
             vector<Separator> newSeps;
 
             for (int i = 0; i < orders.size(); i++) {
-                if (Pace20Params::tle) break;
+                if (cnf.sw.tle("main")) break;
                 Separator sep = getBestSeparatorForExpansionOrder(V, orders[i]);
 
 
                 newSeps.push_back(sep);
             }
 
-
-            if (Pace20Params::tle) break;
+            if (cnf.sw.tle("main")) break;
             bool improveSeparator = true;
             if (improveSeparator) {
                 sort(ALL(newSeps), sepEval);
@@ -83,19 +72,14 @@ vector<Separator> ComponentExpansionSeparatorCreator::createSeparators(VVI &V, i
                 if (ORDERS_TO_OPTIMIZE & LEAST_NEIGHBORS_ORDER) {
                     seps.push_back(getBestSeparatorForExpansionOrder(V, optimizeOrderByTraversingFirstSmallestComponents(V, getLeastExteriorNeighborhoodOrder(V, sep.nodes))));
                 }
-
             }
-
 
             seps.insert(seps.end(), ALL(newSeps));
         }
 
-//        ENDL(1);
-
-        if( Pace20Params::tle ) break;
+        if (cnf.sw.tle("main")) break;
     }
 
-//    exit(1);
     for(auto& sp : seps) sp.updatePointers(V);
 
     return seps;
@@ -157,9 +141,6 @@ Separator ComponentExpansionSeparatorCreator::getBestSeparatorForExpansionOrder(
 
         sep.stats.size = borderSize[i];
 
-//        sep.stats.maxCompSize = max( i+1-borderSize[i], compSizes.first[i] );
-//        sep.stats.maxCompEdges = max( compEdges[i], compSizes.second[i] );
-
         sep.stats.maxCompSize = max( borderAndComp.maxInternalCompSize[i], compSizes.first[i] );
         sep.stats.maxCompEdges = max( borderAndComp.maxInternalCompEdges[i], compSizes.second[i] );
 
@@ -199,14 +180,8 @@ Separator ComponentExpansionSeparatorCreator::getBestSeparatorForExpansionOrder(
         }
 
         if( sepEval(sep,bestSep) ){
-//            cerr << "\t\tFOUND BETTER SEPARATOR! i = " << i << endl;
-//            cerr << "\t\t"; DEBUG(bestSep);
-//            cerr << "\t\t"; DEBUG(sep);
-//            ENDL(1);
-
             bestSep = sep;
             bestInd = i;
-
         }
 
     }
@@ -224,8 +199,6 @@ Separator ComponentExpansionSeparatorCreator::getBestSeparatorForExpansionOrder(
         DEBUG(bestInd);
         DEBUG(inBorder);
     }
-
-//    Separator res(V, VI( ALL(inBorder) ) );
 
     Separator res(V, StandardUtils::toVI(inBorder) );
     res.createSeparatorStats();
@@ -421,13 +394,6 @@ ComponentExpansionSeparatorCreator::CompBorder ComponentExpansionSeparatorCreato
 
 
     CompBorder cb;
-//    cb.borderSize = borderSizeNodes;
-//    cb.compEdges = inCompEdges;
-//    cb.modifications = modifications;
-//    cb.maxInternalCompSize = maxInternalCompSize;
-//    cb.maxInternalCompEdges = maxInternalCompEdges;
-
-    // #TEST testing swapping instead of rewriting arrays
     swap( cb.borderSize, borderSizeNodes);
     swap( cb.compEdges, inCompEdges);
     swap( cb.modifications, modifications);
@@ -470,8 +436,6 @@ VVI ComponentExpansionSeparatorCreator::getExpansionOrdersForNodes(VVI &V, VI so
     }
 
 
-//    while( res.size() > T ) res.erase( res.begin() ); // keeping only optimized orders
-
     return res;
 }
 
@@ -484,23 +448,8 @@ Separator ComponentExpansionSeparatorCreator::getIterativeSepForStartingNodes(VV
     auto sep = getBestSeparatorForExpansionOrder( V, tightnessOrder );
     sep.updatePointers(V);
 
-//    cerr << "After tightness order: " << sep << endl;
-//
-//    VI leastExtNeighOrder = getLeastExteriorNeighborhoodOrder(V,sep.nodes);
-//    sep = getBestSeparatorForExpansionOrder( V, leastExtNeighOrder );
-//    sep.updatePointers(V);
-//
-//    cerr << "After least neighbors order: " << sep << endl;
-//
-//    VI bfsOrder = getBFSOrder( V, sep.nodes );
-//    sep = getBestSeparatorForExpansionOrder( V, bfsOrder );
-//    sep.updatePointers(V);
-//
-//    cerr << "After bfs order: " << sep << endl;
-
-//    for(int i=0; i<7; i++) {
     while(1){
-        if( Pace20Params::tle ) break;
+        if (cnf.sw.tle("main")) break;
 
         VI toOpt = optimizeOrderByTraversingFirstSmallestComponents(V, getTightestNeighborOrder(V, sep.nodes));
         auto newsep = getBestSeparatorForExpansionOrder(V, toOpt);
@@ -547,7 +496,6 @@ VI ComponentExpansionSeparatorCreator::getBFSOrder(VVI &V, VI sources) {
 VI ComponentExpansionSeparatorCreator::getBFSLayerVCOrder(VVI &V, VI sources) {
     VVI layers = BFS::getBfsLayers(V, sources);
 
-//    DEBUG(layers);
 
     if( layers.size() == 1 ) return layers[0];
 
@@ -584,7 +532,6 @@ VI ComponentExpansionSeparatorCreator::getBFSLayerVCOrder(VVI &V, VI sources) {
         vertexCovers.push_back(vc);
     }
 
-//    DEBUG(vertexCovers);
 
     VB inVC(V.size(),false);
     for( int i=0; i<vertexCovers.size(); i++ ){
@@ -602,7 +549,6 @@ VI ComponentExpansionSeparatorCreator::getBFSLayerVCOrder(VVI &V, VI sources) {
         else return a < b;
     } );
 
-//    DEBUG(order);
 
     return order;
 
@@ -620,8 +566,6 @@ VI ComponentExpansionSeparatorCreator::getTightestNeighborOrder(VVI &V, VI sourc
     Heap<int> heap( comp );
 
     for(int i=0; i<N; i++){
-//        int w = (GraphUtils::containsEdge( V, i,v ) ? 1 : 0);
-//        if(was[i]) continue;
         int w = 0;
         for(int d : V[i]){
             if( was[d] ) w++;
@@ -631,18 +575,14 @@ VI ComponentExpansionSeparatorCreator::getTightestNeighborOrder(VVI &V, VI sourc
         else heap.push_back(w);
     }
 
-//    heap.removeFromHeap(v);
     for(int p : order) heap.removeFromHeap(p);
 
-//    cerr << "starting in " << order << endl;
 
     while( !heap.empty() ){
 
         int p = heap.top().indInItems;
-//        int tightness = heap.top().val;
         heap.extract_min();
 
-//        cerr << "adding " << p << " to order with tightness " << tightness << endl;
         order.push_back(p);
 
         was[p] = true;
@@ -653,11 +593,7 @@ VI ComponentExpansionSeparatorCreator::getTightestNeighborOrder(VVI &V, VI sourc
         }
     }
 
-//    DEBUG(order);
-
     return order;
-
-
 }
 
 
@@ -674,8 +610,6 @@ VI ComponentExpansionSeparatorCreator::getLeastExteriorNeighborhoodOrder(VVI &V,
     Heap<int> heap(comp);
 
     for(int i=0; i<N; i++){
-//        int w = (GraphUtils::containsEdge( V, i,v ) ? 1 : 0);
-//        if(was[i]) continue;
         int w = 0;
         for(int d : V[i]){
             if( !was[d] ) w++;
@@ -684,9 +618,6 @@ VI ComponentExpansionSeparatorCreator::getLeastExteriorNeighborhoodOrder(VVI &V,
         if( was[i] ) heap.push_back(w);
         else heap.push_back(INF);
     }
-
-//    for(int i=0; i<N; i++) if( !was[i] ) heap.removeFromHeap(i);
-
 
     VI toAdd;
 
@@ -703,18 +634,14 @@ VI ComponentExpansionSeparatorCreator::getLeastExteriorNeighborhoodOrder(VVI &V,
             val = heap.top().val;
             heap.extract_min();
 
-//            cerr << "\tremoving " << p << " from border and adding " << val << " neighbors to border" << endl;
             for( int d : V[p] ){
                 if( !was[d] ){
                     toAdd.push_back(d);
-//                    cerr << "\t\tadding " << d << endl;
                 }
             }
 
             was[p] = true;
             inBorder[p] = false;
-
-//            ENDL(1);
 
             continue;
         }
@@ -725,7 +652,6 @@ VI ComponentExpansionSeparatorCreator::getLeastExteriorNeighborhoodOrder(VVI &V,
             int neighInExt = 0;
             for (int d : V[p]) if (!was[d]) neighInExt++;
 
-//            cerr << "adding " << p << " to border and setting neighbors to " << neighInExt << endl;
             heap.set(p, neighInExt);
 
             order.push_back(p);
@@ -738,16 +664,10 @@ VI ComponentExpansionSeparatorCreator::getLeastExteriorNeighborhoodOrder(VVI &V,
                     heap.set(d, heap[d] - 1);
                 }
             }
-
-//            ENDL(1);
         }
     }
 
-//    DEBUG(order);
-
     return order;
-
-
 }
 
 
@@ -758,10 +678,6 @@ VI ComponentExpansionSeparatorCreator::optimizeOrderByTraversingFirstSmallestCom
     int N = V.size();
     int firstInOrder = order[0];
 
-   /* if( order.size() != N ){
-        DEBUG(order.size());
-        DEBUG( ConnectedComponents::getConnectedComponents(V).size() );
-    }*/
     assert( order.size() == N );
 
     VVI traverseGraph(N);
@@ -827,8 +743,6 @@ VI ComponentExpansionSeparatorCreator::optimizeOrderByTraversingFirstSmallestCom
         }
     };
 
-//    newOrder.push_back( order[0] );
-//    restoreNewOrder( order[0] );
     newOrder.push_back( firstInOrder );
     restoreNewOrder( firstInOrder );
 
@@ -861,7 +775,8 @@ void ComponentExpansionSeparatorCreator::test() {
         iota(ALL(order),0);
         swap( order[1], order[2] );
 
-        ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::estimatedDepthTreeEdge );
+        Config cnf{};
+        ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::estimatedDepthTreeEdge, cnf );
 
         order = ceCr.getLeastExteriorNeighborhoodOrder( V, {0} );
         order = ceCr.optimizeOrderByTraversingFirstSmallestComponents(V,order);
@@ -870,12 +785,10 @@ void ComponentExpansionSeparatorCreator::test() {
 
 
         order = {12, 1, 0, 2, 3, 13, 7, 17, 11, 14, 15, 16, 9, 10, 8, 4, 5, 6, 19, 20, 18};
-//        ceCr.getBestSeparatorForExpansionOrder( V, order );
         Separator res = ceCr.getBestSeparatorForExpansionOrder( V, ceCr.optimizeOrderByTraversingFirstSmallestComponents(V,order) );
         DEBUG(res);
 
-//        Separator sep(V, {12} ); sep.createSeparatorStats();
-//        DEBUG( sep );
+
     }
     else {
 
@@ -889,7 +802,8 @@ void ComponentExpansionSeparatorCreator::test() {
             int M = 5*N;
             VVI V = GraphGenerator::getRandomGraph(N, M);
             if (ConnectedComponents::getConnectedComponents(V).size() > 1) continue;
-            ComponentExpansionSeparatorCreator ceCr(SeparatorEvaluators::estimatedDepthTreeEdge);
+            Config cnf{};
+            ComponentExpansionSeparatorCreator ceCr(SeparatorEvaluators::estimatedDepthTreeEdge, cnf);
             ceCr.createSeparators(V, 5);
 
         }

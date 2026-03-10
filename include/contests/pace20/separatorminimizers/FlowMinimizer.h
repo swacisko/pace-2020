@@ -11,7 +11,7 @@
 
 class FlowMinimizer : public SeparatorMinimizer{
 public:
-
+    FlowMinimizer(Config c) : SeparatorMinimizer(c) {}
 
     Separator minimizeSeparator( Separator sep );
 

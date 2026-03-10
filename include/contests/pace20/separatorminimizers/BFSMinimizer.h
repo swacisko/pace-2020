@@ -11,6 +11,7 @@
 
 class BFSMinimizer : public SeparatorMinimizer{
 public:
+    BFSMinimizer(Config c) : SeparatorMinimizer(c) {}
 
     Separator minimizeSeparator(Separator sep);
 

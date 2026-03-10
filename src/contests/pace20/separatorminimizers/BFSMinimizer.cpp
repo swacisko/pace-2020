@@ -16,15 +16,12 @@
 
 Separator BFSMinimizer::minimizeSeparator(Separator sep) {
     VVI* V = sep.V;
-    BFSSeparatorCreator bfsCr( *V );
+    BFSSeparatorCreator bfsCr( *V,cnf );
     auto seps = bfsCr.createLayerSeparators( sep.nodes );
 
-//    SeparatorEvaluator sepEval = SeparatorEvaluators::estimatedDepthTreeEdge;
     SeparatorEvaluator sepEval = SeparatorEvaluators::sepEvalToUse;
 
     sort(ALL(seps), sepEval);
-
-//    for(auto s : seps) DEBUG(s);
 
     return seps[0];
 }
@@ -38,7 +35,8 @@ void BFSMinimizer::test() {
     Separator sep(V, nodes);
     sep.createSeparatorStats();
 
-    BFSMinimizer minim;
+    Config cnf{};
+    BFSMinimizer minim(cnf);
     auto res = minim.minimizeSeparator(sep);
 
     DEBUG(sep);

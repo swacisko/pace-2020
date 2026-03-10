@@ -11,6 +11,7 @@
 
 class ExpansionMinimizer : public SeparatorMinimizer{
 public:
+    ExpansionMinimizer(Config c) : SeparatorMinimizer(c) {}
 
 
     Separator minimizeSeparator( Separator sep );

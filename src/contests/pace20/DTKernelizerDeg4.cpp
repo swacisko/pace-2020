@@ -218,7 +218,7 @@ void DTKernelizerDeg4::test(){
     DEBUG( GraphUtils::countEdges(V) );
 
 
-    DTKernelizerDeg4 ker(V);
+    DTKernelizerDeg4 ker(V,Config());
     VVI newV = ker.kernelize();
 
     cerr << "kernelized!" << endl;

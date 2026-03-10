@@ -14,8 +14,8 @@
  * bipartite graph (sep.nodes, N( sep.nodes ) \cap X)
  */
 class LargestComponentsVCMinimizer : public SeparatorMinimizer{
-
 public:
+    LargestComponentsVCMinimizer(Config c) : SeparatorMinimizer(c) {}
 
     Separator minimizeSeparator(Separator sep);
     Separator minimizeSeparator(Separator sep, double sizeBalance );

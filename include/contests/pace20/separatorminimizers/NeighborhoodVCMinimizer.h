@@ -19,6 +19,7 @@
  */
 class NeighborhoodVCMinimizer : public SeparatorMinimizer{
 public:
+    NeighborhoodVCMinimizer(Config c) : SeparatorMinimizer(c) {}
 
 
     Separator minimizeSeparator( Separator sep );

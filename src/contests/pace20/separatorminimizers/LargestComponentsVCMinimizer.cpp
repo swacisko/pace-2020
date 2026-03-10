@@ -102,7 +102,8 @@ void LargestComponentsVCMinimizer::test(){
     sep.createSeparatorStats();
     DEBUG(sep);
 
-    LargestComponentsVCMinimizer minim;
+    Config cnf{};
+    LargestComponentsVCMinimizer minim(cnf);
     auto newSep = minim.minimizeSeparator(sep);
     DEBUG(newSep);
 

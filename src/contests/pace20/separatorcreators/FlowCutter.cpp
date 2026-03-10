@@ -203,7 +203,7 @@ vector<Separator> FlowCutter::getSeparatorsForSourcesAndTargets(VVI &V, VVI &exp
         };
 
         for( int o=0; o<ordersToCheck.size(); o++ ) {
-            if( Pace20Params::tle ) return seps;
+            if( cnf.sw.tle("main") ) return seps;
 
             VI ord = ordersToCheck[o];
             if(debug) cerr << "checking order #" << getOrderName(o) << endl;
@@ -381,12 +381,9 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
     int augmentingTimes = 0;
 
     auto augmentStep = [=, &augmentingTimes,&lastPNSourceSize, &lastPNTargetSize, &canExpandSources, &canExpandTargets](){
-        if( Pace20Params::tle ) return;
+        if( cnf.sw.tle("main") ) return;
 
         augmentingTimes++;
-
-//        cerr << "AUGMENTING FLOW, value: " << uf->flowValue() << ", sources.size() + targets.size() = "
-//             << sources.size() + targets.size() << " / " << V.size() << " = expV.size()" << endl;
 
         if(debug){
 
@@ -395,23 +392,11 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
         }
 
 
-//        for( int i=0; i<N; i++ ) if( isSource[i] && isTarget[i] ) ERROR( "", "node both in sources and targets" ); // LINE JUST FOR TESTING!! REMOVE IT LATER
-
 
         canBeAugmented = false;
         uf->augmentFlow();
 
         if( debug ) cerr << "Flow augmented" << endl;
-
-        /*sourceReachable = sources;
-        targetReachable = targets;
-
-        isSource = StandardUtils::toVB(N,sources);
-        isTarget = StandardUtils::toVB(N,targets);
-
-        isSourceReachable = StandardUtils::toVB( N,sources );
-        isTargetReachable = StandardUtils::toVB( N,targets );*/
-
 
         for( int s : sourceReachable ) isSourceReachable[s] = false; sourceReachable = sources;
         for( int s : sources ) isSourceReachable[s] = true;
@@ -419,19 +404,11 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
         for(int t : targetReachable ) isTargetReachable[t] = false; targetReachable = targets;
         for(int t : targets ) isTargetReachable[t] = true;
 
-
-
         fGrow();
-
-//        for( int i=0; i<N; i++ ) if( isSourceReachable[i] && isTargetReachable[i] ) ERROR( "", "node after augmenting is both source and target reachable" ); // LINE JUST FOR TESTING!! REMOVE IT LATER
 
         if(debug) DEBUG(sourceReachable);
 
-
-
         bGrow();
-
-//        for( int i=0; i<N; i++ ) if( isSourceReachable[i] && isTargetReachable[i] ) ERROR( "", "node after augmenting is both source and target reachable" ); // LINE JUST FOR TESTING!! REMOVE IT LATER
 
         if(debug) DEBUG(targetReachable);
 
@@ -449,12 +426,11 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
             uf->writeSaturatedEdges(); ENDL(5);
         }
 
-//        calculateDistances();
 
     };
 
     auto expandSourcesStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
-        if( Pace20Params::tle ) return;
+        if( cnf.sw.tle("main") ) return;
 
         if(debug){
             cerr << "Expanding sources" << endl;
@@ -484,7 +460,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
         if( isTarget[pN] ){
             canExpandSources = false;
-//            continue;
             return;
         }
 
@@ -508,7 +483,7 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
     };
 
     auto expandTargetsStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
-        if( Pace20Params::tle ) return;
+        if( cnf.sw.tle("main") ) return;
 
         if(debug){
             cerr << "Expanding targets" << endl;
@@ -565,7 +540,7 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
 
     while( sources.size() + targets.size() < N ){
-        if( Pace20Params::tle ) break;
+        if( cnf.sw.tle("main") ) break;
 
         if( uf->flowValue() > max( (double)15, bestResultSoFarSeparatorNodesSize * maximalDeviationFromBestResultFactor) ) break;
 
@@ -575,7 +550,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
             augmentStep();
 
         }else{
-//            for( int i=0; i<N; i++ ) if( isSource[i] && isTarget[i] ) ERROR( "", "node both in sources and targets" ); // LINE JUST FOR TESTING!! REMOVE IT LATER
 
             if( !canExpandSources && !canExpandTargets ) break; // all sources and targets already form a separator, each piercing node is either a source or target
 
@@ -585,7 +559,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
             bool expandSources;
             if( !canExpandTargets ) expandSources = true;
             else if( !canExpandSources ) expandSources = false;
-//            else expandSources = ( sourceReachable.size() <= targetReachable.size() ); // original version
             else{
                 vector<PiercingNode> pNodes = getAllPiercingNodes();
                 VI augSrc, nonaugSrc, augTrg, nonaugTrg;
@@ -614,30 +587,21 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
 
             if( expandSources ){ // original version
-
                 expandSourcesStep();
-
             }else{
                 expandTargetsStep();
-
             }
-
 
         }
     }
 
     if(debug){
-        cerr << "Finished!" << endl;
         DEBUG(sources);
         DEBUG(targets);
         DEBUG(expansionOrder);
     }
 
-
-
     return expansionOrder;
-
-
 }
 
 void FlowCutter::fGrow(int s) {
@@ -1031,21 +995,17 @@ void FlowCutter::test() {
     DEBUG( GraphUtils::countEdges(V) );
 
     VVI initKernV; // this is initially kernelized V - V after subgraph kernelization, before deg3 kernelization, since deg3 kernelization may yield different results depending on nodes in IS
-    DTKernelizer initKernelizer(V);
+    Config cnf{};
+    DTKernelizer initKernelizer(V,cnf);
     V = initKernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
 
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
-//    DEBUG( FlowCutter::getExpansionGraph(V) );
-
-
     TimeMeasurer::startMeasurement("FC");
 
-    FlowCutter fc( SeparatorEvaluators::sepEvalToUse );
+    FlowCutter fc( SeparatorEvaluators::sepEvalToUse, cnf );
     auto seps = fc.createSeparators(V,10);
-//    for( auto& sp : seps ) DEBUG(sp);
-//    fc.getFlowCutterExpansionOrder( V, {0}, {15} );
 
     TimeMeasurer::stopMeasurement("FC");
     TimeMeasurer::writeAllMeasurements();

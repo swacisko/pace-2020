@@ -45,11 +45,6 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
 
 
         secondHighest = max( secondHighest, (double)dt->height - data[num].height + (double)data[num].sepNodes.size() + data[ sons[1] ].height );
-//        DEBUG(num);
-//        DEBUG(secondHighest);
-
-        // add separator to nodesToClose
-
         StandardUtils::append( nodesToClose, data[num].sepNodes );
 
 
@@ -68,7 +63,6 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
     getNodesToClose(0,0);
 
     if( nodesToClose.size() <= 10 ){ // #TEST using imbalanced tree improver only if there are at least 10 nodes to close
-//        cerr << "nodesToClose are empty" << endl;
         return t;
     }
 
@@ -77,30 +71,18 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
 
     VI allNodesInSmallerParts;
     for( VI& v : nodesInSmallerParts ) StandardUtils::append(allNodesInSmallerParts, v);
-//    DEBUG(allNodesInSmallerParts);
-
 
     VI nodesInLargerPart = GraphUtils::getComplimentaryNodes( *dt->V, allNodesInSmallerParts );
-
-//    DEBUG(nodesInLargerPart);
-
-//    DEBUG(nodesInSmallerParts);
-//    DEBUG(rootsInSmallerParts);
-
     VVI V2 = *dt->V;
     int N = V2.size();
 
-//    DEBUG(V2);
     CliqueUtils::fillToClique( V2, nodesToClose );
-//    DEBUG(V2);
-
-    // now filling clique
 
     InducedGraph gLarge = GraphInducer::induce( V2, nodesInLargerPart ); // gLarge is connected
 
 
 
-    DepthTreeCreatorLarge creator( gLarge.V, 0 );
+    DepthTreeCreatorLarge creator( gLarge.V, 0, cnf );
     DepthTree dtLarge = creator.getDepthTree();
 
     DEBUG(dtLarge.height);
@@ -116,8 +98,6 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
         if( b != -1 ) b = gLarge.nodes[b];
 
         dtRes.par[a] = b;
-
-//        DEBUG(VI({a,b}));
     }
 
     auto gLargeDepths = dtLarge.getNodeDepths();
@@ -141,23 +121,15 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
         for( int p : v ){
             if( subtreesRoots[p] ){
                 dtRes.par[p] = attachment;
-//                cerr << endl << "Assigning par of root " << p << " to " << attachment << endl;
             }
             else dtRes.par[p] = dt->par[p];
         }
     }
 
-
-
-    // appending smaller parts to current tree
-
     dtRes.height = dtRes.calculateHeight();
-//    dtRes.writeBalanceStructure();
 
     DEBUG(dtRes.height);
     assert( dtRes.isCorrect() );
-
-//    exit(1);
     return dtRes;
 }
 
@@ -167,16 +139,12 @@ bool ImbalancedTreeImprover::isImbalanced(DepthTree &dt) {
 }
 
 void ImbalancedTreeImprover::test() {
-//    VVI V = GraphReader::readGraphDIMACSWunweighed(cin);
-//    DEBUG(V.size());
-//    DEBUG( GraphUtils::countEdges(V) );
 
     int N = 16;
     VVI V(N);
     V[0] = {5}; V[1] = {3}; V[2] = {4}; V[3] = {1,4,5}; V[4] = {2,3,5}; V[5] = {0,3,4};
 
 
-//    DEBUG(V);
     DepthTree dt(V);
     dt.root = 0;
     dt.par = {
@@ -208,15 +176,11 @@ void ImbalancedTreeImprover::test() {
         p = i;
     }
 
-//    GraphUtils::addEdge( V,N, N/2 );
-//    for( int i=N; i < 4*N; i++ )  for( int k=i+1; k < 4*N; k++ ) GraphUtils::addEdge( V,i,k );
-
-//    DEBUG(V);
     dt.height = dt.calculateHeight();
     dt.writeBalanceStructure();
 
 
-    ImbalancedTreeImprover improver;
+    ImbalancedTreeImprover improver(Config());
     dt = improver.improve(dt);
     dt.writeBalanceStructure();
 
