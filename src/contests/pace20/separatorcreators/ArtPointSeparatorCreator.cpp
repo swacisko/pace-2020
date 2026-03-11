@@ -103,7 +103,7 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
 
         Separator sep(V,sepNodes);
         sep.createSeparatorStats();
-        if( sep.stats.maxCompEdges <= Pace20Params::balance * originalGraphEdges ) break;
+        if( sep.stats.maxCompEdges <= Config::sep_balance * originalGraphEdges ) break;
 
         if( bestNode == -1 ){
             cerr << "bestNode = -1, that means there is no balanced art-point separator" << endl;
@@ -134,7 +134,7 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
             bestVal = best.second;
 
             edgesInComponent[bestNode] = countEdgesInComponent(bestNode);
-            if( edgesInComponent[bestNode] <= Pace20Params::balance * originalGraphEdges ) continue;
+            if( edgesInComponent[bestNode] <= Config::sep_balance * originalGraphEdges ) continue;
 
             double minLocalChange = 0.995;
             double localBalance = (double) bestVal / edgesInComponent[bestNode];

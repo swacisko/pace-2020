@@ -17,7 +17,6 @@
 
 
 Separator FlowMinimizer::minimizeSeparator( Separator sep ){
-//    sep.createSeparatorStats();
     if( sep.stats.numberOfComponents == 1 ) return sep;
 
     VVI* V = sep.V;
@@ -39,23 +38,17 @@ Separator FlowMinimizer::minimizeSeparator( Separator sep ){
         }
     }
 
-//    DEBUG(edgesInComp);
-
     sort( ALL(comps), [&edgesInComp]( VI& v1, VI& v2 ){ return edgesInComp[v1[0]] > edgesInComp[v2[0]]; } );
 
-    double balance = Pace20Params::balance;
+    double balance = Config::sep_balance;
     int totalEdges = GraphUtils::countEdges(*V);
-
-//    cerr << "comps sizes: "; for(VI& v : comps) cerr << v.size() << " "; cerr << endl;
 
     double largestCompsEdges = 0;
     VI largestCompsNodes;
-//    VI restCompsNodes;
     for( int i=0; i<comps.size(); i++ ){
         largestCompsNodes.insert( largestCompsNodes.end(), ALL(comps[i]) );
         largestCompsEdges += edgesInComp[ comps[i][0] ];
         if( largestCompsEdges > (1-balance) * totalEdges ){
-//            for( int j=i+1; j<comps.size(); j++ ) restCompsNodes.insert( restCompsNodes.end(), ALL(comps[j]) );
             break;
         }
     }
@@ -78,19 +71,11 @@ Separator FlowMinimizer::minimizeSeparator( Separator sep ){
 
     if( smallerPartEnds.empty() || largerPartSources.empty() ) return sep;
 
-//    DEBUG(L);
-//    DEBUG(l);
-//    DEBUG(largerPartSources);
-//    DEBUG(smallerPartEnds);
-
     VI inducerSet;
     for( int i=0; i<=L; i++ ) for( int d : layers[i] ) if( inLargerPart[d] ) inducerSet.push_back(d);
     for( int i=0; i<=l; i++ ) for( int d : layers[i] ) if( !inLargerPart[d] ) inducerSet.push_back(d);
 
 
-//    DEBUG(inducerSet);
-
-//    DEBUG((*V));
     InducedGraph g = GraphInducer::induce( *V, inducerSet);
 
     VI sources = largerPartSources;
@@ -101,37 +86,24 @@ Separator FlowMinimizer::minimizeSeparator( Separator sep ){
     VVI paths = DisjointPaths::getSetOfDisjointPaths( g.V,sources,ends );
 
     for( VI& pth : paths ) for(int& d : pth) d = g.nodes[d];
-//    DEBUG(paths);
 
     VI internalNodes;
     for( VI& pth : paths ) for(int i=1; i<pth.size()-1; i++) internalNodes.push_back( pth[i] );
 
-//    DEBUG(internalNodes);
-
     GreedyNodeEdgeMinimizer gneMinim(cnf,GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
     LargestComponentsVCMinimizer lcMinim(cnf);
 
-
     Separator res(*V,internalNodes);
     res.createSeparatorStats();
-//    DEBUG(res);
 
-    if( res.stats.size <= Pace20Params::maxSeparatorSizeForGNEMinimizer ){
+    if( res.stats.size <= cnf.max_separator_size_for_GNE_minimizer ){
         res = gneMinim.minimizeSeparator(res);
-//        cerr << "Minimizing witg gne" << endl;
     }
     else{
-//        cerr << "minimizing with lc" << endl;
         res = lcMinim.minimizeSeparator(res);
     }
 
-//    res.updatePointers(*V);
-//    res.createSeparatorStats();
-//    DEBUG(res);
-
-
     return res;
-
 }
 
 
@@ -150,7 +122,6 @@ void FlowMinimizer::test(){
     FlowMinimizer minim(cnf);
     auto newSep = minim.minimizeSeparator(sep);
     DEBUG(newSep);
-
 
     exit(1);
 }

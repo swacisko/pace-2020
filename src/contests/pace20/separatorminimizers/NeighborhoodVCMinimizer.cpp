@@ -13,14 +13,11 @@
 #include "graphs/vertex_cover/BipartiteGraphVertexCover.h"
 
 Separator NeighborhoodVCMinimizer::minimizeSeparator(Separator sep) {
-//    cerr << "entering minimizer" << endl;
     VVI V = *sep.V;
     VI nodes = sep.nodes;
     int N = V.size();
 
-//    DEBUG(nodes);
     VI neigh = GraphUtils::getNeighborhood( V, nodes, false );
-//    DEBUG(neigh);
     VB inNodes(N,false);
     for(int d : nodes) inNodes[d] = true;
 
@@ -32,17 +29,11 @@ Separator NeighborhoodVCMinimizer::minimizeSeparator(Separator sep) {
         }
     }
     sort(ALL(neigh));
-//    DEBUG(neigh);
-
-//    DEBUG(nodes.size());
-//    DEBUG(neigh.size());
-
 
     VI inducer = neigh;
     inducer.insert( inducer.end(), ALL(nodes) );
 
     sort(ALL(inducer));
-//    DEBUG(inducer);
 
     InducedGraph gr = GraphInducer::induce(V,inducer);
 
@@ -51,13 +42,11 @@ Separator NeighborhoodVCMinimizer::minimizeSeparator(Separator sep) {
 
     VI vc = BipartiteGraphVertexCover::getVertexCoverOfBipartiteGraph( gr.V, bipartition );
     for(int& d : vc) d = gr.nodes[d];
-//    DEBUG(vc.size());
 
     Separator newSep(V,vc);
     newSep.createSeparatorStats();
     newSep.updatePointers( *sep.V );
 
-//    cerr << "leaving minimizer" << endl;
     return newSep;
 }
 
@@ -74,9 +63,5 @@ void NeighborhoodVCMinimizer::test() {
     auto newSep = minim.minimizeSeparator(sep);
     DEBUG(newSep);
 
-
     exit(1);
-
-
-
 }

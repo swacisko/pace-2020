@@ -15,18 +15,15 @@
 #include "graphs/GraphInducer.h"
 
 Separator ExpansionMinimizer::minimizeSeparator(Separator sep) {
-//    ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::estimatedDepthTreeEdge );
     ComponentExpansionSeparatorCreator ceCr( SeparatorEvaluators::sepEvalToUse, cnf );
 
     ceCr.setOrdersToCreate( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
-//    ceCr.setOrdersToOptimize( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
 
     VVI* V = sep.V;
     VVI orders = ceCr.getExpansionOrdersForNodes( *V, sep.nodes );
 
     // #TEST testing minimizing only with optimized orders
     orders.erase( orders.begin() + orders.size() / 2 );
-
 
     Separator bestSep = sep;
     for(int i=0; i<orders.size(); i++){
@@ -56,8 +53,6 @@ void ExpansionMinimizer::test() {
 
     DEBUG(sep);
     DEBUG(res);
-
-//    res = minim.minimizeSeparator(res);
 
     exit(1);
 }

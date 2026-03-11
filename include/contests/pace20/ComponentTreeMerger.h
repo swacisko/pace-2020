@@ -7,6 +7,7 @@
 #ifndef ALGORITHMSPROJECT_DEPTHTREEMERGER_H
 #define ALGORITHMSPROJECT_DEPTHTREEMERGER_H
 
+#include "Config.h"
 #include "DepthTree.h"
 #include "Separator.h"
 
@@ -17,7 +18,7 @@
 class ComponentTreeMerger{
 public:
 
-    ComponentTreeMerger(VVI & V, Separator& sep, VVI & comps, vector<DepthTree>& subtrees);
+    ComponentTreeMerger(VVI & V, Separator& sep, VVI & comps, vector<DepthTree>& subtrees, Config c);
 
     /**
      *  CAUTION!! Function modifies subtrees passed in constructor!!
@@ -63,7 +64,7 @@ public:
     Separator* sep;
     VVI *comps;
     vector<DepthTree> *subtrees;
-
+    Config cnf;
 
 
     VVI sepGraph;

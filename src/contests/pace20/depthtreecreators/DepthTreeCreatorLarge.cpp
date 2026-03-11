@@ -52,7 +52,8 @@ DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config
 
 DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
-    if( cnf.sw.tle("main") || ( Pace20Params::useOnlyArtPoints && recDepth > 50 ) ){
+    bool use_only_art_points = ( cnf.preprocessing_to_use_mask == ArtPointsPrepr );
+    if( cnf.sw.tle("main") || ( use_only_art_points && recDepth > 50 ) ){
         // Pace20Params::temp += V->size();
         DepthTree dt(*V);
         dt.root = 0;
@@ -77,23 +78,15 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
     if( USE_KERNELIZATION ) {
-        if (Pace20Params::useKernelization &&
-            V->size() >= Pace20Params::minGraphSizeForKernelization /*&& recDepth < 3*/ && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0) {
+        if( cnf.use_preprocessing &&
+            V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0) {
             DTKernelizer dtKernelizer(*V,cnf);
             VVI newV;
 
-//            cerr << "kernelizing!" << endl;
-
-//        GraphUtils::writeBasicGraphStatistics(*V);
-
             bool useSubgraphKernelization = true;
-
 
             if (useSubgraphKernelization) newV = dtKernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
             else newV = dtKernelizer.getKernelizedGraph(); // soft kernelization - only dangling trees and paths
-
-//        GraphUtils::writeBasicGraphStatistics(newV); //exit(1);
-//        ENDL(5);
 
             if (newV.size() != V->size()) {
                 DepthTree dt((*V));
@@ -125,15 +118,13 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
                 newDt.V = V;
                 dt = newDt;
 
-//                dt = DepthTreePivotMaker::makeAllPivots(dt); // maybe do not do that here (time consuming in case of small kernelizations)
-
                 assert(dt.isCorrect());
 
                 return dt;
             }
 
 
-        } else if ( Pace20Params::useKernelization && USE_DEG3_KERNELIZATION && V->size() >= Pace20Params::minGraphSizeForKernelization /*  Pace20Params::minGraphSizeForDeg3Kernelization */ &&
+        } else if ( cnf.use_preprocessing && USE_DEG3_KERNELIZATION && V->size() >= cnf.min_graph_size_for_kernelization &&
                     recDepth == 0 && GraphUtils::countNodesWithDegree(*V, 3, 3) > 0) {
             DTKernelizerDeg3 ker(*V,cnf);
             VVI newV = ker.kernelize();
@@ -155,7 +146,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             assert(dt.isCorrect());
 
             return dt;
-        } else if( USE_DEG4_KERNELIZATION && V->size() >= Pace20Params::minGraphSizeForKernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
+        } else if( USE_DEG4_KERNELIZATION && V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
             DTKernelizerDeg4 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
@@ -179,7 +170,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         }
     }
 
-    const int MAX_SOURCES = min( Pace20Params::maxSources, (int)V->size()-1 );
+    // const int MAX_SOURCES = min( cnf.sep_cr_max_sources, (int)V->size()-1 );
 
 
     auto sepEval = SeparatorEvaluators::sepEvalToUse;
@@ -199,7 +190,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             return s1.stats.size * (s1.stats.maxCompSize+1) * (s1.stats.maxCompEdges+1) == s2.stats.size * (s2.stats.maxCompSize+1) * (s2.stats.maxCompEdges+1);
         } );
 
-        int SS = min( (int)( it - bestSeps.begin() ), Pace20Params::maxBestSepsForRecursion);
+        int SS = min( (int)( it - bestSeps.begin() ), cnf.max_best_seps_for_recursion);
         while( bestSeps.size() > SS ) bestSeps.pop_back();
         for(auto& sp : bestSeps) sp.updatePointers(*V);
     };
@@ -210,7 +201,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             return 1ll * s1.stats.size * (s1.stats.maxCompSize+1) * (s1.stats.maxCompEdges+1) == 1ll * s2.stats.size * (s2.stats.maxCompSize+1) * (s2.stats.maxCompEdges+1);
         } );
 
-        int SS = min( (int)( it - bestSeps.begin() ), Pace20Params::maxBestSepsForMinimizers);
+        int SS = min( (int)( it - bestSeps.begin() ), cnf.max_best_seps_for_minimizers);
         while( bestSeps.size() > SS ) bestSeps.pop_back();
         for(auto& sp : bestSeps) sp.updatePointers(*V);
     };
@@ -234,7 +225,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     if( SEPARATOR_CREATORS_MODE & ART_POINTS_CREATOR ){ // ARTICULATION POINTS
         if( recDepth == 0 ) cerr << "\tcreating art-points" << flush;
         ArtPointSeparatorCreator apCr(cnf);
-        vector<Separator>  apSeps = apCr.createSeparators(*V, Pace20Params::maxSources);
+        vector<Separator>  apSeps = apCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(apSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
 
@@ -246,17 +237,17 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     if( SEPARATOR_CREATORS_MODE & BFS_CREATOR ){ // BFS
         if( recDepth == 0 ) cerr << "\tcreating bfs" << flush;
         BFSSeparatorCreator sepCr(*V,cnf);
-        vector<Separator>  bfsSeps = sepCr.createSeparators(*V, Pace20Params::maxSources);
+        vector<Separator>  bfsSeps = sepCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(bfsSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
     }
 
     if( SEPARATOR_CREATORS_MODE & FLOW_CREATOR){ // FLOW
         if( recDepth == 0 ) cerr << "\tcreating flow" << flush;
-        GreedyNodeEdgeMinimizer minimizer(cnf, Pace20Params::minimizeNodesIteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
+        GreedyNodeEdgeMinimizer minimizer(cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
         minimizer.sepEval = &sepEval;
         FlowSeparatorCreator sepFl(cnf,&minimizer);
-        int repeats = 3*Pace20Params::maxSources;
+        int repeats = 3*cnf.sep_cr_max_sources;
         vector<Separator> flowSeps = sepFl.createSeparators( *V, repeats );
         bestSeps.insert( bestSeps.end(), ALL(flowSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
@@ -272,7 +263,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         else if( recDepth == 1 ) factor = 4;
         else if( recDepth == 2 ) factor = 3;
 
-        if( Pace20Params::quickAndWeakTreeCreation ) factor = 1.01 * ( (double)1 /  Pace20Params::maxSources );
+        if( cnf.quick_and_weak_tree_creation ) factor = 1.01 * ( (double)1 /  cnf.sep_cr_max_sources );
 
         int D1 = 1, D2 = 3;
 
@@ -284,7 +275,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             ceCr.setOrdersToOptimize( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
         }
 
-        vector<Separator>  ceSeps = ceCr.createSeparators(*V, factor * Pace20Params::maxSources);
+        vector<Separator>  ceSeps = ceCr.createSeparators(*V, factor * cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(ceSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
 
@@ -294,7 +285,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     if( SEPARATOR_CREATORS_MODE & CLIQUE_CREATOR ){ // ARTICULATION POINTS
         if( recDepth == 0 ) cerr << "\tcreating clique separators" << flush;
         CliqueSeparatorCreator clqCr(*V,cnf);
-        vector<Separator>  ceSeps = clqCr.createSeparators(*V, 3*Pace20Params::maxSources);
+        vector<Separator>  ceSeps = clqCr.createSeparators(*V, 3*cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(ceSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
     }
@@ -385,9 +376,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     }
 
 
-
-
-    // Pace20Params::temp += bestSep.nodes.size();
     if( V->size() > 500 && recDepth <= 10 ){
         cerr << endl;
         for(int i=0; i<recDepth; i++) cerr << "  ";
@@ -396,7 +384,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
         ENDL(1);
     }
-
 
 
     sortAndResizeSeparatorsForRecursion();
@@ -439,7 +426,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             compTrees.push_back(cmpTree);
         }
 
-        ComponentTreeMerger merger( *V, bestSep, comps, compTrees );
+        ComponentTreeMerger merger( *V, bestSep, comps, compTrees, cnf );
         DepthTree dt = merger.mergeComponents();
 
         if( bestSep.stats.size != bestSep.nodes.size() ){
@@ -454,12 +441,11 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     DepthTree dt = getBestDTForSeparator( bestSep );
 
-    int sepsToCheck = Pace20Params::maxBestSepsForRecursion;
-    sepsToCheck = (int)ceil( (double) Pace20Params::maxBestSepsForRecursion / (1 << min(30,recDepth)) );
+    int sepsToCheck = cnf.max_best_seps_for_recursion;
+    sepsToCheck = (int)ceil( (double) cnf.max_best_seps_for_recursion / (1 << min(30,recDepth)) );
     sepsToCheck = min( sepsToCheck, (int)bestSeps.size() );
 
     for( int i=1; i<sepsToCheck; i++ ){
-//        if( V->size() > 150 ){ for( int j=0; j<recDepth; j++ ) cerr << "  "; cerr << bestSeps[i] << endl; }
         DepthTree dt2 = getBestDTForSeparator( bestSeps[i] );
         if( dt2.height < dt.height ) dt = dt2;
     }
@@ -469,7 +455,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     dt.V = &*V;
     assert( dt.height == dt.calculateHeight() );
     if( cnf.sw.tle("main") ) return dt;
-
 
 
 
@@ -592,12 +577,12 @@ void DepthTreeCreatorLarge::testVCorARTPOINTKernelization() {
     bool useArtPointKernelization = false;
     if( useArtPointKernelization && recDepth <= 1 ){
         ArtPointSeparatorCreator apCr(cnf);
-        vector<Separator>  apSeps = apCr.createSeparators(*V, Pace20Params::maxSources);
+        vector<Separator>  apSeps = apCr.createSeparators(*V, cnf.sep_cr_max_sources);
         apSeps[0].updatePointers(*V);
 
         DEBUG(V->size());
 
-        if( SeparatorEvaluators::isBalanced(apSeps[0], Pace20Params::balance) == false ){
+        if( SeparatorEvaluators::isBalanced(apSeps[0], Config::sep_balance) == false ){
             cerr << "art-point separator is not balanced!" << endl;
             VI arts = BridgesAndArtPoints::getBridgesAndArtPoints(*V).first;
             VVI comps = ConnectedComponents::getConnectedComponents(*V, arts);
@@ -699,8 +684,8 @@ Separator DepthTreeCreatorLarge::testMatchingEdgesContraction() {
 
 void DepthTreeCreatorLarge::test() {
 
-    Pace20Params::quickAndWeakTreeCreation = false;
     Config cnf{};
+    cnf.quick_and_weak_tree_creation = false;
 
     for( int i=50; i<100; i++ ) {
         int N = i;

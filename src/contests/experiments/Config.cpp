@@ -10,3 +10,5 @@ void Config::writeBasicInfo() {
         << "\t metadata_filepath: " << metadata_filepath << endl;
 }
 
+double Config::sep_balance = 0.97;
+bool Config::require_balanced_separators = true;

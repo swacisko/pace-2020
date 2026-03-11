@@ -8,13 +8,14 @@
 #include "contests/pace20/Pace20Params.h"
 #include "contests/pace20/ComponentTreeMerger.h"
 
-ComponentTreeMerger::ComponentTreeMerger(VVI &V, Separator &sep, VVI &comps, vector<DepthTree> &subtrees) {
+ComponentTreeMerger::ComponentTreeMerger(VVI &V, Separator &sep, VVI &comps, vector<DepthTree> &subtrees, Config c) {
 
     this->V = &V;
     this->sep = &sep;
     this->comps = &comps;
     this->subtrees = &subtrees;
     this->RANDOM_REPS = 10;
+    this->cnf = c;
 
     createSepGraph();
 }
@@ -25,7 +26,8 @@ DepthTree ComponentTreeMerger::mergeComponents(int MERGE_TYPE, int reps) {
 
     if( MERGE_TYPE == AUTOMATIC ){
         this->MERGE_TYPE= ComponentTreeMerger::LARGEST_FIRST;
-        if( comps->size() <= Pace20Params::CTMergerSmallSize ) this->MERGE_TYPE = ComponentTreeMerger::ALL_ORDERS;
+        // if( comps->size() <= Pace20Params::CTMergerSmallSize ) this->MERGE_TYPE = ComponentTreeMerger::ALL_ORDERS;
+        if( comps->size() <= cnf.ct_merger_small_size ) this->MERGE_TYPE = ComponentTreeMerger::ALL_ORDERS;
     }
 
     VI mergeOrder = getMergeOrder();
@@ -255,7 +257,8 @@ void ComponentTreeMerger::test() {
     VVI comps = { {5,6,7}, {8,9} };
     vector<DepthTree> subtrees = { t1,t2 };
 
-    ComponentTreeMerger merger(V, sep, comps, subtrees);
+    Config cnf{};
+    ComponentTreeMerger merger(V, sep, comps, subtrees, cnf);
     merger.mergeComponents();
 
 

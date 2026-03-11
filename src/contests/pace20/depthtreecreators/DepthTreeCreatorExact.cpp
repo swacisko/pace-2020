@@ -504,11 +504,11 @@ DepthTree DepthTreeCreatorExact::getDTCLLowerBound() {
     for( int i=0; i<reps;i++ ){
         if( i == 0 ){
             SeparatorEvaluators::nodeScaleFactor = 0.95; SeparatorEvaluators::edgeScaleFactor = 0.05;
-            Pace20Params::minimizeNodesIteration = true;
+            cnf.minimize_nodes_iteration = true;
         }
         else if(i==1){
             SeparatorEvaluators::nodeScaleFactor = 0.05; SeparatorEvaluators::edgeScaleFactor = 0.95;
-            Pace20Params::minimizeNodesIteration = false;
+            cnf.minimize_nodes_iteration = false;
         }else{
             SeparatorEvaluators::nodeScaleFactor = 0.5; SeparatorEvaluators::edgeScaleFactor = 0.5;
         }
@@ -727,22 +727,18 @@ void DepthTreeCreatorExact::createBranchingNodes() {
 
 
 void DepthTreeCreatorExact::test(){
-    Pace20Params::quickAndWeakTreeCreation = false;
+    Config cnf{};
+    cnf.quick_and_weak_tree_creation = false;
 
     VVI V = GraphReader::readGraphDIMACSWunweighed(cin);
-
-    Pace20Params::inputGraphSize = V.size();
-    Pace20Params::inputGraphEdges = GraphUtils::countEdges(V);
 
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
-    Config cnf{};
     int K = V.size();
     DepthTreeCreatorExact dtce(V,K,0,cnf);
 
     auto bestTree = dtce.getDepthTree();
-
 
     cerr << "FINISHED" << endl;
     DEBUG(bestTree);

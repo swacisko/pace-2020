@@ -7,6 +7,7 @@
 #ifndef ALGORITHMSPROJECT_SEPARATOREVALUATORS_H
 #define ALGORITHMSPROJECT_SEPARATOREVALUATORS_H
 
+#include "Config.h"
 #include "Separator.h"
 
 

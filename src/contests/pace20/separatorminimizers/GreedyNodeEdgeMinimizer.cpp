@@ -16,9 +16,6 @@
 
 
 Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGraph,  VI nodeW, VI edgeW) {
-//    cerr << "entering minimizer" << endl;
-
-
     bool debug = false;
 
     nodeWeights = nodeW;
@@ -58,8 +55,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
         if( minimizationType == MINIMIZE_NODES) totalWeight = sep.stats.originalGraphSize;
         else totalWeight = sep.stats.originalGraphEdges;
     }
-//    int totalWeight = sep.nodes.size(); // in this case we consider balnce together with nodes in separator
-
 
     for( int i=0; i<n; i++ ){
         nodeWeights[i] = 1;
@@ -86,16 +81,12 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
 
 
     auto isBalanced = [=, &totalWeight, &neighCompSizesSum, &edgeCompSizesSum](int a){
-        double balance = Pace20Params::balance;
+        double balance = cnf.sep_balance;
         if( minimizationType == MINIMIZE_NODES ) return neighCompSizesSum[a] <= balance * totalWeight;
-//        else return edgeCompSizesSum[a] <= balance * totalWeight;
         else return edgeCompSizesSum[a] + edgeWeightsSum[a] <= balance * totalWeight;
     };
 
     auto comp = [=, &neighCompSizesSum, &edgeCompSizesSum, &degInComps, &edgeWeightsSum]( int a, int b ) {
-//        if( degInComps[a] == 1 && degInComps[b] != 1 ) return true;
-//        if( degInComps[a] != 1 && degInComps[b] == 1 ) return false;
-
 
         /**
          * If there is a node that has no neighbors in any component, then i try to isolate it from separator and make it a new component.
@@ -106,18 +97,8 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
                    gr[b].size(); // if both a and b have no neighbors in component, then i isolate the one with less neighbors in separator
 
 
-//        if( degInComps[a] <= 1 && degInComps[b] <= 1 && degInComps[a] != degInComps[b] )  return degInComps[a] < degInComps[b];
-
-////        if( degInComps[a] != degInComps[b] ) return degInComps[a] < degInComps[b];
-//        if( degInComps[a] <= 1 && degInComps[b] != 1 ) return degInComps[a] < degInComps[b];
-//        if( degInComps[a] != 1 && degInComps[b] <= 1 ) return degInComps[a] < degInComps[b];
-
         if (minimizationType == MINIMIZE_NODES && neighCompSizesSum[a] != neighCompSizesSum[b])
             return neighCompSizesSum[a] < neighCompSizesSum[b];
-
-//        else if( minimizationType == MINIMIZE_EDGES && edgeCompSizesSum[a] != edgeCompSizesSum[b] ){
-//            return edgeCompSizesSum[a] < edgeCompSizesSum[b];
-//        }
         else if( minimizationType == MINIMIZE_EDGES && edgeCompSizesSum[a] + edgeWeightsSum[a] != edgeCompSizesSum[b] + edgeWeightsSum[b] ){
             // add sum of weights of all edges into components
             return edgeCompSizesSum[a] + edgeWeightsSum[a] < edgeCompSizesSum[b] + edgeWeightsSum[b];
@@ -129,11 +110,7 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
 
 
     Separator bestSep = sep; bestSep.stats.sep = &bestSep;
-//    VI nodeRemovalOrder; // order of nodes that were removed from heap during minimization
-//    int bestIndex=0; // bestIndex is number of beginning elements of nodeRemovalOrder that should be removed from bestSep.nodes to obtain best possible separator
     VB bestSepNodes(sep.nodes.size(),true);
-
-
 
     VB neighVec(N,false);
     VB nodesSet(N,false);
@@ -155,7 +132,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
                 wN += nodeWeights[d];
                 wE += edgeWeights[d];
                 mergeTo = min( mergeTo,d );
-//                sep.stats.numberOfComponents--;
             }else{
                 if( !useGlobalTotalWeight ) if( minimizationType == MINIMIZE_NODES ) totalWeight++;
                 wN++;
@@ -203,11 +179,8 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
             neighVec.push_back(false);
             totalEdges.push_back(0);
 
-//            sep.stats.numberOfComponents++;
-
             N++;
         }
-
 
         for(int p : nodes){
             for(int j=0; j<gr[p].size(); j++){
@@ -216,7 +189,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
 
                 neighCompSizesSum[d] -= nodeWeights[p];
                 edgeCompSizesSum[d] -= edgeWeights[p];
-
 
                 if( p >= n ) degInComps[d]--;
             }
@@ -247,8 +219,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
                         swap( gr[d][j], gr[d].back() );
                         gr[d].pop_back();
 
-//                        edgeWeightsSum[d] -= grW[d][j];
-
                         swap( grW[d][j], grW[d].back() );
                         grW[d].pop_back();
                     }
@@ -273,8 +243,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
             grW[p].push_back( totalEdges[p] );
             grW[mergeTo].push_back( totalEdges[p] ); // yes, here is again the same totalEdges[p] as above since the values are the same (symmetrical), we keep only one of them
 
-//            edgeWeightsSum[p] += totalEdges[p];
-
             degInComps[p]++;
             neighCompSizesSum[p] += wN;
             edgeCompSizesSum[p] += wE;
@@ -291,13 +259,10 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
     for(int i=0; i<n; i++){
 
         heap.push_back(i); // version with heap
-//        if( !( isBalanced(i) || degInComps[i] == 1 ) ){ // version with heap
         if( !( isBalanced(i) || degInComps[i] <= 1 ) ){ // version with heap
             heap.removeFromHeap(i);
         }
-
     }
-
 
     int nodesRemoved = 0;
 
@@ -339,7 +304,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
             else edgeWeightsSum[d]++;
         }
 
-
         neigh.clear();
         for( int p : nodes ){
             for( int d : gr[p] ){
@@ -347,7 +311,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
                 neighVec[d] = true;
             }
         }
-
 
         for( int d : nodes ) nodesSet[d] = true;
 
@@ -376,7 +339,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
             }
         }
 
-
         if(debug){
             cerr << "After removing " << p << endl;
             DEBUG(gr);
@@ -393,8 +355,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
 
         for( int d : nodes ) nodesSet[d] = false;
         for( int p : neigh ) neighVec[p] = false;
-
-
 
 
         // TESTING ALL STATES CHECK!
@@ -418,20 +378,6 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
 
             sep.stats.numberOfComponents = comps.size();
 
-            /*ENDL(5);
-            cerr << "I am here at all" << endl;
-
-            {
-                cerr << "in GNE slow checking of correctness" << endl;
-                VI tempNodes;
-                for(int i=0; i<n; i++) if( !gr[i].empty() ) tempNodes.push_back( sep.nodes[i] );
-                Separator temp(*sep.V,tempNodes);
-                temp.createSeparatorStats();
-//                DEBUG(sep.stats);
-//                DEBUG(temp.stats);
-                assert( temp.stats.maxCompSize == sep.stats.maxCompSize );
-                assert( temp.stats.maxCompEdges == sep.stats.maxCompEdges );
-            }*/
 
             if( debug ){
                 DEBUG(sep);
@@ -439,24 +385,14 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
             }
 
             if( (*sepEval)( sep,bestSep ) ){
-//                cerr << "\tsep is better than bestSep!" << endl << "nodes in sep: ";
-//                for(int i=0; i<n; i++) if( !gr[i].empty() ) cerr << sep.nodes[i] << " "; cerr << endl;
-
                 fill(ALL(bestSepNodes),false);
                 for(int i=0; i<n; i++) if( !gr[i].empty() ) bestSepNodes[i] = true;
 
                 bestSep.stats = sep.stats;
                 bestSep.stats.sep = &bestSep;
             }
-//            else{
-//                cerr << "\tsep is WORSE than bestSep" << endl << "nodes in sep: ";
-//                for(int i=0; i<n; i++) if( !gr[i].empty() ) cerr << sep.nodes[i] << " "; cerr << endl;
-//                ENDL(2);
-//            }
         }
         // END OF TESTING ALL STATES CHECK
-
-
     }
 
 
@@ -467,23 +403,12 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
     for(int i=0; i<n; i++) if( gr[i].size() > 0 ) newNodes.push_back( i );
 
 
-
     if( sepEval != nullptr ){
         VI bestNodes = StandardUtils::toVI( bestSepNodes );
-
-//        if( bestNodes.size() != newNodes.size() ){
-//            cerr << "best sep found in the middle of minimization, bestNodes.size() should be > newNodes.size()" << endl;
-//            DEBUG(bestNodes.size());
-//            DEBUG(newNodes.size());
-//            DEBUG(bestSep);
-//            DEBUG(sep);
-//            ENDL(1);
-//        }
 
         for( int& d : bestNodes ) d = sep.nodes[d];
 
         bestSep.nodes = bestNodes;
-//        cerr << "returning bestSep: " << bestSep << endl;
         return bestSep;
     }
 
@@ -518,22 +443,13 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
     for( int& d : sep.nodes ) d = oldNodes[d];
 
 
-    if(debug){
-        cerr << "Separator after minimization" << endl;
-        DEBUG(sep);
-        ENDL(3);
-    }
-
-//    DEBUG(nodesInsertedToZb);
+    if(debug){ cerr << "Separator after minimization" << endl; DEBUG(sep); ENDL(3); }
 
     if( sep.stats.size != sep.nodes.size() ){
         cerr << "in minimizer stats.size != nodes.size()" << endl;
         DEBUG(sep);
         exit(1);
     }
-
-//cerr << "leaving minimizer" << endl;
-//    ENDL(2);
 
     return sep;
 }

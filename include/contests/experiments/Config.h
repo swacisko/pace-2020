@@ -14,7 +14,7 @@ enum SepCr {
     ComponentExpansionCr,
     FlowCr,
     NodeAddOrderCr,
-    FullCr
+    FullSepCr
 };
 
 enum SepMinim {
@@ -29,11 +29,11 @@ enum SepMinim {
 
 enum Prepr {
     AllPrepr = 1,
-    ArtPoints,
-    IndSet3,
-    IndSet4,
-    PathCompression,
-    CactusMerging,
+    ArtPointsPrepr,
+    IndSet3Prepr,
+    IndSet4Prepr,
+    PathCompressionPrepr,
+    CactusMergingPrepr,
 };
 
 enum Pivots {
@@ -68,21 +68,21 @@ public:
     //************************** General config
 
     bool quick_and_weak_tree_creation = false;
-    bool require_balanced_separators = true;
+    static bool require_balanced_separators;
 
 
 
 
     //************************** Separator evaluation config
 
-    double sep_eval_balance = 0.97;
+    static double sep_balance;
 
 
 
 
     //************************** Separator creators config
 
-    int sep_cr_to_use_mask = SepCr::FullCr;
+    int sep_cr_to_use_mask = SepCr::FullSepCr;
     VI sep_cr_iters = {7,5}; // default of 10 iterations for each separator creator
     int sep_cr_max_sources = 7;
 
@@ -104,7 +104,9 @@ public:
     //************************** Pivots config
 
     int pivots_to_use_mask = Pivots::AllPivots;
-
+    vector<double> pivot_balances_large_graph = { 0.60, 0.45, 0.30, 0.15 };
+    vector<double> pivot_balances_small_graph = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
+    vector<double> pivot_balances = pivot_balances_large_graph;
 
 
 };

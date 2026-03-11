@@ -225,7 +225,7 @@ void TotalPivotMaker::test() {
                 {15}            // 17
         };
 
-        Pace20Params::inputGraphSize = V.size();
+        // Pace20Params::inputGraphSize = V.size();
 //        Pace20Params::quickAndWeakTreeCreation = false;
 
         DepthTree dt(V);

@@ -7,17 +7,22 @@
 #ifndef ALGORITHMSPROJECT_DEPTHTREEPIVOTMAKER_H
 #define ALGORITHMSPROJECT_DEPTHTREEPIVOTMAKER_H
 
+#include "Config.h"
 #include "DepthTree.h"
 
 
-namespace DepthTreePivotMaker{
+class DepthTreePivotMaker{
+public:
+    Config cnf;
+
+    DepthTreePivotMaker(Config c) : cnf(c) {}
 
     /**
      * Function checks whether there can be made any pivots in the depth tree concerning the root stretch of the tree
      * @param dt
      * @return
      */
-    extern DepthTree makePivot( DepthTree & dt );
+    DepthTree makePivot( DepthTree & dt );
 
 
     /**
@@ -27,7 +32,7 @@ namespace DepthTreePivotMaker{
      * @param balance
      * @return
      */
-    extern DepthTree makePivotMultipleStretch( DepthTree& dt, double balance );
+    DepthTree makePivotMultipleStretch( DepthTree& dt, double balance );
 
 
     /**
@@ -36,7 +41,7 @@ namespace DepthTreePivotMaker{
      * @param balance
      * @return
      */
-    extern DepthTree makeHallSetPivots( DepthTree& dt, double balance, bool useDeepestPath = false );
+    DepthTree makeHallSetPivots( DepthTree& dt, double balance, bool useDeepestPath = false );
 
 
 
@@ -47,7 +52,7 @@ namespace DepthTreePivotMaker{
         unordered_set<int> neighInP;
     };
 
-    extern DepthTree makeHallSetPivotsSinglePass( DepthTree& dt, bool useDeepestPath = false );
+    DepthTree makeHallSetPivotsSinglePass( DepthTree& dt, bool useDeepestPath = false );
 
 
 
@@ -56,10 +61,10 @@ namespace DepthTreePivotMaker{
      * @param dt
      * @return
      */
-    extern DepthTree makeAllPivots( DepthTree& dt );
+    DepthTree makeAllPivots( DepthTree& dt );
 
-    extern void test();
+    static void test();
 
-}
+};
 
 #endif //ALGORITHMSPROJECT_DEPTHTREEPIVOTMAKER_H

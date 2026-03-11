@@ -13,17 +13,10 @@
 #include "graphs/matching/MaxMatchBipartite.h"
 #include "contests/pace20/Pace20.h"
 
-namespace DepthTreePivotMaker{
 
 
-    DepthTree makePivot( DepthTree & dt ){
+DepthTree DepthTreePivotMaker::makePivot( DepthTree & dt ){
         if( dt.height <= 3 ) return dt;
-
-//        cerr << "entering pivot" << endl;
-//        DEBUG( (*dt.V) );
-//        DEBUG(dt.root);
-//        DEBUG(dt.par);
-//        DEBUG(dt.height);
 
         auto stretchT = dt.getStretchStructure();
         VVI T = stretchT.first;
@@ -31,27 +24,11 @@ namespace DepthTreePivotMaker{
 
         if( T[0].size() == 0 ) return dt; // single node in stretch representation
 
-        /*for( int i=0; i<T.size(); i++ ){
-            DEBUG(i);
-            DEBUG(T[i]);
-            sort( ALL(T[i]), [&data](int a, int b){
-                return data[a].height > data[b].height;
-            } );
-            DEBUG(T[i]);
-            ENDL(1);
-        }*/
-
-//        DEBUG(T[0]);
         sort( ALL(T[0]), [&data](int a, int b){
             return data[a].height > data[b].height;
         } );
-//        DEBUG(T[0]);
-
-//        DEBUG(stretchT);
-
 
         // HERE SHOULD BE EXACT CHECKING WITH ALL EDGES IN ORIGINAL GRAPH - WHERE ALL SUBTREES END AND WHAT IS THE HEIGHT THEN
-
 
         function< void(int,int,VI&) > getSubtreeNodes = [&getSubtreeNodes, &T, &data]( int num, int par, VI& nodes ){
             nodes.insert( nodes.end(), ALL( data[num].sepNodes ) );
@@ -83,8 +60,6 @@ namespace DepthTreePivotMaker{
         VI newStretchNodes = data[v0].sepNodes;
         newStretchNodes.insert( newStretchNodes.end(), ALL( data[0].sepNodes ) );
 
-//        DEBUG(newStretchNodes);
-
         vector<DepthTree> subtrees;
         VVI comps;
 
@@ -93,9 +68,6 @@ namespace DepthTreePivotMaker{
             VI tNodes;
             int p = T[v0][i];
             getSubtreeNodes( p,v0,tNodes );
-
-//            DEBUG(p);
-//            DEBUG(tNodes);
 
             t.root = tNodes[0];
             t.height = data[p].height;
@@ -107,16 +79,11 @@ namespace DepthTreePivotMaker{
             comps.push_back(tNodes);
         }
 
-//        for(int i=0; i<subtrees.size(); i++) DEBUG(subtrees[i]);
-
         for( int i=1; i<T[0].size(); i++ ){
             DepthTree t( *dt.V );
             VI tNodes;
             int p = T[0][i];
             getSubtreeNodes( p,0,tNodes );
-
-//            DEBUG(p);
-//            DEBUG(tNodes);
 
             t.root = tNodes[0];
             t.height = data[p].height;
@@ -128,29 +95,16 @@ namespace DepthTreePivotMaker{
             comps.push_back(tNodes);
         }
 
-//        for(int i=0; i<subtrees.size(); i++) DEBUG(subtrees[i]);
-//        DEBUG(comps);
-
         Separator sep( *dt.V, newStretchNodes );
-//        DEBUG((*sep.V));
         sep.createSeparatorStats();
-//        DEBUG(sep);
-        ComponentTreeMerger merger( *dt.V, sep, comps, subtrees );
+        ComponentTreeMerger merger( *dt.V, sep, comps, subtrees, cnf );
         auto resDt = merger.mergeComponents();
 
-//        DEBUG(resDt);
-
-//        ENDL(1);
-//        exit(1);
-
-//        cerr << "Leaving pivotMaker" << endl << endl;
-
         return resDt;
-
     }
 
 
-    DepthTree makePivotMultipleStretch(DepthTree &dt, double balance) {
+DepthTree DepthTreePivotMaker::makePivotMultipleStretch(DepthTree &dt, double balance) {
         const bool debug = false;
 
         if( debug ) cerr << "in multiple stretch, dt = " << dt << endl;
@@ -173,14 +127,12 @@ namespace DepthTreePivotMaker{
 
         function< void(int,int) > addToSubtrees = [&tree, &data, &subtreeNodes, &addToSubtrees, &subtreeRoots](int num, int par){
             StandardUtils::append( subtreeNodes.back(), data[num].sepNodes );
-//        subtreeRoots.push_back( data[num].sepNodes[0] );
             for( int d : tree[num] ) if( d != par ) addToSubtrees(d,num);
         };
 
 
         function< void(int,int) > createSubtreesAndSeparator = [=, &debug,&tree,&T,&data, &separatorNodes, &createSubtreesAndSeparator, &secondHighest, &subtreeNodes,&subtreeRoots]
                 (int num, int par){
-//            if( tree[num].size() <= 1 ) return; // if in a leaf or there is only one stretch (e.g in a clique)
             VI sons;
             for( int d : tree[num] ) if( d != par ) sons.push_back(d);
             if(debug)DEBUG(sons);
@@ -190,11 +142,8 @@ namespace DepthTreePivotMaker{
             if(debug)DEBUG(num);
             if(debug)DEBUG(secondHighest);
 
-
             // add separator to separatorNodes
-
             StandardUtils::append( separatorNodes, data[num].sepNodes );
-
 
             if( sons.empty() ) return;
 
@@ -221,11 +170,7 @@ namespace DepthTreePivotMaker{
         if( separatorNodes.empty() || subtreeNodes.empty() ) return dt;
 
 
-        if(debug){
-            DEBUG(separatorNodes);
-            DEBUG(subtreeNodes);
-            DEBUG(subtreeRoots);
-        }
+        if(debug){ DEBUG(separatorNodes); DEBUG(subtreeNodes); DEBUG(subtreeRoots); }
 
 
         VI heightOfNodeStretch(dt.V->size(),-1);
@@ -251,7 +196,7 @@ namespace DepthTreePivotMaker{
         }
 
 
-        ComponentTreeMerger merger(*dt.V,sep, comps, subtrees);
+        ComponentTreeMerger merger(*dt.V,sep, comps, subtrees, cnf);
 
         DepthTree dtRes = merger.mergeComponents();
 
@@ -264,7 +209,7 @@ namespace DepthTreePivotMaker{
     }
 
 
-    DepthTree makeHallSetPivots(DepthTree &dt, double balance, bool useDeepestPath) {
+DepthTree DepthTreePivotMaker::makeHallSetPivots(DepthTree &dt, double balance, bool useDeepestPath) {
         const bool debug = false;
 
         if(debug){
@@ -305,7 +250,6 @@ namespace DepthTreePivotMaker{
 
             if( sons.empty() ) return;
             if( secondHighest > dt.height * imbalanceFactor ){ // if the height of the second heighest tree is large enough
-//                for( int i=0; i<sons.size(); i++ ){
                 for( int i=(int)sons.size()-1; i>=0; i-- ){ // adding in reverse order - deepest subtree is subtrees.back()
                     subtreeNodes.push_back(VI());
                     subtreeRoots.push_back( data[ sons[i] ].sepNodes[0] );
@@ -327,11 +271,7 @@ namespace DepthTreePivotMaker{
 
         if( separatorNodes.empty() || subtreeNodes.empty() ) return dt;
 
-        if(debug){
-            DEBUG(separatorNodes);
-            DEBUG(subtreeNodes);
-            DEBUG(subtreeRoots);
-        }
+        if(debug){ DEBUG(separatorNodes); DEBUG(subtreeNodes); DEBUG(subtreeRoots); }
 
         if( separatorNodes.size() == dt.height ) return dt;
 
@@ -358,13 +298,10 @@ namespace DepthTreePivotMaker{
             if(debug)cerr << "Adding subtree " << tmp << endl;
         }
 
-//        sort( ALL(subtrees), []( auto & t1, auto & t2 ){ return t1.height > t2.height; } ); // deepest should be subtrees.back(), no need to sort
-
         if(debug) DEBUG(subtrees);
 
         VB inT0( dt.V->size(), false );
         VI T0Nodes;
-//        DepthTree* T0 = &subtrees[0]; // deepest should be subtrees.back()
         DepthTree* T0 = &subtrees.back();
         for( PII p : T0->par ){
             inT0[ p.first ] = true;
@@ -421,7 +358,6 @@ namespace DepthTreePivotMaker{
         VI matching = matcher.getMaximumMatchingInBipartition( g.V, bipartition );
 
         VI violator = matcher.getMaximumHallViolator( g.V, bipartition, matching ); // P2 set but in induced graph
-//        VI violator = matcher.getRandomMinimalHallViolator( g.V, bipartition, matching ); // #TEST taking minimal hall violator instead of maximal
 
         if(debug){
             cerr << "matching:" << endl;
@@ -581,7 +517,7 @@ namespace DepthTreePivotMaker{
 
 
 
-    DepthTree makeHallSetPivotsSinglePass(DepthTree &dt, bool useDeepestPath) {
+DepthTree DepthTreePivotMaker::makeHallSetPivotsSinglePass(DepthTree &dt, bool useDeepestPath) {
         const bool debug = false;
 
         VVI* V = dt.V;
@@ -798,15 +734,10 @@ namespace DepthTreePivotMaker{
                 DEBUG(P2);
                 DEBUG(neighP2);
                 DEBUG(PNoP2);
-//                DEBUG(T0Nodes);
             }
 
 
-
-
             unordered_map<int,int> newPar;
-
-
 
             { // creating parent of nodes in T0 \ neighP2
                 int lowestPNoP2; // lowest node that is in P but not in P2. If such node does not exist (P = P2) then it is last node of neighP2
@@ -862,7 +793,6 @@ namespace DepthTreePivotMaker{
 
             { // And here we attach all subtrees that were attached to P to the deepest node in P \ P2 + P2
                 vector<DepthTree*> hasNeighInP2, noNeighInP2;
-//            for( int i=1; i<subtrees.size(); i++ ){
                 for( int i=0; i<(int)subtrees.size(); i++ ){
                     VI TiNodes; // TiNodes is the set of all neighbors of nodes in subtrees[i] (these neighbors are in P)
 
@@ -940,7 +870,6 @@ namespace DepthTreePivotMaker{
                     }
 
                     auto pivotDt = makePivot();
-//                    assert( pivotDt.height <= dt.height );
                     if( pivotDt.height < dt.height ) return pivotDt;
                 }else{
                     if(debug){
@@ -1013,318 +942,253 @@ namespace DepthTreePivotMaker{
         return dt;
     }
 
-    DepthTree makeAllPivots(DepthTree &dt) {
-        if( dt.height <= 3 ) return dt;
-        auto res = dt;
+DepthTree DepthTreePivotMaker::makeAllPivots(DepthTree &dt) {
+    if( dt.height <= 3 ) return dt;
+    auto res = dt;
 
 
-//        cerr << "making usual pivots" << endl;
+    auto pivotDt = makePivot(res);
+    while ((pivotDt.height < res.height) ) {
 
-        auto pivotDt = DepthTreePivotMaker::makePivot(res);
-        while ((pivotDt.height < res.height) ) {
-
-            if (pivotDt.height < res.height) {
-//                cerr << "usual pivot makes better!" << endl;
-//                DEBUG(res.height);
-//                DEBUG(pivotDt.height);
-//                ENDL(1);
-
-                res = pivotDt;
-            }
-            pivotDt = DepthTreePivotMaker::makePivot(pivotDt);
+        if (pivotDt.height < res.height) {
+            res = pivotDt;
         }
-        assert(res.isCorrect());
+        pivotDt = makePivot(pivotDt);
+    }
+    assert(res.isCorrect());
 
 
 //        VD balances = { 0.5, 0.4, 0.3, 0.2, 0.1 }; // original version
-        VD balances = { 0.5, 0.3, 0.1 }; // #TEST
-        if( Pace20Params::quickAndWeakTreeCreation ) balances = {};
-        else if( Pace20Params::inputGraphEdges <= 100'000 ) balances = { 0.60, 0.45, 0.30, 0.15 };
-        else if( Pace20Params::inputGraphEdges <= 10'000 ) balances = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
-
-//        cerr << "making multiple-stretch pivots, balances = " << balances << endl;
-
-
-        for( double balance : balances ){
-            pivotDt = makePivotMultipleStretch( res, balance );
-            if( pivotDt.height < res.height ){
-//                cerr << "pivot multiple stretch makes better!" << endl;
-//                DEBUG(res.height);
-//                DEBUG(pivotDt.height);
-//                ENDL(1);
-                res = pivotDt;
-//                balance = 1; // starting from the beginning
-            }
-        }
-
-//        cerr << "done" << endl;
+    VD balances = { 0.5, 0.3, 0.1 }; // #TEST
+    if( cnf.quick_and_weak_tree_creation ) balances = {};
+    // else if( Pace20Params::inputGraphEdges <= 100'000 ) balances = { 0.60, 0.45, 0.30, 0.15 };
+    // else if( Pace20Params::inputGraphEdges <= 10'000 ) balances = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
+    balances = cnf.pivot_balances;
 
 
+    for( double balance : balances ){
+        pivotDt = makePivotMultipleStretch( res, balance );
+        if( pivotDt.height < res.height ) res = pivotDt;
+    }
 
-        bool useHallSetPivots = true;
-        if (Pace20Params::quickAndWeakTreeCreation) useHallSetPivots = false;
-        else if( Pace20Params::inputGraphSize > 100'000 && dt.V->size() < 100 ) useHallSetPivots = false;
-
-
-        if(useHallSetPivots) {
-//            cerr << "making HS-pivots-balance" << endl;
-
-            if (Pace20Params::inputGraphSize < 100'000) balances = {0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6}; // #TEST
-//            else balances = {0.9, 0.85, 0.8, 0.75, 0.7}; // keeping only those that appear most often in improvements
-            else balances = {0.95, 0.9, 0.85, 0.8, 0.75 }; // #TEST - 0.95 seems to be much more often that 0.7
-
-//            if( Pace20Params::inputGraphSize <= 500 ) balances = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.01 }; // #TEST - for exact track
+    bool useHallSetPivots = true;
+    if (cnf.quick_and_weak_tree_creation) useHallSetPivots = false;
+    else if( Pace20Params::inputGraphSize > 100'000 && dt.V->size() < 100 ) useHallSetPivots = false;
 
 
-
+    if(useHallSetPivots) {
+        if (Pace20Params::inputGraphSize < 100'000) balances = {0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6}; // #TEST
+        else balances = {0.95, 0.9, 0.85, 0.8, 0.75 }; // #TEST - 0.95 seems to be much more often that 0.7
 
 //            small values (  0.65, 0.7, 0.75 ) of balances make improvements in trees with small height (e.g improves height 6 for 5), while larger
 //            make improvements in trees with greater heights
 
-            {
+        {
 
+            reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
+            for (int i = 0; i < balances.size(); i++) {
+                double balance = balances[i];
+                pivotDt = makeHallSetPivots(res, balance, false);
+                if (pivotDt.height < res.height) {
+                    res = pivotDt;
+                    i--; // #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
+                }
+            }
+
+            { // #TEST section
+                balances.clear(); for( double d = 0.45; d >= 0.18; d -= 0.05 ) balances.push_back(d);
                 reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
+
                 for (int i = 0; i < balances.size(); i++) {
                     double balance = balances[i];
-                    pivotDt = makeHallSetPivots(res, balance, false);
+                    pivotDt = makeHallSetPivots(res, 1 - balance, true);
                     if (pivotDt.height < res.height) {
-//                        cerr << "Hall-set-pivotDt makes better tree!" << endl;
-//                        DEBUG(res);DEBUG(pivotDt);DEBUG(balance);ENDL(1);
                         res = pivotDt;
-//                        i = -1; // original
-                        i--; // #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
-                    }/* else { // #TEST
-                        pivotDt = makeHallSetPivots(res, 1 - balance, true);
-                        if (pivotDt.height < res.height) {
-                            cerr << "Hall-set-pivotDt-DEEPEST_PATH makes better tree!" << endl;
-                            DEBUG(res);DEBUG(pivotDt);DEBUG(balance);ENDL(1);
-                            res = pivotDt;  i = -1;
-                        }
-                    }*/
-                }
-
-                { // #TEST section
-                    balances.clear(); for( double d = 0.45; d >= 0.18; d -= 0.05 ) balances.push_back(d);
-                    reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
-
-                    for (int i = 0; i < balances.size(); i++) {
-                        double balance = balances[i];
-                        pivotDt = makeHallSetPivots(res, 1 - balance, true);
-                        if (pivotDt.height < res.height) {
-//                            cerr << "Hall-set-pivotDt-DEEPEST_PATH makes better tree!" << endl;
-//                            DEBUG(res);DEBUG(pivotDt);DEBUG(balance);ENDL(1);
-                            res = pivotDt;
-//                            i = -1;// original
-                            i--;// #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
-                        }
+                        i--;// #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
                     }
                 }
-
-            }
-
-
-            bool useHallSetPivotsSinglePass = false;
-            if( Pace20Params::inputGraphSize <= 500 ) useHallSetPivotsSinglePass = true;
-            if(useHallSetPivotsSinglePass){
-                int H;
-                do {
-                    H = res.height;
-
-//                    cerr << "making HS-pivots-single-pass" << endl;
-
-                    res = makeHallSetPivotsSinglePass(res, false);
-                    res = makeHallSetPivotsSinglePass(res, true);
-
-
-
-//                    if (res.height < H) {
-//                        cerr << "Hall-set-single-pass makes better tree!" << endl;
-//                        DEBUG(res);DEBUG(pivotDt);ENDL(1);
-//                        DEBUG(H);
-//                        DEBUG(res.height);
-//                        ENDL(1);
-//                    }
-
-                } while (res.height < H);
             }
 
         }
 
-//        cerr << "exiting makeAllPivots" << endl;
 
-        return res;
-
+        bool useHallSetPivotsSinglePass = false;
+        if( Pace20Params::inputGraphSize <= 500 ) useHallSetPivotsSinglePass = true;
+        if(useHallSetPivotsSinglePass){
+            int H;
+            do {
+                H = res.height;
+                res = makeHallSetPivotsSinglePass(res, false);
+                res = makeHallSetPivotsSinglePass(res, true);
+            } while (res.height < H);
+        }
     }
 
+    return res;
+}
 
 
 
 
-    void test(){
-        if(false) { // usual pivot test
+
+void DepthTreePivotMaker::test(){
+    Config cnf{};
+    DepthTreePivotMaker pivot_maker(cnf);
+
+    if(false) { // usual pivot test
 //        VVI V = { {1,2,4}, {0,5}, {0}, {4}, {3,0,7}, {1,6}, {5,10,12}, {4,8}, {7,9}, {8}, {6,11}, {10}, {6,13}, {12} }; // tree
 //        VVI V = { {1,2,4}, {0,5}, {0}, {4,9}, {3,0,7}, {1,6}, {5,10,12}, {4,8}, {7,9}, {8,3}, {6,11}, {10}, {6,13}, {12} }; // additional edge (9,3)
-            VVI V = {{1, 2,  4},
-                     {0, 5},
-                     {0},
-                     {4},
-                     {3, 0,  7,  6},
-                     {1, 6},
-                     {5, 10, 12, 4},
-                     {4, 8},
-                     {7, 9},
-                     {8},
-                     {6, 11},
-                     {10},
-                     {6, 13},
-                     {12}}; // additional edge (4,6)
+        VVI V = {{1, 2,  4},
+                 {0, 5},
+                 {0},
+                 {4},
+                 {3, 0,  7,  6},
+                 {1, 6},
+                 {5, 10, 12, 4},
+                 {4, 8},
+                 {7, 9},
+                 {8},
+                 {6, 11},
+                 {10},
+                 {6, 13},
+                 {12}}; // additional edge (4,6)
 
-            int N = V.size();
-            DepthTree dt(V);
-            dt.root = 3;
-            dt.height = 8;
-            dt.V = &V;
-            dt.par = {{3,  -1},
-                      {4,  3},
-                      {0,  4},
-                      {2,  0},
-                      {1,  0},
-                      {5,  1},
-                      {6,  5},
-                      {10, 6},
-                      {11, 10},
-                      {12, 6},
-                      {13, 12},
-                      {7,  4},
-                      {8,  7},
-                      {9,  8}};
+        int N = V.size();
+        DepthTree dt(V);
+        dt.root = 3;
+        dt.height = 8;
+        dt.V = &V;
+        dt.par = {{3,  -1},
+                  {4,  3},
+                  {0,  4},
+                  {2,  0},
+                  {1,  0},
+                  {5,  1},
+                  {6,  5},
+                  {10, 6},
+                  {11, 10},
+                  {12, 6},
+                  {13, 12},
+                  {7,  4},
+                  {8,  7},
+                  {9,  8}};
 
-            DEBUG(dt);
+        DEBUG(dt);
+        Config cnf{};
+        DepthTreePivotMaker pivot_maker(cnf);
+        auto resDt = pivot_maker.makePivot(dt);
+        DEBUG(resDt);
+        ENDL(1);
 
-            auto resDt = makePivot(dt);
-            DEBUG(resDt);
-            ENDL(1);
+        resDt = pivot_maker.makePivot(resDt);
+        DEBUG(resDt);
+        ENDL(1);
 
-            resDt = makePivot(resDt);
-            DEBUG(resDt);
-            ENDL(1);
+        resDt = pivot_maker.makePivot(resDt);
+        DEBUG(resDt);
+        ENDL(1);
+    }
 
-            resDt = makePivot(resDt);
-            DEBUG(resDt);
-            ENDL(1);
-        }
-
-        if(false){ // multiple stretch test
-            int N = 16;
-            VVI V(N);
-            V[0] = {5}; V[1] = {3}; V[2] = {4}; V[3] = {1,4,5}; V[4] = {2,3,5}; V[5] = {0,3,4};
+    if(false){ // multiple stretch test
+        int N = 16;
+        VVI V(N);
+        V[0] = {5}; V[1] = {3}; V[2] = {4}; V[3] = {1,4,5}; V[4] = {2,3,5}; V[5] = {0,3,4};
 
 
-//    DEBUG(V);
-            DepthTree dt(V);
-            dt.root = 0;
-            dt.par = {
-                    {0,-1},
-                    {1,0},
-                    {2,1},
-                    {3,2},
-                    {4,3},
-                    {5,4}
-            };
+        DepthTree dt(V);
+        dt.root = 0;
+        dt.par = {
+                {0,-1},
+                {1,0},
+                {2,1},
+                {3,2},
+                {4,3},
+                {5,4}
+        };
 
-            int p = 2;
-            for( int i=6; i<N; i++ ){
-                dt.par[i] = p;
-                p = i;
+        int p = 2;
+        for( int i=6; i<N; i++ ){
+            dt.par[i] = p;
+            p = i;
 
-                if( i <= N/2 ) GraphUtils::addEdge( V,i,p%3 );
+            if( i <= N/2 ) GraphUtils::addEdge( V,i,p%3 );
 
-                for( int k=i+1; k<N; k++ ) GraphUtils::addEdge(V,i,k); // forming a clique from 6 up
-
-            }
-
-            p = N/2;
-
-            for( int i=N; i<4*N; i++ ){
-                dt.par[i] = p;
-                V.push_back(VI());
-                GraphUtils::addEdge( V, i,p );
-                p = i;
-            }
-
-//                GraphUtils::addEdge( V,N, N/2 );
-//                for( int i=N; i < 4*N; i++ )  for( int k=i+1; k < 4*N; k++ ) GraphUtils::addEdge( V,i,k );
-
-            //    DEBUG(V);
-            dt.height = dt.calculateHeight();
-            dt.writeBalanceStructure();
-
-            makePivotMultipleStretch( dt,0.2 );
+            for( int k=i+1; k<N; k++ ) GraphUtils::addEdge(V,i,k); // forming a clique from 6 up
 
         }
 
+        p = N/2;
 
-        if(true){ // hall set pivots test
-
-            VVI V = {
-                    {1,2,7,8,15},   // 0
-                    {0,2,4,15},     // 1
-                    {0,1,3,7,8,14}, // 2
-                    {2,7,8,12,13},  // 3
-                    {1,5,6},        // 4
-                    {4,6,7},        // 5
-                    {4,5,7,8,11},   // 6
-                    {0,2,3,5,8,11}, // 7
-                    {0,2,3,6,7,9,10}, // 8
-                    {8,10},         // 9
-                    {8,9},          // 10
-                    {6,7},          // 11
-                    {3,13},         // 12
-                    {3,12},         // 13
-                    {2},            // 14
-                    {0,1,16,17},    // 15
-                    {15},           // 16
-                    {15}            // 17
-            };
-
-            DepthTree dt(V);
-            dt.root = 0;
-            dt.height = 11;
-            dt.par = {
-                    {0,-1},
-                    {1,0},
-                    {2,1},
-                    {3,2},
-                    {4,3},
-                    {5,4},
-                    {6,5},
-                    {7,6},
-                    {8,7},
-                    {9,8},
-                    {10,9},
-                    {11,7},
-                    {12,3},
-                    {13,12},
-                    {14,2},
-                    {15,1},
-                    {16,15},
-                    {17,15}
-            };
-
-            double balance = 0.4;
-//            auto res = makeHallSetPivots( dt, balance );
-//            auto res = makeAllPivots( dt );
-
-            auto res = makeHallSetPivotsSinglePass( dt ); ENDL(10);
-            res = makeHallSetPivotsSinglePass( res ); ENDL(10);
-            res = makeHallSetPivotsSinglePass( res ); ENDL(10);
+        for( int i=N; i<4*N; i++ ){
+            dt.par[i] = p;
+            V.push_back(VI());
+            GraphUtils::addEdge( V, i,p );
+            p = i;
         }
 
+        dt.height = dt.calculateHeight();
+        dt.writeBalanceStructure();
+
+        pivot_maker.makePivotMultipleStretch( dt,0.2 );
+
+    }
 
 
-        exit(1);
+    if(true){ // hall set pivots test
+
+        VVI V = {
+                {1,2,7,8,15},   // 0
+                {0,2,4,15},     // 1
+                {0,1,3,7,8,14}, // 2
+                {2,7,8,12,13},  // 3
+                {1,5,6},        // 4
+                {4,6,7},        // 5
+                {4,5,7,8,11},   // 6
+                {0,2,3,5,8,11}, // 7
+                {0,2,3,6,7,9,10}, // 8
+                {8,10},         // 9
+                {8,9},          // 10
+                {6,7},          // 11
+                {3,13},         // 12
+                {3,12},         // 13
+                {2},            // 14
+                {0,1,16,17},    // 15
+                {15},           // 16
+                {15}            // 17
+        };
+
+        DepthTree dt(V);
+        dt.root = 0;
+        dt.height = 11;
+        dt.par = {
+                {0,-1},
+                {1,0},
+                {2,1},
+                {3,2},
+                {4,3},
+                {5,4},
+                {6,5},
+                {7,6},
+                {8,7},
+                {9,8},
+                {10,9},
+                {11,7},
+                {12,3},
+                {13,12},
+                {14,2},
+                {15,1},
+                {16,15},
+                {17,15}
+        };
+
+        double balance = 0.4;
+
+        auto res = pivot_maker.makeHallSetPivotsSinglePass( dt ); ENDL(10);
+        res = pivot_maker.makeHallSetPivotsSinglePass( res ); ENDL(10);
+        res = pivot_maker.makeHallSetPivotsSinglePass( res ); ENDL(10);
     }
 
 
 
+    exit(1);
 }

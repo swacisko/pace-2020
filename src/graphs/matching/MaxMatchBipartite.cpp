@@ -66,29 +66,12 @@ VI MaxMatchBipartite::getMaximumMatchingInBipartition(VVI &G, VB &bipartition, b
 
 
     if( fastSearch ){
-
-//        ENDL(5);
-//        cerr << "G:" << endl << G << endl << "bipartition: " << bipartition << endl;
-//        cerr << "matching: " << matching << endl;
         VVI paths = getMaximalSetOfDisjointAugmentingPaths( G,bipartition,matching );
-//        WRITE_ALL(paths,"augmenting paths found:",0);
 
         while( !paths.empty() ){
-
-            for( VI & path : paths ){
-                applyAugmentingPath( matching,path );
-            }
-
-//            cerr << "bipartition: " << bipartition << endl;
-//            cerr << "matching: " << matching << endl;
-
+            for( VI & path : paths ) applyAugmentingPath( matching,path );
             paths = getMaximalSetOfDisjointAugmentingPaths( G,bipartition,matching );
-//            WRITE_ALL(paths,"augmenting paths found:",0);
-//            cerr << "bipartition: " << bipartition << endl;
-//            cerr << "matching: " << matching << endl;
         }
-
-//        exit(1);
 
     }else{
         VI was(G.size(),-1);
@@ -268,7 +251,6 @@ VI MaxMatchBipartite::getRandomMinimalHallViolator(VVI &V, VB &bipartition, VI &
 VI MaxMatchBipartite::getMaximumHallViolator(VVI &V, VB &bipartition, VI &matching) {
     VI res;
 
-//    cerr << "looking for violator" << endl;
     VB was(V.size(),false);
     VI neigh;
     for( int i=0; i<V.size(); i++ ){
@@ -278,13 +260,10 @@ VI MaxMatchBipartite::getMaximumHallViolator(VVI &V, VB &bipartition, VI &matchi
         }
     }
 
-//    cerr << "in the beginning, neigh: " << neigh << endl;
-
     for( int i=0; i<neigh.size(); i++ ){
         int p = neigh[i];
 
         if( bipartition[p] == false ){
-//            cerr << "adding " << p << " to violator" << endl;
             res.push_back(p);
 
             for( int d : V[p] ){
@@ -296,22 +275,14 @@ VI MaxMatchBipartite::getMaximumHallViolator(VVI &V, VB &bipartition, VI &matchi
         }else{
             if( matching[p] == -1 ){
                 cerr << "ERROR, unmatched node " << p << ", augmenting path exists and hall violator may not even exist! " << endl;
-//                cerr << "matching[130] = " << matching[130] << endl;
                 exit(1);
             }else{
                 int d = matching[p];
-
-//                if( d == -1 ){
-//                    cerr << "some error, matching[p] == -1" << endl;
-//                    exit(1);
-//                }
                 neigh.push_back(d);
                 was[d] = true;
             }
         }
     }
-
-//    cerr << "finished" << endl;
 
     return res;
 }
@@ -321,8 +292,6 @@ VVI MaxMatchBipartite::getMaximalSetOfDisjointAugmentingPaths(VVI & G, VB &bipar
 
     VVI layerG = createLayerGraph( G, bipartition,matching );
 
-//    cerr << "layerG: " << endl << layerG << endl;
-//
     VB was(G.size(),false); // this should not be neccessary
 
     for( int i=0; i<bipartition.size(); i++){
@@ -345,12 +314,8 @@ VVI MaxMatchBipartite::createLayerGraph(VVI &G, VB &bipartition, VI &matching) {
         }
     }
 
-//        cerr << "in the beginning, neigh: " << neigh << endl;
-
     for(int i=0; i<neigh.size(); i++){
         int p = neigh[i];
-
-//        cerr << "p = " << p << "   dst[p] = " << dst[p] << endl;
 
         if( bipartition[p] == true ){
 
@@ -360,12 +325,8 @@ VVI MaxMatchBipartite::createLayerGraph(VVI &G, VB &bipartition, VI &matching) {
                 if( dst[d] == Constants::INF ){
                     dst[d] = 1 + dst[p];
                     neigh.push_back( d );
-//                    cerr << "\tpushing d = " << d << endl;
                 }
-
             }
-
-
         }else{
 
             for( int d : G[p] ){
@@ -375,14 +336,11 @@ VVI MaxMatchBipartite::createLayerGraph(VVI &G, VB &bipartition, VI &matching) {
                     layerG[p].push_back(d);
                     dst[d] = 1 + dst[p];
                     neigh.push_back( d );
-//                    cerr << "\tpushing d = " << d << endl;
                 }else if( dst[d] == 1 + dst[p] || ( bipartition[d] == true && matching[d] == -1 ) ){
                     layerG[p].push_back(d);
                 }
             }
-
         }
-
     }
 
     return layerG;
@@ -393,13 +351,10 @@ bool MaxMatchBipartite::getMaximalSetOfDisjointAugmentingPaths(VVI &layerG, VB &
     if( was[p] ) return false;
     was[p] = true;
 
-//    cerr << "p = " << p << endl;
-
     if( bipartition[p] == true && layerG[p].size() == 0 ){ // i found an augmenting path
         augmentingPaths.push_back( VI( 1,p ) );
         return true;
     }
-
 
     for( int i=layerG[p].size()-1; i >= 0; i-- ){
         int d = layerG[p][i];
@@ -415,8 +370,6 @@ bool MaxMatchBipartite::getMaximalSetOfDisjointAugmentingPaths(VVI &layerG, VB &
         }else{
             layerG[p].pop_back();
         }
-
-
     }
 
     return false;

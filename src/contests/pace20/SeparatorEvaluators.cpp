@@ -86,9 +86,9 @@ double SeparatorEvaluators::estimateDepthBasedOnEdges(const Separator &sep) {
 
 
 bool SeparatorEvaluators::estimatedDepthTreeNode(const Separator &sep1, const Separator &sep2) {
-    if( Pace20Params::requireBalancedSeparators ){
-        double balance = Pace20Params::balance;
-        if( SeparatorEvaluators::isBalanced(sep1,balance) != SeparatorEvaluators::isBalanced(sep2,balance) ) return SeparatorEvaluators::isBalanced(sep1,balance);
+    if( Config::require_balanced_separators ){
+        double balance = Config::sep_balance;
+        if( isBalanced(sep1,balance) != isBalanced(sep2,balance) ) return isBalanced(sep1,balance);
     }
 
     double perc1 = (double)sep1.stats.size / sep1.stats.originalGraphSize;
@@ -98,20 +98,18 @@ bool SeparatorEvaluators::estimatedDepthTreeNode(const Separator &sep1, const Se
     if( perc1 > THR && perc2 <= THR ) return false;
     if( perc1 <= THR && perc2 > THR ) return true;
 
-
     return estimateDepthBasedOnNodes(sep1) < estimateDepthBasedOnNodes(sep2);
 }
 
 
 bool SeparatorEvaluators::estimatedDepthTreeEdge(const Separator &sep1, const Separator &sep2) {
-    if( Pace20Params::requireBalancedSeparators ){
-        double balance = Pace20Params::balance;
-        if( SeparatorEvaluators::isBalanced(sep1,balance) != SeparatorEvaluators::isBalanced(sep2,balance) ) return SeparatorEvaluators::isBalanced(sep1,balance);
+    if( Config::require_balanced_separators ){
+        double balance = Config::sep_balance;
+        if( isBalanced(sep1,balance) != isBalanced(sep2,balance) ) return isBalanced(sep1,balance);
     }
 
     double perc1 = (double)sep1.stats.size / sep1.stats.originalGraphSize; // original
     double perc2 = (double)sep2.stats.size / sep2.stats.originalGraphSize; // original
-
 
     double THR = 0.75;
     if( perc1 > THR && perc2 <= THR ) return false;
@@ -125,14 +123,13 @@ double SeparatorEvaluators::edgeScaleFactor = 0.5;
 double SeparatorEvaluators:: nodeScaleFactor = 0.5;
 
 bool SeparatorEvaluators::estimatedDepthTreeEdgePlusNode(const Separator &sep1, const Separator &sep2) {
-    if( Pace20Params::requireBalancedSeparators ){
-        double balance = Pace20Params::balance;
-        if( SeparatorEvaluators::isBalanced(sep1,balance) != SeparatorEvaluators::isBalanced(sep2,balance) ) return SeparatorEvaluators::isBalanced(sep1,balance);
+    if( Config::require_balanced_separators ){
+        double balance = Config::sep_balance;
+        if( isBalanced(sep1,balance) != isBalanced(sep2,balance) ) return isBalanced(sep1,balance);
     }
 
     double perc1 = (double)sep1.stats.size / sep1.stats.originalGraphSize; // original
     double perc2 = (double)sep2.stats.size / sep2.stats.originalGraphSize; // original
-
 
     double THR = 0.75;
     if( perc1 > THR && perc2 <= THR ) return false;
@@ -150,9 +147,9 @@ SeparatorEvaluator SeparatorEvaluators::sepEvalToUse = estimatedDepthTreeEdgePlu
 
 
 bool SeparatorEvaluators::estimatedDepthTreeMaxNodeEdge(const Separator &sep1, const Separator &sep2) {
-    if( Pace20Params::requireBalancedSeparators ){
-        double balance = Pace20Params::balance;
-        if( SeparatorEvaluators::isBalanced(sep1,balance) != SeparatorEvaluators::isBalanced(sep2,balance) ) return SeparatorEvaluators::isBalanced(sep1,balance);
+    if( Config::require_balanced_separators ){
+        double balance = Config::sep_balance;
+        if( isBalanced(sep1,balance) != isBalanced(sep2,balance) ) return isBalanced(sep1,balance);
     }
 
     return
@@ -162,9 +159,9 @@ bool SeparatorEvaluators::estimatedDepthTreeMaxNodeEdge(const Separator &sep1, c
 }
 
 bool SeparatorEvaluators::estimatedDepthTreeMinNodeEdge(const Separator &sep1, const Separator &sep2) {
-    if( Pace20Params::requireBalancedSeparators ){
-        double balance = Pace20Params::balance;
-        if( SeparatorEvaluators::isBalanced(sep1,balance) != SeparatorEvaluators::isBalanced(sep2,balance) ) return SeparatorEvaluators::isBalanced(sep1,balance);
+    if( Config::require_balanced_separators ){
+        double balance = Config::sep_balance;
+        if( isBalanced(sep1,balance) != isBalanced(sep2,balance) ) return isBalanced(sep1,balance);
     }
 
     return
