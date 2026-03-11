@@ -267,7 +267,7 @@ bool DepthTreeCreatorExact::branch( VI sep ) {
 
     for( int i=0; i<comps.size(); i++ ){
         subgraphs.push_back( GraphInducer::induce(*V,comps[i]) );
-        creators.push_back( DepthTreeCreatorExact( subgraphs.back().V, K - sep.size(), recDepth+1 ) );
+        creators.push_back( DepthTreeCreatorExact( subgraphs.back().V, K - sep.size(), recDepth+1, cnf ) );
         for( int j=0; j<comps[i].size(); j++ ) creators.back().originalGraphRemapper[j] = originalGraphRemapper[ subgraphs.back().nodes[j] ];
         if( creators.back().checkLowerBounds() == false ) return false;
     }

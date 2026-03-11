@@ -7,13 +7,11 @@
 #include <contests/pace20/separatorcreators/ArtPointSeparatorCreator.h>
 #include <graphs/components/ConnectedComponents.h>
 #include <contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h>
-#include <graphs/GraphReader.h>
 #include <datastructures/Heap.h>
 #include <contests/pace20/Pace20Params.h>
 #include <graphs/generators/GraphGenerator.h>
 #include <contests/pace20/SeparatorEvaluators.h>
 
-#include "contests/pace20/separatorcreators/ArtPointSeparatorCreator.h"
 #include "graphs/components/BridgesAndArtPoints.h"
 #include "graphs/GraphUtils.h"
 
@@ -23,30 +21,21 @@
 
 Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
     this->V = V;
-//    DEBUG(V);
     const int INF = Constants::INF;
 
     createArtPointGraph();
     if( N <= 1 ){
-//        cerr << "No articulation point in graph returning separator of first |V|/2 nodes from V" << endl;
         VI nodes;
         for( int i=0; i<(V.size()+1)/2; i++ ) nodes.push_back(i);
         Separator sep(V,nodes);
         sep.createSeparatorStats();
-//        DEBUG(sep);
         return sep;
     }
-
-//    DEBUG(arts.size());
 
     VB was(N,false);
     VB forbidden = was;
     preOrder = VI(N,-1);
     low = VI(N,INF);
-
-//    VI forb = { 1,2,4 };
-//    for(int d : forb) forbidden[d] = true;
-
 
     VI sepNodes;
     int originalGraphEdges = GraphUtils::countEdges(V);
@@ -65,27 +54,11 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
         Separator testSep(V,testNodes);
         testSep.createSeparatorStats();
 
-//        DEBUG(testSep.stats); exit(1);
-
         if( testSep.stats.maxCompEdges != bestVal ){
             cerr << "FOUND ERROR!" << endl;
-            DEBUG(V);
-            DEBUG(apT);
-            DEBUG(apW);
-            DEBUG(arts);
-            DEBUG(preOrder);
-            DEBUG(low);
-            DEBUG(nodeWeights);
-            DEBUG(edgeWeights);
-            DEBUG(nodeWeightsSumInSubgraph);
-            DEBUG(edgeWeightsSumInSubgraph);
-            DEBUG(maxNodesInSubgraph);
-            DEBUG(maxEdgesInSubgraph);
-            DEBUG(bestNode);
-            DEBUG(bestVal);
-            DEBUG(testSep.stats);
-
-
+            DEBUG(V); DEBUG(apT); DEBUG(apW); DEBUG(arts); DEBUG(preOrder); DEBUG(low);
+            DEBUG(nodeWeights); DEBUG(edgeWeights); DEBUG(nodeWeightsSumInSubgraph); DEBUG(edgeWeightsSumInSubgraph);
+            DEBUG(maxNodesInSubgraph); DEBUG(maxEdgesInSubgraph); DEBUG(bestNode); DEBUG(bestVal); DEBUG(testSep.stats);
             exit(1);
         }
 
@@ -104,12 +77,6 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
         return pCompEdges;
     };
 
-
-//    DEBUG(bestNode);
-//    DEBUG(bestVal);
-
-//    cerr << "best node found: " << ( bestNode == -1 ? -1 : arts[bestNode] ) << " with val " << bestVal << endl;
-
     VI edgesInComponent(N,-1);
     edgesInComponent[bestNode] = countEdgesInComponent(bestNode);
 
@@ -125,46 +92,23 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
 
     VI bestValInComponent(N,Constants::INF);
     bestValInComponent[bestNode] = bestVal;
-//    ENDL(2);
-//    cerr << "starting!" << endl;
     while( !heap.empty() ){
-//        DEBUG(heap);
-
         int p = heap.extract_min();
-
-//        DEBUG(p);
-
         int pCompEdges = edgesInComponent[p];
-//        double currentBalance = (double)edgesInComponent[p] / originalGraphEdges;
         double currentBalance = (double)bestValInComponent[p] / originalGraphEdges;
-//        DEBUG(currentBalance);
-
-//        if( pCompEdges <= Pace20Params::balance * originalGraphEdges ) continue;
-
-//        cerr << "ADDING NODE TO SEP: " << p << " corresponding to original node: " << arts[p] << " with balance: "
-//             << currentBalance << " = " << bestValInComponent[p] << " / " << originalGraphEdges << endl;
-
         edgesInComponent[p] = -1;
         sepNodes.push_back( arts[p] );
 
-
         bestNode = p;
-
-
 
         Separator sep(V,sepNodes);
         sep.createSeparatorStats();
         if( sep.stats.maxCompEdges <= Pace20Params::balance * originalGraphEdges ) break;
 
-
-
-//        cerr << "best node found: " << ( bestNode == -1 ? -1 : arts[bestNode] ) << " with val " << bestVal << endl;
         if( bestNode == -1 ){
             cerr << "bestNode = -1, that means there is no balanced art-point separator" << endl;
             exit(1);
         }
-
-
 
         forbidden[bestNode] = true;
         VVI comps;
@@ -176,15 +120,6 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
         }
 
         for(VI& v : comps) for(int d : v) forbidden[d] = false;
-
-//        DEBUG(comps);
-//        for( int i=0; i<comps.size(); i++ ){
-//            DEBUG( comps[i].size() );
-//            DEBUG( countEdgesInComponent( comps[i][0] ) );
-//        }
-
-
-
 
         for( VI& v : comps ){
             int representative = -1;
@@ -202,35 +137,21 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
             if( edgesInComponent[bestNode] <= Pace20Params::balance * originalGraphEdges ) continue;
 
             double minLocalChange = 0.995;
-//            double minLocalChange = 0.9999;
-//            double minLocalChange = Pace20Params::balance;
             double localBalance = (double) bestVal / edgesInComponent[bestNode];
             // if the best vertex does not reduce maximum edges in component by more than minLocalChange, then i terminate (there may be gazillion 'small' art points
             // that do not make any general change to the graph
-            if( localBalance > minLocalChange ){
-//                DEBUG( arts[representative] );
-//                cerr << "local balance = " << localBalance << " = " << bestVal << " / " << edgesInComponent[bestNode] << endl;
-                continue;
-            }
+            if( localBalance > minLocalChange ) continue;
 
             bestValInComponent[bestNode] = bestVal;
             heap.set(bestNode,bestNode);
-//            cerr << "inserting to heap component " << v << " with " << edgesInComponent[bestNode]
-//                 << " edges and balance " << ( (double)edgesInComponent[bestNode] / originalGraphEdges ) << endl;
         }
-
-//        ENDL(2);
-
     }
 
     Separator sep(V,sepNodes);
     sep.updatePointers(V);
     sep.createSeparatorStats();
-//    DEBUG(sep.stats);
 
-//    exit(1);
     return sep;
-
 }
 
 void ArtPointSeparatorCreator::createArtPointGraph() {
@@ -260,12 +181,6 @@ void ArtPointSeparatorCreator::createArtPointGraph() {
         }
     }
 
-//    DEBUG(arts);
-//    DEBUG(apT);
-//    DEBUG(apW);
-//    DEBUG(nodeWeights);
-//    DEBUG(edgeWeights);
-
     nodeWeightsSum = edgeWeightsSum = nodeWeightsSumInSubgraph = edgeWeightsSumInSubgraph = maxNodesInSubgraph = maxEdgesInSubgraph = VI(N,0);
 }
 
@@ -294,7 +209,6 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
     int totalNodes = 0;
     int totalEdges = 0;
     function< void(int) > dfsGetTotals = [=, &totalNodes, &totalEdges, &was, &dfsGetTotals]( int num ){
-//        DEBUG(num);
         was[num] = true;
         totalNodes += nodeWeights[num];
         totalEdges += 2*edgeWeights[num];
@@ -307,7 +221,6 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
             }
         }
     };
-
 
     dfsGetTotals(num);
 
@@ -341,10 +254,7 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
         for( int d : apT[num] ){
             if(forbidden[d]) continue;
             if( low[d] == givenLow ) getNodesWithGivenLow(d,givenLow);
-//            if( low[d] >= givenLow ) getNodesWithGivenLow(d,givenLow); // ONLY FOR TESTING!
-
         }
-
     };
 
 
@@ -357,7 +267,6 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
             if( low[d] < preOrder[num] ) propagate( d,num,lowVal, visited, path );
         }
         low[num] = lowVal;
-//        visited[num] = false;
     };
 
     VB visitedPropagate(N,false);
@@ -365,12 +274,9 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
 
     int cnt = 0;
     function< void(int,int) > dfsLow = [=, &dfsLow, &was, &forbidden, &cnt, &wasWithGivenLow, &propagate, &visitedPropagate](int num, int par){
-//        if(debug) DEBUG(num);
-
         was[num] = true;
         if( preOrder[num] == -1 ){
             preOrder[num] = cnt;
-//            cerr << "setting preOrder[" << num << "] to " << cnt << endl;
         }
         if( low[num] == Constants::INF ) low[num] = preOrder[num];
         cnt++;
@@ -381,13 +287,10 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
             if( d != par ){
                 if( !was[d] ){
                     dfsLow(d,num);
-//                    low[num] = min( low[num], low[d] );
 
                     if( low[d] < low[num] ){
                         low[num] = low[d];
                     }else if( low[d] == preOrder[num] ){
-                        // TESTING propagation
-
                         VI path(1,num);
                         visitedPropagate[num] = true;
                         propagate(d,num, low[d], visitedPropagate, path);
@@ -400,18 +303,6 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
                 }
             }
         }
-
-
-
-
-
-        // TESTING ONLY!!
-//        for( int d : apT[num] ){
-//            if( forbidden[d] ) continue;
-//            if( d != par ){
-//                if( low[d] < preOrder[d] ) low[d] = min( low[d], low[num] );
-//            }
-//        }
     };
 
     dfsLow(num,num);
@@ -422,12 +313,9 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
     }
 
 
-    for( int t : compNodes ){
-        was[t] = false;
-    }
+    for( int t : compNodes ) was[t] = false;
 
     function< void(int,int) > dfsFindSizes = [=, &dfsFindSizes, &was, &forbidden, &cnt, &wasWithGivenLow](int num, int par){
-//        DEBUG(num);
         was[num] = true;
 
         for( int d : apT[num] ){
@@ -444,7 +332,6 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
             if( forbidden[d] ) continue;
 
             if( d != par  ){
-
                 if(preOrder[d] == low[d] && preOrder[d] > preOrder[num] ){
                     nodeWeightsSumInSubgraph[num] += nodeWeightsSumInSubgraph[d];
 
@@ -460,14 +347,9 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
         }
 
         if(debug){
-            ENDL(1);
-            DEBUG(num);
-            DEBUG(par);
-            DEBUG(wasWithGivenLow);
-            DEBUG(nodeWeightsSumInSubgraph[num]);
-            DEBUG(edgeWeightsSumInSubgraph[num]);
-            DEBUG(maxNodesInSubgraph[num]);
-            DEBUG(maxEdgesInSubgraph[num]);
+            ENDL(1); DEBUG(num); DEBUG(par); DEBUG(wasWithGivenLow);
+            DEBUG(nodeWeightsSumInSubgraph[num]); DEBUG(edgeWeightsSumInSubgraph[num]);
+            DEBUG(maxNodesInSubgraph[num]); DEBUG(maxEdgesInSubgraph[num]);
         }
 
         unordered_set<int> wasInCluster;
@@ -480,22 +362,15 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
             wasWithGivenLow.insert(num);
 
             if(debug) DEBUG(dd);
-//            getNodesWithGivenLow(num, preOrder[num]);
             getNodesWithGivenLow(dd, preOrder[num]);
 
-            if(debug){
-                DEBUG(num);
-                DEBUG(par);
-                DEBUG(wasWithGivenLow);
-            }
+            if(debug){ DEBUG(num); DEBUG(par); DEBUG(wasWithGivenLow); }
             wasWithGivenLow.erase(num);
 
             if(debug){
                 DEBUG(wasWithGivenLow);
-                DEBUG(nodeWeightsSumInSubgraph[num]);
-                DEBUG(edgeWeightsSumInSubgraph[num]);
-                DEBUG(maxNodesInSubgraph[num]);
-                DEBUG(maxEdgesInSubgraph[num]);
+                DEBUG(nodeWeightsSumInSubgraph[num]); DEBUG(edgeWeightsSumInSubgraph[num]);
+                DEBUG(maxNodesInSubgraph[num]); DEBUG(maxEdgesInSubgraph[num]);
             }
 
             wasInCluster.insert( ALL(wasWithGivenLow) );
@@ -519,24 +394,17 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
 
             edgesBetween >>= 1;
 
-            if(debug){
-                DEBUG(tempSumNodes);
-                DEBUG(tempSumEdges);
-                DEBUG(edgesBetween);
-            }
+            if(debug){ DEBUG(tempSumNodes); DEBUG(tempSumEdges); DEBUG(edgesBetween); }
 
             edgeWeightsSumInSubgraph[num] += edgesBetween;
             maxNodesInSubgraph[num] = max( maxNodesInSubgraph[num], tempSumNodes );
             maxEdgesInSubgraph[num] = max( maxEdgesInSubgraph[num], tempSumEdges + edgesBetween);
 
             if(debug){
-                DEBUG(nodeWeightsSumInSubgraph[num]);
-                DEBUG(edgeWeightsSumInSubgraph[num]);
-                DEBUG(maxNodesInSubgraph[num]);
-                DEBUG(maxEdgesInSubgraph[num]);
+                DEBUG(nodeWeightsSumInSubgraph[num]); DEBUG(edgeWeightsSumInSubgraph[num]);
+                DEBUG(maxNodesInSubgraph[num]); DEBUG(maxEdgesInSubgraph[num]);
                 ENDL(1);
             }
-
 
             wasWithGivenLow.clear();
         }
@@ -545,14 +413,9 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
     dfsFindSizes(num,num);
 
     if(debug){
-        ENDL(5);
-        DEBUG(preOrder);
-        cerr << "     "; DEBUG(low);
-
-        DEBUG(nodeWeightsSumInSubgraph);
-        DEBUG(edgeWeightsSumInSubgraph);
-        DEBUG(maxNodesInSubgraph);
-        DEBUG(maxEdgesInSubgraph);
+        ENDL(5); DEBUG(preOrder); cerr << "     "; DEBUG(low);
+        DEBUG(nodeWeightsSumInSubgraph); DEBUG(edgeWeightsSumInSubgraph);
+        DEBUG(maxNodesInSubgraph); DEBUG(maxEdgesInSubgraph);
     }
 
 
@@ -571,46 +434,20 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
         for( int i=0; i<apT[t].size(); i++ ){
             int d = apT[t][i];
             if( forbidden[d] ) continue;
-            if(debug) cerr << "\td = " << d << endl;
-
-//            if( low[d] >= preOrder[t] ) m = max( m, maxEdgesInSubgraph[d] );
-//            else excessEdges += apW[t][i];
-
             if( low[d] < preOrder[t] ) excessEdges += apW[t][i];
         }
 
         m = max( m, totalEdges - excessEdges - edgeWeightsSumInSubgraph[t] );
 
-        if(debug){
-            DEBUG(excessEdges);
-            DEBUG(m);
-        }
-
-        if( m < M ){
-            M = m;
-            bestNode = t;
-        }
-
+        if(debug){ DEBUG(excessEdges); DEBUG(m); }
+        if( m < M ){ M = m; bestNode = t; }
         if(debug) ENDL(1);
     }
 
-    if(debug){
-        DEBUG(bestNode);
-        DEBUG(M);
-    }
-
-//    exit(7);
-
-
+    if(debug){ DEBUG(bestNode); DEBUG(M); }
 
     // clearing in the end
-    for( int t : compNodes ){
-        was[t] = false;
-//        preOrder[t] = -1;
-//        low[t] = Constants::INF;
-//        nodeWeightsSum[t] = edgeWeightsSum[t] = nodeWeightsSumInSubgraph[t] = edgeWeightsSumInSubgraph[t] = 0;
-    }
-
+    for( int t : compNodes ) was[t] = false;
 
     return {bestNode,M};
 }
@@ -695,8 +532,5 @@ void ArtPointSeparatorCreator::test(){
     cerr << "PASSED!" << endl;
 
 
-
     exit(1);
-
-
 }

@@ -138,9 +138,6 @@ void FlowSeparatorCreator::test() {
 
 
 
-
-
-
     // checking number of paths
 
     for( int i=0; i<10; i++ ){

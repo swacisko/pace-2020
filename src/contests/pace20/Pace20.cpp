@@ -9,6 +9,7 @@
 
 #include "contests/pace20/Pace20.h"
 
+#include "StandardUtils.h"
 #include "contests/pace20/separatorcreators/FlowSeparatorCreator.h"
 #include "contests/pace20/separatorcreators/ArtPointSeparatorCreator.h"
 #include "contests/pace20/separatorcreators/ComponentExpansionSeparatorCreator.h"
@@ -82,7 +83,7 @@ namespace Pace20{
         TimeMeasurer::startMeasurement("PACE20");
 
 
-        addSigtermCheck();
+        // addSigtermCheck();
         increaseStack();
 
 
@@ -219,7 +220,7 @@ namespace Pace20{
                 globalBestTree = &bestTree;
             }
 
-            if(Pace20Params::tle) break;
+            if(cnf.sw.tle("main")) break;
             if( !exactTrack && r > 0 && V.size() < 5'000 && dtree.height < bestTree.height + 3 ){
                 ImbalancedTreeImprover improver(cnf);  cerr << "improving imbalanced tree if possible" << endl;
                 SeparatorEvaluators::nodeScaleFactor = 0.4; SeparatorEvaluators::edgeScaleFactor = 0.6; Pace20Params::minimizeNodesIteration = false;
@@ -256,7 +257,9 @@ namespace Pace20{
 
             if(cnf.sw.tle("main")) break;
 
-            for( VI& v : V ) random_shuffle(ALL(v));
+            // for( VI& v : V ) random_shuffle(ALL(v));
+            IntGenerator rnd;
+            for( VI& v : V ) StandardUtils::shuffle(v,rnd);
 
             Pace20Params::quickAndWeakTreeCreation = false;
 

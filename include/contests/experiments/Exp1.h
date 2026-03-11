@@ -13,6 +13,11 @@
 struct ExpData {
     int N0,M0, N,M, treedepth;
 
+    map<string,double> pivot_data;
+    map<string,double> preprocessing_data;
+    map<string,double> sep_minim_data;
+    map<string,double> sep_cr_data;
+    map<string,double> sep_eval_data;
 
     static vector<string> getHeader() {
         vector<string> fields{"N0", "M0", "N", "M", "treedepth" };
@@ -33,20 +38,17 @@ struct ExpData {
 
 class Exp1 {
 public:
-    Exp1(Config cnf) {
-        this->cnf = cnf;
-    }
+    Exp1(VVI V, Config cnf) { this->V = V; this->cnf = cnf; }
 
     void runPreprocessingExperiments();
     void runSeparatorCreatorExperiments();
     void runSeparatorMinimizerExperiments();
     void runPivotExperiments();
     void runSeparatorEvaluatorExperiments();
-
     void runAllExperiments();
 
 
-
+    VVI V;
     Config cnf;
     ExpData data;
 };

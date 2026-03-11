@@ -83,7 +83,7 @@ vector<Separator> FlowCutter::getSeparatorsForSourcesAndTargets(VVI &V, VVI &exp
 
     getFlowCutterExpansionOrder( expV, S, T );
 
-    if( Pace20Params::tle ) return seps;
+    if( cnf.sw.tle("main") ) return seps;
 
 
 
@@ -124,7 +124,7 @@ vector<Separator> FlowCutter::getSeparatorsForSourcesAndTargets(VVI &V, VVI &exp
         }
 
 
-        ComponentExpansionSeparatorCreator ceCr(sepEval);
+        ComponentExpansionSeparatorCreator ceCr(sepEval,cnf);
 
         VVI ordersToCheck = {orderV}; // orderV
         reverse(ALL(orderV));
@@ -267,7 +267,7 @@ vector<Separator> FlowCutter::createSeparators(VVI &V, int repeats) {
 
     vector<Separator> seps;
     for( int i=0; i<sourceTargets.size(); i++ ){
-        if( Pace20Params::tle ) break;
+        if( cnf.sw.tle("main") ) break;
 
         PII x = sourceTargets[i];
         int s = x.first;

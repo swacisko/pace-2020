@@ -26,55 +26,21 @@ TotalMinimizer::TotalMinimizer(SeparatorEvaluator *eval,  Config c) : SeparatorM
 Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
     bool debug = false;
 
-//    if( bestSep.stats.originalGraphSize > 400 ) debug = true;
-
     VVI* V = bestSep.V;
-    if( Pace20Params::tle ) return bestSep;
+    if( cnf.sw.tle("main") ) return bestSep;
 
-//    bool foundBetter = true;
     int foundBetterIndex = -1;
-
     int index = -1;
 
 
-//    while(foundBetter){
     while(true){
         index = -1;
-//        foundBetter = false;
 
-
-
-        /*if( Pace20Params::tle ) return bestSep;
-//        if( debug ) DEBUG(index);
-//        index++; if( foundBetterIndex == index ) break;
-        {
-            SnapToNonpathNodesMinimizer minim;
-            auto npnSep = minim.minimizeSeparator(bestSep);
-            npnSep.updatePointers(*V);
-
-            while ((*sepEval)(npnSep, bestSep)) {
-                if(debug){
-                    cerr << "snpMinimizer makes beter solution!" << endl;
-                    DEBUG(bestSep);
-                    DEBUG(npnSep);
-                    ENDL(1);
-                }
-                bestSep = npnSep;
-                npnSep = minim.minimizeSeparator(bestSep);
-                npnSep.updatePointers(*V);
-                foundBetter = true;
-//                foundBetterIndex = index;
-                if( Pace20Params::tle ) return bestSep;
-            }
-        }*/
-
-
-
-        if( Pace20Params::tle ) return bestSep;
+        if( cnf.sw.tle("main") ) return bestSep;
         if( debug ) DEBUG(index);
         index++; if( foundBetterIndex == index ) break;
         {
-            NeighborhoodVCMinimizer vcmin;
+            NeighborhoodVCMinimizer vcmin(cnf);
             auto vcSep = vcmin.minimizeSeparator(bestSep);
             vcSep.updatePointers(*V);
 
@@ -88,19 +54,18 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                 bestSep = vcSep;
                 vcSep = vcmin.minimizeSeparator(bestSep);
                 vcSep.updatePointers(*V);
-//                foundBetter = true;
                 foundBetterIndex = index;
-                if( Pace20Params::tle ) return bestSep;
+                if( cnf.sw.tle("main") ) return bestSep;
             }
         }
 
 
 
-        if( Pace20Params::tle ) return bestSep;
+        if( cnf.sw.tle("main") ) return bestSep;
         if( debug ) DEBUG(index);
         index++; if( foundBetterIndex == index ) break;
         {
-            LargestComponentsVCMinimizer minim;
+            LargestComponentsVCMinimizer minim(cnf);
             auto lcSep = minim.minimizeSeparator(bestSep);
             lcSep.updatePointers(*V);
 
@@ -114,9 +79,8 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                 bestSep = lcSep;
                 lcSep = minim.minimizeSeparator(bestSep);
                 lcSep.updatePointers(*V);
-//                foundBetter = true;
                 foundBetterIndex = index;
-                if( Pace20Params::tle ) return bestSep;
+                if( cnf.sw.tle("main") ) return bestSep;
             }
 
         }
@@ -154,11 +118,11 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
             }
         }*/
 
-        if( Pace20Params::tle ) return bestSep;
+        if( cnf.sw.tle("main") ) return bestSep;
         if( debug ) DEBUG(index);
         index++; if( foundBetterIndex == index ) break;
         if (bestSep.stats.size <= Pace20Params::maxSeparatorSizeForFlowMinimizer) {
-            FlowMinimizer fmin;
+            FlowMinimizer fmin(cnf);
             auto fSep = fmin.minimizeSeparator(bestSep);
             fSep.updatePointers(*V);
 
@@ -172,9 +136,8 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                 bestSep = fSep;
                 fSep = fmin.minimizeSeparator(bestSep);
                 fSep.updatePointers(*V);
-//                foundBetter = true;
                 foundBetterIndex = index;
-                if (Pace20Params::tle) return bestSep;
+                if ( cnf.sw.tle("main") ) return bestSep;
             }
         }
 
@@ -213,11 +176,11 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
 
 
 
-        if( Pace20Params::tle ) return bestSep;
+        if( cnf.sw.tle("main") ) return bestSep;
         if( debug ) DEBUG(index);
         index++; if( foundBetterIndex == index ) break;
         {
-            ExpansionMinimizer exMin;
+            ExpansionMinimizer exMin(cnf);
             auto exSep = exMin.minimizeSeparator(bestSep);
             exSep.updatePointers(*V);
 
@@ -230,8 +193,7 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                 }
 
                 auto estDepth = SeparatorEvaluators::estimateDepthBasedOnEdges;
-//                if( estDepth( bestSep ) - estDepth(exSep) < 1 ){
-                if( V->size() > 1'000 && estDepth( bestSep ) - estDepth(exSep) < 1 ){ // #TEST
+                if( V->size() > 1'000 && estDepth( bestSep ) - estDepth(exSep) < 1 ){
                     bestSep = exSep;
                     break;
                 }
@@ -239,15 +201,10 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                 bestSep = exSep;
                 exSep = exMin.minimizeSeparator(bestSep);
                 exSep.updatePointers(*V);
-//                foundBetter = true;
                 foundBetterIndex = index;
-                if (Pace20Params::tle) return bestSep;
+                if ( cnf.sw.tle("main") ) return bestSep;
             }
         }
-
-
-
-
 
         if( debug ) DEBUG(foundBetterIndex);
         if( foundBetterIndex == -1 ) break;
@@ -260,11 +217,9 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
     }
 
 
-    if( Pace20Params::tle ) return bestSep;
-//    if( debug ) DEBUG(index);
-//    index++; if( foundBetterIndex == index ) break;
+    if( cnf.sw.tle("main") ) return bestSep;
     if (bestSep.stats.size <= Pace20Params::maxSeparatorSizeForGNEMinimizer) {
-        GreedyNodeEdgeMinimizer gneMin( Pace20Params::minimizeNodesIteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
+        GreedyNodeEdgeMinimizer gneMin( cnf, Pace20Params::minimizeNodesIteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
         gneMin.sepEval = sepEval;
 
         auto gneSep = gneMin.minimizeSeparator(bestSep);
@@ -280,9 +235,8 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
             bestSep = gneSep;
             gneSep = gneMin.minimizeSeparator(bestSep);
             gneSep.updatePointers(*V);
-//            foundBetter = true;
             foundBetterIndex = index;
-            if (Pace20Params::tle) return bestSep;
+            if ( cnf.sw.tle("main") ) return bestSep;
         }
     }
 
@@ -306,31 +260,20 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                     if (inLargest[d]) cnt++;
                 }
 
-                if (cnt == 1) {
-//                cerr << "in total minimizer in bestSep node " << p << " has only one neighbor in largest component" << endl;
-                    toChange.push_back(p);
-                }
+                if (cnt == 1) toChange.push_back(p);
             }
 
             if (!toChange.empty()) {
-//            DEBUG(toChange);
                 VI diff;
                 sort(ALL(nodes));
                 sort(ALL(toChange));
                 set_difference(ALL(nodes), ALL(toChange), back_inserter(diff));
                 for (int p : toChange) for (int d : (*V)[p]) if (inLargest[d]) diff.push_back(d);
 
-//            DEBUG(nodes);
-//            DEBUG(diff);
-
-
                 auto newSep = Separator(*V, diff);
                 newSep.createSeparatorStats();
 
                 if ((*sepEval)(newSep, bestSep) && !(*sepEval)(bestSep, newSep)) {
-//                    DEBUG(bestSep);
-//                    DEBUG(newSep);
-//                    ENDL(1);
                     bestSep = newSep;
                     bestSep.updatePointers(*V);
                     improved = true;
@@ -340,9 +283,8 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
     }
 
 
-    if( bestSep.V->size() < 10'000 && bestSep.V->size() > 100 ){ // original
-//    if( bestSep.V->size() > 100 ){ // #TEST
-        FlowCutterMinimizer fcMin(*sepEval);
+    if( bestSep.V->size() < 10'000 && bestSep.V->size() > 100 ){
+        FlowCutterMinimizer fcMin(sepEval,cnf);
         fcMin.MINIMIZATION_MODE = FlowCutterMinimizer::FURTHEST_POINT_MINIMIZATION;
         auto fcSep = fcMin.minimizeSeparator(bestSep);
         fcSep.updatePointers(*V);
@@ -355,15 +297,12 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                 ENDL(1);
             }
 
-
             bestSep = fcSep; bestSep.updatePointers(*V);
             fcSep = fcMin.minimizeSeparator(bestSep);
             fcSep.updatePointers(*V);
-            if (Pace20Params::tle) return bestSep;
+            if ( cnf.sw.tle("main") ) return bestSep;
         }
     }
-
-
 
     if(debug){
         ENDL(1);

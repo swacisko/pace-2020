@@ -6,25 +6,43 @@
 #include <getopt.h>
 #include <bits/getopt_core.h>
 
+#include "GraphReader.h"
 #include "../../../include/contests/experiments/Config.h"
 
 
 void Exp1::runPreprocessingExperiments() {
+    clog << "Exp1 -> running preprocessing experiments" << endl;
+
+
 }
 
 void Exp1::runSeparatorCreatorExperiments() {
+    clog << "Exp1 -> running separator creator experiments" << endl;
+
+
 }
 
 void Exp1::runSeparatorMinimizerExperiments() {
+    clog << "Exp1 -> running separator minimizer experiments" << endl;
+
+
 }
 
 void Exp1::runPivotExperiments() {
+    clog << "Exp1 -> running pivot experiments" << endl;
+
+
 }
 
 void Exp1::runSeparatorEvaluatorExperiments() {
+    clog << "Exp1 -> running separator evaluator experiments" << endl;
+
+
 }
 
 void Exp1::runAllExperiments() {
+    clog << "Exp1 -> running all experiments" << endl;
+
 
 }
 
@@ -56,10 +74,11 @@ Config parse_arguments(int argc, char* argv[]) {
         switch (opt) {
 
             case OPT_TIME:
-                cnf.max_time_millis = std::stoi(optarg);
+                cnf.max_time_millis = 1000 * std::stoi(optarg);
                 break;
             case METADATA_FILEPATH:
                 cnf.metadata_filepath = optarg;
+                break;
 
             case '?':
             default:
@@ -80,8 +99,20 @@ int main(int argc, char* argv[]) {
 
 
     clog << "Hello, running experiments!" << endl;
+    // auto V = GraphReader::readGraphStandardEdges(cin);
+    auto V = GraphReader::readGraphDIMACSWunweighed(cin);
 
-    Exp1 exp_runner(cnf);
+
+    // running experiments
+    Exp1 exp_runner(V,cnf);
+    exp_runner.runAllExperiments();
+
+
+    // writing data to the cnf.metadata_filepath file
+    auto data = exp_runner.data;
+    ofstream f(cnf.metadata_filepath);
+    data.writeData(f);
+    f.close();
 
     return 0;
 }

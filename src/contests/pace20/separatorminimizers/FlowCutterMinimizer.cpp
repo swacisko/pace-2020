@@ -207,10 +207,7 @@ Separator FlowCutterMinimizer::getFurthestPointMinimizedSeparator(Separator &sep
         if( cnt > balance * C1.size() ) break;
     }
 
-//    DEBUG(targets);
-
-    FlowCutter fc(*sepEval);
-
+    FlowCutter fc(*sepEval,cnf);
 
     auto expV = fc.getExpansionGraph(*V);
 
@@ -221,7 +218,6 @@ Separator FlowCutterMinimizer::getFurthestPointMinimizedSeparator(Separator &sep
     bestSep.updatePointers(*V);
 
     return bestSep;
-
 }
 
 
@@ -235,7 +231,8 @@ void FlowCutterMinimizer::test() {
     sep.createSeparatorStats();
     DEBUG(sep);
 
-    FlowCutterMinimizer fcMinim( SeparatorEvaluators::sepEvalToUse );
+    Config cnf{};
+    FlowCutterMinimizer fcMinim( &SeparatorEvaluators::sepEvalToUse, cnf );
     fcMinim.MINIMIZATION_MODE = FURTHEST_POINT_MINIMIZATION;
     sep = fcMinim.minimizeSeparator(sep);
 

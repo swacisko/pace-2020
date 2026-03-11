@@ -578,7 +578,8 @@ void GreedyNodeEdgeMinimizer::test() {
     DEBUG(V.size());
     DEBUG( GraphUtils::countEdges(V) );
 
-    GreedyNodeEdgeMinimizer minim(MINIMIZE_EDGES);
+    Config cnf{};
+    GreedyNodeEdgeMinimizer minim(cnf,MINIMIZE_EDGES);
 
 
     VI nodes = { 0,1,2,3 };

@@ -179,7 +179,8 @@ void SubtreeRerunnerImprover::test() {
 
         double balance = 0.75;
 
-        SubtreeRerunnerImprover improver(Config);
+        Config cnf{};
+        SubtreeRerunnerImprover improver(cnf);
         improver.improve(dt, balance);
     }
 

@@ -139,7 +139,6 @@ bool ImbalancedTreeImprover::isImbalanced(DepthTree &dt) {
 }
 
 void ImbalancedTreeImprover::test() {
-
     int N = 16;
     VVI V(N);
     V[0] = {5}; V[1] = {3}; V[2] = {4}; V[3] = {1,4,5}; V[4] = {2,3,5}; V[5] = {0,3,4};
@@ -148,12 +147,12 @@ void ImbalancedTreeImprover::test() {
     DepthTree dt(V);
     dt.root = 0;
     dt.par = {
-            {0,-1},
-            {1,0},
-            {2,1},
-            {3,2},
-            {4,3},
-            {5,4}
+        {0,-1},
+        {1,0},
+        {2,1},
+        {3,2},
+        {4,3},
+        {5,4}
     };
 
     int p = 2;
@@ -180,7 +179,8 @@ void ImbalancedTreeImprover::test() {
     dt.writeBalanceStructure();
 
 
-    ImbalancedTreeImprover improver(Config());
+    Config cnf{};
+    ImbalancedTreeImprover improver(cnf);
     dt = improver.improve(dt);
     dt.writeBalanceStructure();
 

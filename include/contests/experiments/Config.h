@@ -44,6 +44,8 @@ enum Pivots {
 
 class Config {
 public:
+    void writeBasicInfo();
+
     static constexpr int inf = 1e9+1;
 
     string metadata_filepath = "";
