@@ -38,7 +38,7 @@ vector<Separator> CliqueSeparatorCreator::createSeparators(VVI &V, int repeats) 
         clqSep.createSeparatorStats();
 
         res.push_back(clqSep);
-        GreedyNodeEdgeMinimizer minimizer( cnf,Pace20Params::minimizeNodesIteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
+        GreedyNodeEdgeMinimizer minimizer( cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
         minimizer.sepEval = &SeparatorEvaluators::sepEvalToUse;
         clqSep = minimizer.minimizeSeparator(clqSep);
 

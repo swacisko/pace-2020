@@ -18,11 +18,7 @@
 DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
     const bool debug = false;
 
-    if(debug){
-        ENDL(5);
-        DEBUG(*dt.V);
-        DEBUG(dt);
-    }
+    if(debug){ ENDL(5); DEBUG(*dt.V); DEBUG(dt); }
 
     auto strStr = dt.getStretchStructure();
     VVI tree = strStr.first;
@@ -97,10 +93,6 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
         for (int i = 0; i < T; i++) for (int d : data[i].sepNodes) if (d == root) { prevHeight = data[i].height; }
 
         if (dtree.height < prevHeight) {
-//            cerr << endl << "SubtreeRerunnerImprover found better subtree!" << endl;
-//            DEBUG(prevHeight);
-//            DEBUG(dtree);
-//            ENDL(1);
 
             for (PII p : dtree.par) {
                 int a = g.nodes[p.first];
@@ -113,14 +105,11 @@ DepthTree SubtreeRerunnerImprover::improve(DepthTree &dt, double balance) {
 
             newDt.height = newDt.calculateHeight();
 
-            newDt = DepthTreePivotMaker::makeAllPivots(newDt);
+            DepthTreePivotMaker pm(cnf);
+            newDt = pm.makeAllPivots(newDt);
 
             assert(newDt.isCorrect());
 
-//            DEBUG(dt);
-//            DEBUG(newDt);
-
-//            cerr << "Improving again!" << endl;
             newDt = improve(newDt, balance);
         }
 

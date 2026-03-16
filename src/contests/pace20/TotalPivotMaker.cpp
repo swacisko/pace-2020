@@ -11,7 +11,7 @@
 
 #include "contests/pace20/TotalPivotMaker.h"
 
-TotalPivotMaker::TotalPivotMaker(DepthTree &dt, int rD) : dt(dt) {
+TotalPivotMaker::TotalPivotMaker(DepthTree &dt, int rD, Config c) : cnf(c), dt(dt) {
     V = dt.V;
     N = V->size();
     inCmp = VB(N,false);
@@ -81,9 +81,7 @@ DepthTree TotalPivotMaker::makePivots() {
     const bool debug = false;
     const int INIT_H = dt.height;
 
-    if( debug ){
-        logSpacing(); DEBUG(dt);
-    }
+    if( debug ){ logSpacing(); DEBUG(dt); }
 
     auto strStr = dt.getStretchStructure();
     VVI tree = strStr.first;
@@ -91,13 +89,7 @@ DepthTree TotalPivotMaker::makePivots() {
     auto data =strStr.second;
     for( int i=0; i<T; i++ ) sort( ALL(tree[i]), [&data]( int a, int b ){ return data[a].height > data[b].height; } );
 
-    if(debug){
-        logSpacing();
-        DEBUG(tree);
-        for(int i=0; i<T; i++){
-            logSpacing(); DEBUG(data[i]);
-        }
-    }
+    if(debug){ logSpacing(); DEBUG(tree); for(int i=0; i<T; i++){ logSpacing(); DEBUG(data[i]); } }
 
     VI nodeOrder(T,0);
     iota(ALL(nodeOrder),0);
@@ -106,7 +98,6 @@ DepthTree TotalPivotMaker::makePivots() {
     { // create nodeOrder
         VI depth(T,0);
         function< void(int) > dfs = [=,&nodeOrder,&depth, &tree, &dfs](int num){
-//            DEBUG(num);
             if( num == 0 ) depth[num] = 0;
             else depth[num] = 1 + depth[ tree[num][0] ];
 
@@ -140,7 +131,8 @@ DepthTree TotalPivotMaker::makePivots() {
                 logSpacing(); cerr << "considering subgraph with nodes: " << sg.g.nodes << "   and induced depth-tree: " << sg.tree << endl;
             }
 
-            auto pivotDt = DepthTreePivotMaker::makeAllPivots( sg.tree );
+            DepthTreePivotMaker pm(cnf);
+            auto pivotDt = pm.makeAllPivots( sg.tree );
 
             if( pivotDt.height < sg.tree.height ) {
                 if (debug && pivotDt.height < sg.tree.height) {
@@ -149,21 +141,14 @@ DepthTree TotalPivotMaker::makePivots() {
                          << " = sg.tre.height, starting new TotalPivotMaker" << endl;
                     logSpacing(); DEBUG(pivotDt);
                     logSpacing(); DEBUG(sg.tree);
-
-//                    exit(1);
                 }
 
-                TotalPivotMaker totMaker(pivotDt, recDepth+1);
+                TotalPivotMaker totMaker(pivotDt, recDepth+1, cnf);
                 pivotDt = totMaker.makePivots();
 
-                if(debug){
-                    logSpacing();
-                    cerr << "after recursive pivots, pivotDt = " << pivotDt << endl;
-                }
+                if(debug){ logSpacing(); cerr << "after recursive pivots, pivotDt = " << pivotDt << endl; }
 
-                if (debug){
-                    logSpacing(); cerr << "updating dt at root = " << root << ": " << dt << endl;
-                }
+                if (debug){ logSpacing(); cerr << "updating dt at root = " << root << ": " << dt << endl; }
 
 
                 for (int i = 0; i < sg.g.V.size(); i++) {
@@ -176,20 +161,12 @@ DepthTree TotalPivotMaker::makePivots() {
 
                 dt.height = dt.calculateHeight();
 
-                if (debug){
-                    logSpacing(); cerr << "dt updated:" << dt << endl;
-                }
+                if (debug){ logSpacing(); cerr << "dt updated:" << dt << endl; }
 
                 assert( dt.isCorrect() );
-
-//                exit(1);
             }
         }
-
-//        if(debug) cerr << "WTF2?" << endl;
     }
-
-//    if(debug) cerr << "almost exiting totalPivotMAker.makePivots()" << endl;
 
     dt.height = dt.calculateHeight();
 
@@ -252,7 +229,8 @@ void TotalPivotMaker::test() {
                 {17,15}
         };
 
-        TotalPivotMaker tpm(dt,0);
+        Config cnf{};
+        TotalPivotMaker tpm(dt,0, cnf);
         dt = tpm.makePivots();
     }
 

@@ -514,12 +514,14 @@ DepthTree DepthTreeCreatorExact::getDTCLLowerBound() {
         }
 
         DepthTreeCreatorLarge dtcl(*V, 1,cnf); // recDepth is set to 1 just to disable logs
-        dtcl.MINIMIZE_SEPARATORS = false;
-        dtcl.USE_KERNELIZATION = false;
-        dtcl.SEPARATOR_CREATORS_MODE = DepthTreeCreatorLarge::COMP_EXP_CREATOR;
+        // dtcl.MINIMIZE_SEPARATORS = false;
+        dtcl.cnf.sep_minim_to_use_mask = NoMinim;
+        // dtcl.USE_KERNELIZATION = false;
+        dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
+        // dtcl.SEPARATOR_CREATORS_MODE = DepthTreeCreatorLarge::COMP_EXP_CREATOR;
+        dtcl.cnf.sep_cr_to_use_mask = SepCr::ComponentExpansionCr;
 
         DepthTree dtree = dtcl.getDepthTree();
-//        DEBUG(dtree);
         dtrees.push_back(dtree);
     }
     int ind = -1, m = 500;
@@ -728,7 +730,6 @@ void DepthTreeCreatorExact::createBranchingNodes() {
 
 void DepthTreeCreatorExact::test(){
     Config cnf{};
-    cnf.quick_and_weak_tree_creation = false;
 
     VVI V = GraphReader::readGraphDIMACSWunweighed(cin);
 

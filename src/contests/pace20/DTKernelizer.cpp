@@ -280,41 +280,6 @@ void DTKernelizer::test() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
     if( V->size() == 1 || Tree::isTree(*V) ){
         VI v(V->size());
@@ -334,7 +299,6 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
 
     for( int i=0; i<kolejka.size(); i++ ){
         int p = kolejka[i];
-//        DEBUG(p);
 
         if( deg[p] == 0 ){
             for( int d : (*V)[p] ){
@@ -343,27 +307,16 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
             continue;
         }
 
-
         for( int d : (*V)[p] ){
             deg[d]--;
-
-//            cerr << "\td = " << d << "   deg[d] = " << deg[d] << endl;
-
-            if( deg[d] == 1 ){
-                kolejka.push_back(d);
-            }
-            else if( deg[d] == 0 ){
-//                cerr << "union" << endl;
-                fau.Union(p,d);
-            }
+            if( deg[d] == 1 ) kolejka.push_back(d);
+            else if( deg[d] == 0 ) fau.Union(p,d);
         }
     }
 
 
     VVI nodes(N);
-    for( int p : kolejka ){
-        nodes[ fau.Find(p) ].push_back(p);
-    }
+    for( int p : kolejka ) nodes[ fau.Find(p) ].push_back(p);
 
     for( VI& v : nodes ){
         if(!v.empty()){
@@ -371,12 +324,8 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
 
             VI attPoints = getAttachmentPoints( v );
             for( int d : attPoints ) if( d != -1 ) removedSubgraphsNodes.back().push_back( d );
-
-//            DEBUG(v);
         }
     }
-//    DEBUG(removedTreeNodes);
-
 
     // creating paths and merging them with existing trees if possible
 
@@ -388,9 +337,6 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
         for( PII& p : edges ) p = { g.nodes[p.first], g.nodes[p.second] };
         edgesToRemove.insert( edgesToRemove.end(), ALL(edges) );
     }
-
-//    DEBUG(edgesToRemove);
-
 
 
     VVI V2 = *V;
@@ -436,9 +382,7 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
 
     if( !allNodes.empty() && allNodes.size() != V->size() ) {
 
-
         VVI comps = ConnectedComponents::getConnectedComponents(V2, allNodes);
-
 
         sort( ALL(comps), []( auto& v1, auto& v2 ){ return v1.size() > v2.size(); } );
         assert( comps[0].size() != V->size() );
@@ -459,7 +403,6 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
                     }
                 }
             }
-
         }
     }
 
@@ -472,12 +415,7 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
         nodes[ fau.Find(p) ].push_back(p);
     }
 
-    for( VI& v : nodes ){
-        if(!v.empty()){
-            removedSubgraphsNodes.push_back(v);
-        }
-    }
-
+    for( VI& v : nodes ) if(!v.empty()) removedSubgraphsNodes.push_back(v);
 
     if( recDepth == 0 ) {
 
@@ -504,9 +442,12 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
             InducedGraph g = GraphInducer::induce( *V,sub );
 
             DepthTreeCreatorLarge dtCr( g.V,1, cnf );
-            dtCr.setSeparatorCreatorsMode( DepthTreeCreatorLarge::ART_POINTS_CREATOR );
-            dtCr.MINIMIZE_SEPARATORS = false;
-            dtCr.USE_KERNELIZATION = false;
+            dtCr.cnf.sep_cr_to_use_mask = SepCr::ArtPointCr;
+            // dtCr.setSeparatorCreatorsMode( DepthTreeCreatorLarge::ART_POINTS_CREATOR );
+            dtCr.cnf.sep_minim_to_use_mask = NoMinim;
+            // dtCr.MINIMIZE_SEPARATORS = false;
+            dtCr.cnf.preprocessing_to_use_mask = NoPrepr;
+            // dtCr.USE_KERNELIZATION = false;
 
             assert( g.V.size() < V->size() );
 

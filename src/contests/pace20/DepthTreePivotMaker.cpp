@@ -958,63 +958,42 @@ DepthTree DepthTreePivotMaker::makeAllPivots(DepthTree &dt) {
     assert(res.isCorrect());
 
 
-//        VD balances = { 0.5, 0.4, 0.3, 0.2, 0.1 }; // original version
-    VD balances = { 0.5, 0.3, 0.1 }; // #TEST
-    if( cnf.quick_and_weak_tree_creation ) balances = {};
-    // else if( Pace20Params::inputGraphEdges <= 100'000 ) balances = { 0.60, 0.45, 0.30, 0.15 };
-    // else if( Pace20Params::inputGraphEdges <= 10'000 ) balances = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
-    balances = cnf.pivot_balances;
+    VD balances = cnf.pivot_balances;
 
-
-    for( double balance : balances ){
-        pivotDt = makePivotMultipleStretch( res, balance );
-        if( pivotDt.height < res.height ) res = pivotDt;
+    if ( cnf.pivots_to_use_mask & Pivots::BlockPivots ) {
+        for( double balance : balances ){
+            pivotDt = makePivotMultipleStretch( res, balance );
+            if( pivotDt.height < res.height ) res = pivotDt;
+        }
     }
 
-    bool useHallSetPivots = true;
-    if (cnf.quick_and_weak_tree_creation) useHallSetPivots = false;
-    else if( Pace20Params::inputGraphSize > 100'000 && dt.V->size() < 100 ) useHallSetPivots = false;
+    if(cnf.pivots_to_use_mask & Pivots::HallSetPivots) {
 
-
-    if(useHallSetPivots) {
-        if (Pace20Params::inputGraphSize < 100'000) balances = {0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6}; // #TEST
-        else balances = {0.95, 0.9, 0.85, 0.8, 0.75 }; // #TEST - 0.95 seems to be much more often that 0.7
-
-//            small values (  0.65, 0.7, 0.75 ) of balances make improvements in trees with small height (e.g improves height 6 for 5), while larger
-//            make improvements in trees with greater heights
-
-        {
-
-            reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
-            for (int i = 0; i < balances.size(); i++) {
-                double balance = balances[i];
-                pivotDt = makeHallSetPivots(res, balance, false);
-                if (pivotDt.height < res.height) {
-                    res = pivotDt;
-                    i--; // #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
-                }
+        reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
+        for (int i = 0; i < balances.size(); i++) {
+            double balance = balances[i];
+            pivotDt = makeHallSetPivots(res, balance, false);
+            if (pivotDt.height < res.height) {
+                res = pivotDt;
+                i--; // #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
             }
-
-            { // #TEST section
-                balances.clear(); for( double d = 0.45; d >= 0.18; d -= 0.05 ) balances.push_back(d);
-                reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
-
-                for (int i = 0; i < balances.size(); i++) {
-                    double balance = balances[i];
-                    pivotDt = makeHallSetPivots(res, 1 - balance, true);
-                    if (pivotDt.height < res.height) {
-                        res = pivotDt;
-                        i--;// #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
-                    }
-                }
-            }
-
         }
 
+        if (false){ // #TEST section
+            balances.clear(); for( double d = 0.45; d >= 0.18; d -= 0.05 ) balances.push_back(d);
+            reverse( ALL(balances) ); // #TEST - balances seem to improve tree repeatedly but most often only in increasing steps of balance
 
-        bool useHallSetPivotsSinglePass = false;
-        if( Pace20Params::inputGraphSize <= 500 ) useHallSetPivotsSinglePass = true;
-        if(useHallSetPivotsSinglePass){
+            for (int i = 0; i < balances.size(); i++) {
+                double balance = balances[i];
+                pivotDt = makeHallSetPivots(res, 1 - balance, true);
+                if (pivotDt.height < res.height) {
+                    res = pivotDt;
+                    i--;// #TEST - it seems that multiple improvements are done most often in increasing sequence of balances
+                }
+            }
+        }
+
+        if(cnf.use_hall_set_pivots_single_pass){
             int H;
             do {
                 H = res.height;

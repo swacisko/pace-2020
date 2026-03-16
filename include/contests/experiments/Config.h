@@ -10,7 +10,8 @@
 
 
 enum SepCr {
-    ArtPointCr = 1,
+    NoCr = 0,
+    ArtPointCr,
     ComponentExpansionCr,
     FlowCr,
     NodeAddOrderCr,
@@ -18,7 +19,8 @@ enum SepCr {
 };
 
 enum SepMinim {
-    BfsMinim = 1,
+    NoMinim = 0,
+    BfsMinim,
     ExpansionMinim,
     FlowCutterMinim,
     FlowMinim,
@@ -28,7 +30,8 @@ enum SepMinim {
 };
 
 enum Prepr {
-    AllPrepr = 1,
+    NoPrepr = 0,
+    AllPrepr,
     ArtPointsPrepr,
     IndSet3Prepr,
     IndSet4Prepr,
@@ -37,7 +40,8 @@ enum Prepr {
 };
 
 enum Pivots {
-    BlockPivots = 1,
+    NoPivots = 0,
+    BlockPivots,
     HallSetPivots,
     AllPivots,
 };
@@ -55,7 +59,7 @@ public:
 
 
     int min_graph_size_for_kernelization = 1'000;
-    bool minimize_nodes_iteration = false;
+    bool minimize_nodes_iteration = false; // minimize nodes vs minimize edges
 
 
     double ct_merger_small_size = 4;
@@ -67,7 +71,7 @@ public:
 
     //************************** General config
 
-    bool quick_and_weak_tree_creation = false;
+    // bool quick_and_weak_tree_creation = false;
     static bool require_balanced_separators;
 
 
@@ -84,7 +88,7 @@ public:
 
     int sep_cr_to_use_mask = SepCr::FullSepCr;
     VI sep_cr_iters = {7,5}; // default of 10 iterations for each separator creator
-    int sep_cr_max_sources = 7;
+    int sep_cr_max_sources = 15;
 
 
     //************************** Separator Minimizers config
@@ -98,7 +102,6 @@ public:
     //************************** Preprocessing config
 
     bool preprocessing_to_use_mask = Prepr::AllPrepr;
-    bool use_preprocessing = (preprocessing_to_use_mask != 0);
 
 
     //************************** Pivots config
@@ -107,7 +110,7 @@ public:
     vector<double> pivot_balances_large_graph = { 0.60, 0.45, 0.30, 0.15 };
     vector<double> pivot_balances_small_graph = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
     vector<double> pivot_balances = pivot_balances_large_graph;
-
+    bool use_hall_set_pivots_single_pass = false; // use only for small graphs
 
 };
 

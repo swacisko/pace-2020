@@ -46,15 +46,12 @@
 #include "graphs/flow/DisjointPaths.h"
 #include "graphs/flow/UnitFlow.h"
 
-DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config c, bool randomSepEval) : DepthTreeCreator(V,recurrenceDepth,c) {
-    this->randomSepEval = randomSepEval;
-}
+DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config c) : DepthTreeCreator(V,recurrenceDepth,c) { }
 
 DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     bool use_only_art_points = ( cnf.preprocessing_to_use_mask == ArtPointsPrepr );
     if( cnf.sw.tle("main") || ( use_only_art_points && recDepth > 50 ) ){
-        // Pace20Params::temp += V->size();
         DepthTree dt(*V);
         dt.root = 0;
         dt.par[0] = -1;
@@ -64,16 +61,12 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     }
 
     if( V->size() == 1 ){
-        // Pace20Params::temp += V->size();
         DepthTree dt(*V);
         dt.root = 0;
         dt.par[0] = -1;
         dt.height = 1;
         return dt;
     }
-
-
-//    DEBUG(V->size());
 
 
 
@@ -141,7 +134,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             dt = ker.dekernelize(dt);
             dt.V = V;
 
-            dt = DepthTreePivotMaker::makeAllPivots(dt);
+            DepthTreePivotMaker pm(cnf);
+            dt = pm.makeAllPivots(dt);
 
             assert(dt.isCorrect());
 
@@ -162,7 +156,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             dt = ker.dekernelize(dt);
             dt.V = V;
 
-            dt = DepthTreePivotMaker::makeAllPivots(dt);
+            DepthTreePivotMaker pm(cnf);
+            dt = pm.makeAllPivots(dt);
 
             assert(dt.isCorrect());
 
@@ -170,12 +165,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         }
     }
 
-    // const int MAX_SOURCES = min( cnf.sep_cr_max_sources, (int)V->size()-1 );
-
 
     auto sepEval = SeparatorEvaluators::sepEvalToUse;
-
-
 
     Separator bestSep(*V, VI(1,0) );
     bestSep.createSeparatorStats();
@@ -247,7 +238,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         GreedyNodeEdgeMinimizer minimizer(cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
         minimizer.sepEval = &sepEval;
         FlowSeparatorCreator sepFl(cnf,&minimizer);
-        int repeats = 3*cnf.sep_cr_max_sources;
+        int repeats = cnf.sep_cr_max_sources;
         vector<Separator> flowSeps = sepFl.createSeparators( *V, repeats );
         bestSeps.insert( bestSeps.end(), ALL(flowSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
@@ -258,12 +249,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         if( recDepth == 0 ) cerr << "\tcreating component expansion" << flush;
         ComponentExpansionSeparatorCreator ceCr( sepEval, cnf );
 
-        double factor = 2;
-        if( recDepth == 0 ) factor = 5;
-        else if( recDepth == 1 ) factor = 4;
-        else if( recDepth == 2 ) factor = 3;
 
-        if( cnf.quick_and_weak_tree_creation ) factor = 1.01 * ( (double)1 /  cnf.sep_cr_max_sources );
 
         int D1 = 1, D2 = 3;
 
@@ -275,7 +261,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             ceCr.setOrdersToOptimize( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
         }
 
-        vector<Separator>  ceSeps = ceCr.createSeparators(*V, factor * cnf.sep_cr_max_sources);
+        vector<Separator>  ceSeps = ceCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(ceSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
 
@@ -285,7 +271,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     if( SEPARATOR_CREATORS_MODE & CLIQUE_CREATOR ){ // ARTICULATION POINTS
         if( recDepth == 0 ) cerr << "\tcreating clique separators" << flush;
         CliqueSeparatorCreator clqCr(*V,cnf);
-        vector<Separator>  ceSeps = clqCr.createSeparators(*V, 3*cnf.sep_cr_max_sources);
+        vector<Separator>  ceSeps = clqCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(ceSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
     }
@@ -407,7 +393,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         for( VI & cmp : comps ){
             InducedGraph compGraph = GraphInducer::induce( *V, cmp );
 
-            DepthTreeCreatorLarge dtCrL( compGraph.V, recDepth+1, cnf, randomSepEval );
+            DepthTreeCreatorLarge dtCrL( compGraph.V, recDepth+1, cnf );
             dtCrL.setSeparatorCreatorsMode( SEPARATOR_CREATORS_MODE );
             dtCrL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
             dtCrL.USE_KERNELIZATION = USE_KERNELIZATION;
@@ -465,8 +451,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     if( cnf.sw.tle("main") ) return dt;
 
-
-    dt = DepthTreePivotMaker::makeAllPivots(dt);
+    DepthTreePivotMaker pm(cnf);
+    dt = pm.makeAllPivots(dt);
 
     assert( dt.height == dt.calculateHeight() );
     assert( dt.root >= 0 && dt.root < V->size() );
@@ -685,7 +671,6 @@ Separator DepthTreeCreatorLarge::testMatchingEdgesContraction() {
 void DepthTreeCreatorLarge::test() {
 
     Config cnf{};
-    cnf.quick_and_weak_tree_creation = false;
 
     for( int i=50; i<100; i++ ) {
         int N = i;

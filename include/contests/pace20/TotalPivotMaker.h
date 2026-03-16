@@ -8,17 +8,21 @@
 #define ALGORITHMSPROJECT_TOTALPIVOTMAKER_H
 
 #include <graphs/GraphInducer.h>
+
+#include "Config.h"
 #include "DepthTree.h"
 
 class TotalPivotMaker{
 public:
-    TotalPivotMaker( DepthTree& dt, int recDepth );
+    TotalPivotMaker( DepthTree& dt, int recDepth, Config c );
 
     /**
      *
      * @return besttree after all pivots
      */
     DepthTree makePivots();
+
+    Config cnf;
 
     static void test();
 
