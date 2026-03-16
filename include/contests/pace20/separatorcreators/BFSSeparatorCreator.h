@@ -14,7 +14,7 @@ class BFSSeparatorCreator : public SeparatorCreator{
 public:
     BFSSeparatorCreator(VVI & V, Config c);
 
-    vector<Separator> createSeparators(VVI& V, int maxSources=1);
+    vector<Separator> createSeparators(VVI& V, int max_sources=1);
 
     /**
      *

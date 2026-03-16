@@ -16,14 +16,12 @@ class ComponentExpansionSeparatorCreator : public SeparatorCreator{
         // compEdges[i] = total number of edges in components induced by set X_i  \ border_i,
         // where X_i is the set of first i+1 elements in order and border_i is the set of elements in border after adding first i+1 nodes.
         VI compEdges, borderSize;
-        // maxInternalCompEdges[i] is maximum number of edges in an internal component. The same is for size.
         VI maxInternalCompSize;
         VI maxInternalCompEdges;
         VVI modifications;
     };
 public:
 
-//    ComponentExpansionSeparatorCreator( function< bool(const Separator&, const Separator&) > eval );
     ComponentExpansionSeparatorCreator( SeparatorEvaluator eval, Config c );
 
     vector<Separator> createSeparators(VVI& V, int repeats);

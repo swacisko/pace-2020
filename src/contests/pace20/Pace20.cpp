@@ -8,94 +8,31 @@
 #include <graphs/graphtraversals/BFS.h>
 
 #include "contests/pace20/Pace20.h"
+#include <sys/resource.h>
 
+#include "GraphReader.h"
+#include "GraphUtils.h"
+#include "SeparatorEvaluators.h"
 #include "StandardUtils.h"
-#include "contests/pace20/separatorcreators/FlowSeparatorCreator.h"
-#include "contests/pace20/separatorcreators/ArtPointSeparatorCreator.h"
-#include "contests/pace20/separatorcreators/ComponentExpansionSeparatorCreator.h"
-#include "contests/pace20/separatorcreators/FlowCutter.h"
-#include "contests/pace20/separatorcreators/CliqueSeparatorCreator.h"
-#include "contests/pace20/separatorcreators/NodeAddOrderSeparatorCreator.h"
-
-#include "contests/pace20/depthtreecreators/DepthTreeCreatorExact.h"
-
-#include "contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h"
-#include "contests/pace20/separatorminimizers/NeighborhoodVCMinimizer.h"
-#include "contests/pace20/separatorminimizers/SnapToNonpathNodesMinimizer.h"
-#include "contests/pace20/separatorminimizers/BFSMinimizer.h"
-#include "contests/pace20/separatorminimizers/LargestComponentsVCMinimizer.h"
-#include "contests/pace20/separatorminimizers/ExpansionMinimizer.h"
-#include "contests/pace20/separatorminimizers/TotalMinimizer.h"
-#include "contests/pace20/separatorminimizers/FlowMinimizer.h"
-#include "contests/pace20/separatorminimizers/FlowCutterMinimizer.h"
 
 #include "contests/pace20/DepthTreeIrrelevantNodeShifter.h"
-#include "contests/pace20/ComponentTreeMerger.h"
-#include "contests/pace20/DepthTreePivotMaker.h"
-#include "contests/pace20/TotalPivotMaker.h"
 #include "contests/pace20/DTKernelizer.h"
-#include "contests/pace20/DTKernelizerDeg3.h"
-#include "contests/pace20/DTKernelizerDeg4.h"
 #include "contests/pace20/ImbalancedTreeImprover.h"
-#include "contests/pace20/SubtreeRerunnerImprover.h"
-
-#include "graphs/components/ConnectedComponents.h"
-#include "graphs/vertex_cover/VCUtils.h"
-#include "graphs/generators/GraphGenerator.h"
 
 
 namespace Pace20{
 
-    DepthTree *volatile globalBestTree = nullptr;
-
-
-    // void addSigtermCheck(){
-    //     struct sigaction action;
-    //     memset(&action, 0, sizeof(struct sigaction));
-    //     action.sa_handler = Pace20Params::terminate;
-    //     sigaction(SIGTERM, &action, NULL);
-    // }
-
-    void increaseStack(){
-//        const rlim_t kStackSize = 256L * 1024L * 1024L;   // min stack size = 64 Mb
-        const rlim_t kStackSize = 4L * 256L * 1024L * 1024L;   // min stack size = 64 Mb
-        struct rlimit rl;
-        int result;
-
-        result = getrlimit(RLIMIT_STACK, &rl);
-        if (result == 0)
-        {
-            if (rl.rlim_cur < kStackSize)
-            {
-                rl.rlim_cur = kStackSize;
-                result = setrlimit(RLIMIT_STACK, &rl);
-                if (result != 0)
-                {
-                    fprintf(stderr, "setrlimit returned result = %d\n", result);
-                }
-            }
-        }
-    }
-
-
-
     void run( int argc, char **argv  ){
-        TimeMeasurer::startMeasurement("PACE20");
 
-
-        // addSigtermCheck();
-        increaseStack();
-
+        Config cnf{};
+        cnf.max_time_millis = 60'000;
+        cnf.startMain();
 
         VVI V = GraphReader::readGraphDIMACSWunweighed(cin,false);
 
         DEBUG(V.size());
         DEBUG( GraphUtils::countEdges(V) );
 
-        Pace20Params::inputGraphSize = V.size();
-        Pace20Params::inputGraphEdges = GraphUtils::countEdges(V);
-
-        Config cnf;
 
         VVI initKernV; // this is initially kernelized V - V after subgraph kernelization, before deg3 kernelization, since deg3 kernelization may yield different results depending on nodes in IS
         DTKernelizer initKernelizer(V,cnf);
@@ -118,93 +55,69 @@ namespace Pace20{
 
         if( V.size() < 500 ) {
             reps = 10'000;
-            Pace20Params::maxSources = 10;
+            cnf.sep_cr_max_sources = 10;
         }
         if( V.size() < 1'000 ){
             reps = 10'000;
-            Pace20Params::maxSources = 10;
+            cnf.sep_cr_max_sources = 10;
         }else if( V.size() < 10'000 ){
             reps = 2'000;
         }else if( V.size() < 100'000 ){
             reps = 500;
         }
         else if( V.size() < 300'000 ){
-            Pace20Params::maxSources = 4;
-            Pace20Params::maxBestSepsForMinimizers = 5;
+            cnf.sep_cr_max_sources = 4;
+            cnf.max_best_seps_for_minimizers = 5;
             reps = 100;
         }
-        else /*if( V.size() >= 300'000 )*/{
-            Pace20Params::maxSources = 4;
-            Pace20Params::maxBestSepsForMinimizers = 5;
+        else {
+            cnf.sep_cr_max_sources = 4;
+            cnf.max_best_seps_for_minimizers = 5;
             reps = 20;
         }
 
 
-        if( GraphUtils::countEdges(V) < 1'000 ) Pace20Params::maxBestSepsForRecursion = 8;
-        else if( GraphUtils::countEdges(V) < 2'000 ) Pace20Params::maxBestSepsForRecursion = 6;
-        else if( GraphUtils::countEdges(V) < 3'000 ) Pace20Params::maxBestSepsForRecursion = 4;
+        if( GraphUtils::countEdges(V) < 1'000 ) cnf.max_best_seps_for_recursion = 8;
+        else if( GraphUtils::countEdges(V) < 2'000 ) cnf.max_best_seps_for_recursion = 6;
+        else if( GraphUtils::countEdges(V) < 3'000 ) cnf.max_best_seps_for_recursion = 4;
 
 
-        constexpr bool exactTrack = false;
-        if(exactTrack){
-            reps = 5'000;
-            int L = 16;
-            Pace20Params::maxBestSepsForRecursion = L;
-            Pace20Params::maxBestSepsForMinimizers = L;
-            Pace20Params::maxSources = 10;
-        }
-
-//        reps = 10;
 
         for(int r=0; r<reps; r++){
 
             if( r >= 5 ){
-                Pace20Params::minGraphSizeForKernelization = 100 + 150 * (1+( r % 5 )) * (1+( r % 5 ));
-                if( r % 4 == 0 ) Pace20Params::minGraphSizeForKernelization = Constants::INF;
+                cnf.min_graph_size_for_kernelization = 100 + 150 * (1+( r % 5 )) * (1+( r % 5 ));
+                if( r % 4 == 0 ) cnf.min_graph_size_for_kernelization = Constants::INF;
 
-                if( r % 12 >= 5 && r%12 <= 7)  Pace20Params::balance = 0.5 + (double)(rand()%900) / 2000;
-                else  Pace20Params::balance = 0.97;
+                if( r % 12 >= 5 && r%12 <= 7)  cnf.sep_balance = 0.5 + (double)(rand()%900) / 2000;
+                else cnf.sep_balance = 0.97;
             }
 
 
             cerr << "\rRepetition #" << r << " / " << reps << flush;
 
 
-            if( r > 1 ){ // first one is qucikAndWeak, second one is with default set parameters, the rest are altered
+            if( r > 1 ){
                 int opt = r%3;
                 if( opt == 2 ){
-                    SeparatorEvaluators::sepEvalToUse = SeparatorEvaluators::estimatedDepthTreeEdgePlusNode;
                     SeparatorEvaluators::nodeScaleFactor = 0.95; SeparatorEvaluators::edgeScaleFactor = 0.05;
-                    Pace20Params::minimizeNodesIteration = true;
+                    cnf.minimize_nodes_iteration = true;
                 }
                 else if(opt==0){
-                    SeparatorEvaluators::sepEvalToUse = SeparatorEvaluators::estimatedDepthTreeEdgePlusNode;
                     SeparatorEvaluators::nodeScaleFactor = 0.05; SeparatorEvaluators::edgeScaleFactor = 0.95;
-                    Pace20Params::minimizeNodesIteration = false;
+                    cnf.minimize_nodes_iteration = false;
                 }else{
-                    SeparatorEvaluators::sepEvalToUse = SeparatorEvaluators::estimatedDepthTreeEdgePlusNode;
                     SeparatorEvaluators::nodeScaleFactor = 0.5; SeparatorEvaluators::edgeScaleFactor = 0.5;
-                    if( opt&1 ) Pace20Params::minimizeNodesIteration = false;
-                    else Pace20Params::minimizeNodesIteration = true;
+                    if( opt&1 ) cnf.minimize_nodes_iteration = false;
+                    else cnf.minimize_nodes_iteration = true;
                 }
             }
 
 
-            useInitialKernelization = ( Pace20Params::useKernelization && V.size() >= Pace20Params::minGraphSizeForKernelization );
+            useInitialKernelization = ( cnf.preprocessing_to_use_mask != Prepr::NoPrepr && V.size() >= cnf.min_graph_size_for_kernelization );
             DepthTreeCreatorLarge *creator = nullptr;
             if( useInitialKernelization ) creator = new DepthTreeCreatorLarge( initKernV ,0, cnf );
-            else{
-                creator = new DepthTreeCreatorLarge( V ,0, cnf );
-            }
-
-            if( Pace20Params::quickAndWeakTreeCreation ){
-                creator->MINIMIZE_SEPARATORS = false;
-                creator->setSeparatorCreatorsMode( DepthTreeCreatorLarge::COMP_EXP_CREATOR );
-            }
-            else if( globalBestTree != nullptr && globalBestTree->height < 50 ){
-                creator->USE_DEG3_KERNELIZATION = false; // #TEST disabling deg3 kernelization for graphs with small treedepth
-            }
-
+            else creator = new DepthTreeCreatorLarge( V ,0, cnf );
 
             DepthTree dtree = creator->getDepthTree(); // creating tree
 
@@ -217,70 +130,33 @@ namespace Pace20{
             if( dtree.height < bestTree.height ){
                 auto temp = dtree;
                 swap( bestTree, temp );
-                globalBestTree = &bestTree;
             }
 
             if(cnf.sw.tle("main")) break;
-            if( !exactTrack && r > 0 && V.size() < 5'000 && dtree.height < bestTree.height + 3 ){
+            if( r > 0 && V.size() < 5'000 && dtree.height < bestTree.height + 3 ){
                 ImbalancedTreeImprover improver(cnf);  cerr << "improving imbalanced tree if possible" << endl;
-                SeparatorEvaluators::nodeScaleFactor = 0.4; SeparatorEvaluators::edgeScaleFactor = 0.6; Pace20Params::minimizeNodesIteration = false;
+                SeparatorEvaluators::nodeScaleFactor = 0.4;
+                SeparatorEvaluators::edgeScaleFactor = 0.6;
+                cnf.minimize_nodes_iteration = false;
                 auto impDt = improver.improve(dtree);  DEBUG(impDt.height);
-                if( impDt.height < bestTree.height ) {
-                    auto temp = impDt; swap( bestTree, temp ); globalBestTree = &bestTree;
-                }
-
+                if( impDt.height < bestTree.height ) { auto temp = impDt; swap( bestTree, temp ); }
                 if( impDt.height < dtree.height ) swap( dtree, impDt );
-            }
-
-
-            if( !Pace20Params::quickAndWeakTreeCreation && exactTrack ){
-                VD balances = {};
-
-                if( exactTrack ){ balances.clear(); for(double d = 0.9; d >= 0.1; d -= 0.1) balances.push_back(d); }
-
-                for( double balance : balances ) {
-                    SubtreeRerunnerImprover improver(cnf);
-                    auto impDt = improver.improve(dtree, balance);
-                    if (impDt.height < bestTree.height) {
-                        auto temp = impDt;
-                        swap(bestTree, temp);
-                        globalBestTree = &bestTree;
-                    }
-                    if (impDt.height < dtree.height) swap(dtree, impDt);
-                }
             }
 
 
             cerr << endl << endl << "  Iteration tree height after improvements: " << dtree.height << endl << endl << endl;
             if( creator != nullptr ){ delete creator; creator = nullptr;}
 
-
             if(cnf.sw.tle("main")) break;
 
-            // for( VI& v : V ) random_shuffle(ALL(v));
             IntGenerator rnd;
             for( VI& v : V ) StandardUtils::shuffle(v,rnd);
-
-            Pace20Params::quickAndWeakTreeCreation = false;
-
-            if( globalBestTree->height > 1500 ) Pace20Params::balance = 0.6; /* #TEST for tests with large depth we force balance in first iterations*/
-            if( Pace20Params::inputGraphSize > 100'000 && globalBestTree->height > 300 ) Pace20Params::minGraphSizeForKernelization = 300; // #TEST
-
         }
 
         DEBUG(bestTree.height);
+        bestTree.write();
 
-        { // write answer - this section probabyl will no be reached, since answer will be written in teminate() function after receiving SIGTERM
-            if(exactTrack && bestTree.height >= 20) while(1);
-            bestTree.write();
-        }
-
-        DEBUG(bestTree.height);
-
-
-        TimeMeasurer::stopMeasurement("PACE20");
-        TimeMeasurer::writeAllMeasurements();
-
+        cnf.sw.writeAll();
     }
 
 

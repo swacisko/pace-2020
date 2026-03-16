@@ -68,7 +68,7 @@ Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends)
     Separator sep(V,nodes);
     sep.createSeparatorStats();
 
-    if( minimizer != nullptr && sep.nodes.size() <= Pace20Params::maxSeparatorSizeForFlowMinimizer ) sep = minimizer->minimizeSeparator(sep);
+    if( minimizer != nullptr && sep.nodes.size() <= cnf.max_separator_size_for_flow_minimizer ) sep = minimizer->minimizeSeparator(sep);
 
     return sep;
 }

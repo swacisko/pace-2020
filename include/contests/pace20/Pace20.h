@@ -8,34 +8,9 @@
 #define ALGORITHMSPROJECT_PACE20_H
 
 
-#include "graphs/GraphReader.h"
-#include <csignal>
-#include "contests/pace20/depthtreecreators/DepthTreeCreatorSmall.h"
 #include "contests/pace20/depthtreecreators/DepthTreeCreatorLarge.h"
-#include "graphs/GraphUtils.h"
-#include "Pace20Params.h"
-
-#include <sys/resource.h>
-//#include <graphs/flow/DisjointPaths.h>
-//#include <graphs/flow/UnitFlow.h>
-#include "contests/pace20/separatorcreators/RemovalOrderSeparatorCreator.h"
-#include "SeparatorEvaluators.h"
 
 namespace Pace20{
-
-    extern DepthTree *volatile globalBestTree;
-
-    /**
-     * Installs SIGTERM signal listener
-     */
-    extern void addSigtermCheck();
-
-    /**
-     * Increases stack size (due to hard limit on my machine it is easier to increase in each program execution
-     */
-    extern void increaseStack();
-
-
 
 
     /**

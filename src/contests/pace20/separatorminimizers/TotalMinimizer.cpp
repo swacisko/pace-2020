@@ -5,7 +5,6 @@
 */
 
 #include <contests/pace20/separatorminimizers/TotalMinimizer.h>
-#include <contests/pace20/Pace20Params.h>
 #include <contests/pace20/separatorminimizers/SnapToNonpathNodesMinimizer.h>
 #include <contests/pace20/separatorminimizers/FlowMinimizer.h>
 #include <contests/pace20/separatorminimizers/LargestComponentsVCMinimizer.h>
@@ -37,107 +36,108 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
         index = -1;
 
         if( cnf.sw.tle("main") ) return bestSep;
-        if( debug ) DEBUG(index);
-        index++; if( foundBetterIndex == index ) break;
-        {
-            NeighborhoodVCMinimizer vcmin(cnf);
-            auto vcSep = vcmin.minimizeSeparator(bestSep);
-            vcSep.updatePointers(*V);
-
-            while ((*sepEval)(vcSep, bestSep) && !(*sepEval)(bestSep, vcSep)) {
-                if(debug){
-                    cerr << "vcMinimizer makes beter solution!" << endl;
-                    DEBUG(bestSep);
-                    DEBUG(vcSep);
-                    ENDL(1);
-                }
-                bestSep = vcSep;
-                vcSep = vcmin.minimizeSeparator(bestSep);
+        if (cnf.sep_minim_to_use_mask & SepMinim::NeighVCCMinim) {
+            if( debug ) DEBUG(index);
+            index++; if( foundBetterIndex == index ) break;
+            {
+                NeighborhoodVCMinimizer vcmin(cnf);
+                auto vcSep = vcmin.minimizeSeparator(bestSep);
                 vcSep.updatePointers(*V);
-                foundBetterIndex = index;
-                if( cnf.sw.tle("main") ) return bestSep;
-            }
-        }
 
-
-
-        if( cnf.sw.tle("main") ) return bestSep;
-        if( debug ) DEBUG(index);
-        index++; if( foundBetterIndex == index ) break;
-        {
-            LargestComponentsVCMinimizer minim(cnf);
-            auto lcSep = minim.minimizeSeparator(bestSep);
-            lcSep.updatePointers(*V);
-
-            while (  (*sepEval)(lcSep, bestSep) && !(*sepEval)(bestSep, lcSep)  ) {
-                if(debug){
-                    cerr << "lcMinimizer makes beter solution!" << endl;
-                    DEBUG(bestSep);
-                    DEBUG(lcSep);
-                    ENDL(1);
+                while ((*sepEval)(vcSep, bestSep) && !(*sepEval)(bestSep, vcSep)) {
+                    if(debug){
+                        cerr << "vcMinimizer makes beter solution!" << endl;
+                        DEBUG(bestSep);
+                        DEBUG(vcSep);
+                        ENDL(1);
+                    }
+                    bestSep = vcSep;
+                    vcSep = vcmin.minimizeSeparator(bestSep);
+                    vcSep.updatePointers(*V);
+                    foundBetterIndex = index;
+                    if( cnf.sw.tle("main") ) return bestSep;
                 }
-                bestSep = lcSep;
-                lcSep = minim.minimizeSeparator(bestSep);
+            }
+
+
+            if( cnf.sw.tle("main") ) return bestSep;
+            if( debug ) DEBUG(index);
+            index++; if( foundBetterIndex == index ) break;
+            {
+                LargestComponentsVCMinimizer minim(cnf);
+                auto lcSep = minim.minimizeSeparator(bestSep);
                 lcSep.updatePointers(*V);
-                foundBetterIndex = index;
-                if( cnf.sw.tle("main") ) return bestSep;
-            }
 
+                while (  (*sepEval)(lcSep, bestSep) && !(*sepEval)(bestSep, lcSep)  ) {
+                    if(debug){
+                        cerr << "lcMinimizer makes beter solution!" << endl;
+                        DEBUG(bestSep);
+                        DEBUG(lcSep);
+                        ENDL(1);
+                    }
+                    bestSep = lcSep;
+                    lcSep = minim.minimizeSeparator(bestSep);
+                    lcSep.updatePointers(*V);
+                    foundBetterIndex = index;
+                    if( cnf.sw.tle("main") ) return bestSep;
+                }
+
+            }
         }
 
 
-        //  BFS minimizer should be uncommmented
-        /*if( Pace20Params::tle ) return bestSep;
-        if( debug ) DEBUG(index);
-        index++; if( foundBetterIndex == index ) break;
-        {
-            BFSMinimizer bfsMin;
-            auto bfsSep = bfsMin.minimizeSeparator(bestSep);
-            bfsSep.updatePointers(*V);
-
-            while ((*sepEval)(bfsSep, bestSep) && !(*sepEval)(bestSep, bfsSep) ) {
-                if(debug){
-                    cerr << "bfsMinimizer makes beter solution!" << endl;
-                    DEBUG(bestSep);
-                    DEBUG(bfsSep);
-                    ENDL(1);
-                }
-
-                auto estDepth = SeparatorEvaluators::estimateDepthBasedOnEdges;
-                if( estDepth( bestSep ) - estDepth(bfsSep) < 1 ){
-                    bestSep = bfsSep;
-                    break;
-                }
-
-                bestSep = bfsSep;
-                bfsSep = bfsMin.minimizeSeparator(bestSep);
+        //  BFS minimizer
+        if( cnf.sw.tle("main") ) return bestSep;
+        if (cnf.sep_minim_to_use_mask & SepMinim::BfsMinim) {
+            if( debug ) DEBUG(index);
+            index++; if( foundBetterIndex == index ) break;
+            {
+                BFSMinimizer bfsMin(cnf);
+                auto bfsSep = bfsMin.minimizeSeparator(bestSep);
                 bfsSep.updatePointers(*V);
-//                foundBetter = true;
-                foundBetterIndex = index;
-                if (Pace20Params::tle) return bestSep;
+
+                while ((*sepEval)(bfsSep, bestSep) && !(*sepEval)(bestSep, bfsSep) ) {
+                    if(debug){
+                        cerr << "bfsMinimizer makes beter solution!" << endl;
+                        DEBUG(bestSep);
+                        DEBUG(bfsSep);
+                        ENDL(1);
+                    }
+
+                    auto estDepth = SeparatorEvaluators::estimateDepthBasedOnEdges;
+                    if( estDepth( bestSep ) - estDepth(bfsSep) < 1 ){ bestSep = bfsSep; break; }
+
+                    bestSep = bfsSep;
+                    bfsSep = bfsMin.minimizeSeparator(bestSep);
+                    bfsSep.updatePointers(*V);
+                    foundBetterIndex = index;
+                    if( cnf.sw.tle("main") ) return bestSep;
+                }
             }
-        }*/
+        }
 
         if( cnf.sw.tle("main") ) return bestSep;
-        if( debug ) DEBUG(index);
-        index++; if( foundBetterIndex == index ) break;
-        if (bestSep.stats.size <= Pace20Params::maxSeparatorSizeForFlowMinimizer) {
-            FlowMinimizer fmin(cnf);
-            auto fSep = fmin.minimizeSeparator(bestSep);
-            fSep.updatePointers(*V);
-
-            while ( (*sepEval)(fSep, bestSep) && !(*sepEval)(bestSep, fSep)) {
-                if(debug){
-                    cerr << "fMinimizer makes beter solution!" << endl;
-                    DEBUG(bestSep);
-                    DEBUG(fSep);
-                    ENDL(1);
-                }
-                bestSep = fSep;
-                fSep = fmin.minimizeSeparator(bestSep);
+        if (cnf.sep_minim_to_use_mask & SepMinim::FlowMinim) {
+            if( debug ) DEBUG(index);
+            index++; if( foundBetterIndex == index ) break;
+            if (bestSep.stats.size <= cnf.max_separator_size_for_flow_minimizer) {
+                FlowMinimizer fmin(cnf);
+                auto fSep = fmin.minimizeSeparator(bestSep);
                 fSep.updatePointers(*V);
-                foundBetterIndex = index;
-                if ( cnf.sw.tle("main") ) return bestSep;
+
+                while ( (*sepEval)(fSep, bestSep) && !(*sepEval)(bestSep, fSep)) {
+                    if(debug){
+                        cerr << "fMinimizer makes beter solution!" << endl;
+                        DEBUG(bestSep);
+                        DEBUG(fSep);
+                        ENDL(1);
+                    }
+                    bestSep = fSep;
+                    fSep = fmin.minimizeSeparator(bestSep);
+                    fSep.updatePointers(*V);
+                    foundBetterIndex = index;
+                    if ( cnf.sw.tle("main") ) return bestSep;
+                }
             }
         }
 
@@ -218,8 +218,9 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
 
 
     if( cnf.sw.tle("main") ) return bestSep;
-    if (bestSep.stats.size <= Pace20Params::maxSeparatorSizeForGNEMinimizer) {
-        GreedyNodeEdgeMinimizer gneMin( cnf, Pace20Params::minimizeNodesIteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
+    if ( (cnf.sep_minim_to_use_mask & SepMinim::GNEMinim) && bestSep.stats.size <= cnf.max_separator_size_for_GNE_minimizer) {
+        auto opt = (cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES);
+        GreedyNodeEdgeMinimizer gneMin( cnf, opt );
         gneMin.sepEval = sepEval;
 
         auto gneSep = gneMin.minimizeSeparator(bestSep);
@@ -242,48 +243,8 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
 
 
 
-    if( V->size() > 5 && Pace20Params::inputGraphEdges < 10'000 ){ // only for small input graphs - it probably is not very effective, just shifts single vertices
-        bool improved = true;
 
-        while(improved) {
-            improved = false;
-
-            VI nodes = bestSep.nodes;
-            VVI comps = ConnectedComponents::getConnectedComponents(*V, nodes);
-            sort(ALL(comps), [](auto &v, auto &w) { return v.size() > w.size(); });
-            VB inLargest = StandardUtils::toVB(V->size(), comps[0]);
-
-            int cnt = 0;
-            VI toChange;
-            for (int p : nodes) {
-                for (int d : (*V)[p]) {
-                    if (inLargest[d]) cnt++;
-                }
-
-                if (cnt == 1) toChange.push_back(p);
-            }
-
-            if (!toChange.empty()) {
-                VI diff;
-                sort(ALL(nodes));
-                sort(ALL(toChange));
-                set_difference(ALL(nodes), ALL(toChange), back_inserter(diff));
-                for (int p : toChange) for (int d : (*V)[p]) if (inLargest[d]) diff.push_back(d);
-
-                auto newSep = Separator(*V, diff);
-                newSep.createSeparatorStats();
-
-                if ((*sepEval)(newSep, bestSep) && !(*sepEval)(bestSep, newSep)) {
-                    bestSep = newSep;
-                    bestSep.updatePointers(*V);
-                    improved = true;
-                }
-            }
-        }
-    }
-
-
-    if( bestSep.V->size() < 10'000 && bestSep.V->size() > 100 ){
+    if( cnf.sep_minim_to_use_mask & SepMinim::FlowCutterMinim ){
         FlowCutterMinimizer fcMin(sepEval,cnf);
         fcMin.MINIMIZATION_MODE = FlowCutterMinimizer::FURTHEST_POINT_MINIMIZATION;
         auto fcSep = fcMin.minimizeSeparator(bestSep);

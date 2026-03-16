@@ -21,16 +21,15 @@ BFSSeparatorCreator::BFSSeparatorCreator(VVI &V, Config c) : SeparatorCreator(c)
     this->V = V;
 }
 
-vector<Separator> BFSSeparatorCreator::createSeparators(VVI &V, int maxSources) {
-    const int MAX_SOURCES = min( max(1,maxSources), (int)V.size()-1 );
-    VI sourceQuantities(MAX_SOURCES+1);
-    for( int i=1; i <= MAX_SOURCES; i++ ) sourceQuantities[i] = MAX_SOURCES+1-i;
+vector<Separator> BFSSeparatorCreator::createSeparators(VVI &V, int max_sources) {
+    const int MAX_SOURCES = min( max(1,max_sources), (int)V.size()-1 );
+    VI source_quantities(MAX_SOURCES+1,0);
+    source_quantities[1] = MAX_SOURCES;
+    for( int i=2; i <= MAX_SOURCES; i++ ) source_quantities[i] = source_quantities[i-1] / 2;
+    while( source_quantities.back() == 0 ) source_quantities.pop_back();
+    // sourceQuantities = { 0, 16, 8, 4 };
 
-    sourceQuantities = { 0, 16, 8, 4 };
-
-    if( Pace20Params::quickAndWeakTreeCreation ) sourceQuantities = {0,1};
-
-    VVI sourcesSets = getRandomSources(V.size(),sourceQuantities);
+    VVI sourcesSets = getRandomSources(V.size(),source_quantities);
 
     vector<Separator> res;
     {
@@ -439,7 +438,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
         VI separatorsToRemove;
         for(int i=0; i<L; i++){
 
-            if( separators[i].nodes.size() > Pace20Params::maxSeparatorSizeForGNEMinimizer ) continue;
+            if( separators[i].nodes.size() > cnf.max_separator_size_for_GNE_minimizer ) continue;
 
             if( separators[i].stats.numberOfComponents <= 1 ){
                 separatorsToRemove.push_back(i);
@@ -512,7 +511,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
                 largestComps.push_back(comps[j]);
                 lcEdges += comps[j].edges;
                 lcNodes += comps[j].nodes;
-                if (lcEdges > (1 - Pace20Params::balance) * totalEdges) break;
+                if (lcEdges > (1 - cnf.sep_balance) * totalEdges) break;
             }
 
             VI nodes;
@@ -666,7 +665,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
         int ogEdges = GraphUtils::countEdges(V);
         for (int i = 0; i < L; i++) {
 
-            for( int useVC = 0; useVC <= ( Pace20Params::quickAndWeakTreeCreation ? 0 : 1 )   ; useVC++ ) {
+            for( int useVC = 0; useVC <= 1; useVC++ ) {
                 Separator sep = createLargestComponentsSeparatorForLayer(i, was, fau, useVC);
 
                 for (int d : layers[i]) {

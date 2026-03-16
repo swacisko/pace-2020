@@ -15,7 +15,6 @@
 
 
 Separator LargestComponentsVCMinimizer::minimizeSeparator(Separator sep) {
-//    cerr << "in lcM" << endl;
     VVI comps = ConnectedComponents::getConnectedComponents( *sep.V, sep.nodes );
 
     sort( ALL(comps), []( VI& v1, VI& v2 ){ return v1.size() > v2.size(); } );
@@ -24,9 +23,6 @@ Separator LargestComponentsVCMinimizer::minimizeSeparator(Separator sep) {
 
     int minNeighCompSize = sizeBalance * sizesSum;
 
-//    DEBUG(sizesSum);
-//    DEBUG(minNeighCompSize);
-    int ind = 1;
     int curSize = 0;
     VI cmp;
     for( int i=0; i<comps.size(); i++ ){
@@ -37,19 +33,13 @@ Separator LargestComponentsVCMinimizer::minimizeSeparator(Separator sep) {
 
     VI neigh = GraphUtils::getNeighborhoodOfAInB( *sep.V, sep.nodes, cmp, false );
 
-//    DEBUG(sep.nodes);
-//    DEBUG(cmp);
-//    DEBUG(neigh);
-
     VI inducer = sep.nodes;
     inducer.insert( inducer.end(), ALL(neigh) );
 
     sort(ALL(inducer));
-//    DEBUG(inducer);
 
     InducedGraph gr = GraphInducer::induce(*sep.V,inducer);
 
-//    DEBUG(gr.V);
     unordered_set<int> inSep(ALL(sep.nodes));
     for( int i=0; i<sep.nodes.size(); i++ ){
         int p = sep.nodes[i];
@@ -63,29 +53,16 @@ Separator LargestComponentsVCMinimizer::minimizeSeparator(Separator sep) {
         }
     }
 
-//    DEBUG(gr.V);
-
     VB bipartition(gr.V.size(),false);
     for(int p : neigh) bipartition[ gr.perm[p] ] = true;
 
-//    for( int p : inducer ){
-//        cerr << "gr.perm[" << p << "] = " << gr.perm[p] << endl;
-//    }
-
-
     VI vc = BipartiteGraphVertexCover::getVertexCoverOfBipartiteGraph( gr.V, bipartition );
     for(int& d : vc) d = gr.nodes[d];
-
-//    DEBUG(vc);
 
     Separator newSep(*sep.V, vc);
     newSep.createSeparatorStats();
     newSep.updatePointers(*sep.V);
 
-//    DEBUG(sep);
-//    DEBUG(newSep);
-
-//    exit(1);
     return newSep;
 
 }

@@ -35,7 +35,7 @@ public:
 
 private:
 
-    void logSpacing(){ for(int i=0; i<recDepth; i++) cerr << "  "; }
+    void logSpacing(){ for(int i=0; i<rec_depth; i++) cerr << "  "; }
 
     bool branch();
     bool branch(VI sep);

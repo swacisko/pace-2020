@@ -12,9 +12,10 @@
 enum SepCr {
     NoCr = 0,
     ArtPointCr,
-    ComponentExpansionCr,
+    BfsCr,
+    CompExpCr,
     FlowCr,
-    NodeAddOrderCr,
+    FlowCutterCr,
     FullSepCr
 };
 
@@ -55,6 +56,7 @@ public:
     string metadata_filepath = "";
     int max_time_millis = inf;
     Stopwatch sw;
+    void startMain(){ sw.setLimit("main", max_time_millis); sw.start("main"); }
 
 
 
@@ -89,19 +91,21 @@ public:
     int sep_cr_to_use_mask = SepCr::FullSepCr;
     VI sep_cr_iters = {7,5}; // default of 10 iterations for each separator creator
     int sep_cr_max_sources = 15;
+    int max_rec_depth_for_flowcutter = 1e9;
+    int max_estimated_treedepth_for_flowcutter = 1e9;
 
 
     //************************** Separator Minimizers config
 
     int sep_minim_to_use_mask = SepMinim::TotalMinim;
-    int max_separator_size_for_GNE_minimizer = inf;
-    int max_separator_size_for_flow_minimizer = inf;
+    int max_separator_size_for_GNE_minimizer = 10'000;
+    int max_separator_size_for_flow_minimizer = 10'000;
     int max_best_seps_for_minimizers = 5;
 
 
     //************************** Preprocessing config
 
-    bool preprocessing_to_use_mask = Prepr::AllPrepr;
+    int preprocessing_to_use_mask = Prepr::AllPrepr;
 
 
     //************************** Pivots config
@@ -109,8 +113,14 @@ public:
     int pivots_to_use_mask = Pivots::AllPivots;
     vector<double> pivot_balances_large_graph = { 0.60, 0.45, 0.30, 0.15 };
     vector<double> pivot_balances_small_graph = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
-    vector<double> pivot_balances = pivot_balances_large_graph;
+    vector<double> pivot_balances = pivot_balances_small_graph;
     bool use_hall_set_pivots_single_pass = false; // use only for small graphs
+
+
+
+
+    void enableOptions(int & mask, int options){ mask |= options; }
+    void disableOptions(int & mask, int options){ mask &= ~options; }
 
 };
 

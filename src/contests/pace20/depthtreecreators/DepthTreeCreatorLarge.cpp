@@ -10,7 +10,6 @@
 #include <contests/pace20/separatorcreators/BFSSeparatorCreator.h>
 #include <contests/pace20/separatorcreators/FlowSeparatorCreator.h>
 #include <contests/pace20/separatorcreators/ComponentExpansionSeparatorCreator.h>
-#include <contests/pace20/separatorcreators/RemovalOrderSeparatorCreator.h>
 #include <contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h>
 #include <contests/pace20/separatorminimizers/SnapToNonpathNodesMinimizer.h>
 #include <contests/pace20/separatorminimizers/FlowMinimizer.h>
@@ -51,7 +50,7 @@ DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config
 DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     bool use_only_art_points = ( cnf.preprocessing_to_use_mask == ArtPointsPrepr );
-    if( cnf.sw.tle("main") || ( use_only_art_points && recDepth > 50 ) ){
+    if( cnf.sw.tle("main") || ( use_only_art_points && rec_depth > 50 ) ){
         DepthTree dt(*V);
         dt.root = 0;
         dt.par[0] = -1;
@@ -70,26 +69,25 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( USE_KERNELIZATION ) {
-        if( cnf.use_preprocessing &&
-            V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0) {
+    if( cnf.preprocessing_to_use_mask != NoPrepr ) {
+        if( V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0) {
             DTKernelizer dtKernelizer(*V,cnf);
             VVI newV;
 
-            bool useSubgraphKernelization = true;
+            bool use_subgraph_kernelization = true;
 
-            if (useSubgraphKernelization) newV = dtKernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
+            if (use_subgraph_kernelization) newV = dtKernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
             else newV = dtKernelizer.getKernelizedGraph(); // soft kernelization - only dangling trees and paths
 
             if (newV.size() != V->size()) {
                 DepthTree dt((*V));
                 if (!newV.empty()) {
-                    DepthTreeCreatorLarge dtCL(newV, recDepth,cnf);
-                    dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
-                    dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-                    dtCL.USE_KERNELIZATION = USE_KERNELIZATION; // here it will always be true, since we are in kernelization section
-                    dtCL.USE_DEG3_KERNELIZATION = USE_DEG3_KERNELIZATION; // here it will always be true, since we are in kernelization section
-                    dtCL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION; // here it will always be true, since we are in kernelization section
+                    DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
+                    // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
+                    // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
+                    // dtCL.USE_KERNELIZATION = USE_KERNELIZATION; // here it will always be true, since we are in kernelization section
+                    // dtCL.USE_DEG3_KERNELIZATION = USE_DEG3_KERNELIZATION; // here it will always be true, since we are in kernelization section
+                    // dtCL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION; // here it will always be true, since we are in kernelization section
 
                     dt = dtCL.getDepthTree();
                     assert(dt.root >= 0 && dt.root < newV.size());
@@ -97,11 +95,11 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
                 DepthTree newDt(*V);
-                if (useSubgraphKernelization) newDt = dtKernelizer.dekernelizeSubgraphs(dt);
+                if (use_subgraph_kernelization) newDt = dtKernelizer.dekernelizeSubgraphs(dt);
                 else newDt = dtKernelizer.dekernelize(dt);
 
 
-                if (recDepth == 0 && newDt.height - dt.height > 0) {
+                if (rec_depth == 0 && newDt.height - dt.height > 0) {
                     cerr << "dt.height:    " << dt.height << endl;
                     cerr << "newDt.height: " << newDt.height << endl;
                     cerr << "height difference: " << newDt.height - dt.height << endl;
@@ -117,18 +115,19 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             }
 
 
-        } else if ( cnf.use_preprocessing && USE_DEG3_KERNELIZATION && V->size() >= cnf.min_graph_size_for_kernelization &&
-                    recDepth == 0 && GraphUtils::countNodesWithDegree(*V, 3, 3) > 0) {
+        } else if ( (cnf.preprocessing_to_use_mask & Prepr::IndSet3Prepr) && V->size() >= cnf.min_graph_size_for_kernelization &&
+                    rec_depth == 0 && GraphUtils::countNodesWithDegree(*V, 3, 3) > 0) {
             DTKernelizerDeg3 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
             cerr << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge with recDepth = 1" << endl;
-            DepthTreeCreatorLarge dtCL(newV, recDepth + 1,cnf);
-            dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
-            dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-            dtCL.USE_KERNELIZATION = USE_KERNELIZATION;
-            dtCL.USE_DEG3_KERNELIZATION = false;
-            dtCL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION;
+            DepthTreeCreatorLarge dtCL(newV, rec_depth + 1,cnf);
+            // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
+            // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
+            // dtCL.USE_KERNELIZATION = USE_KERNELIZATION;
+            // dtCL.USE_DEG3_KERNELIZATION = false;
+            // dtCL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION;
+            dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, Prepr::IndSet3Prepr);
 
             dt = dtCL.getDepthTree();
             dt = ker.dekernelize(dt);
@@ -140,17 +139,18 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             assert(dt.isCorrect());
 
             return dt;
-        } else if( USE_DEG4_KERNELIZATION && V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
+        } else if( (cnf.preprocessing_to_use_mask & Prepr::IndSet4Prepr) && V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
             DTKernelizerDeg4 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
             cerr << "Kernelized degree4 nodes" << endl;
-            DepthTreeCreatorLarge dtCL(newV, recDepth,cnf);
-            dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
-            dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-            dtCL.USE_KERNELIZATION = USE_KERNELIZATION;
-            dtCL.USE_DEG3_KERNELIZATION = false;
-            dtCL.USE_DEG4_KERNELIZATION = false;
+            DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
+            // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
+            // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
+            // dtCL.USE_KERNELIZATION = USE_KERNELIZATION;
+            // dtCL.USE_DEG3_KERNELIZATION = false;
+            // dtCL.USE_DEG4_KERNELIZATION = false;
+            dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, Prepr::IndSet3Prepr | Prepr::IndSet4Prepr);
 
             dt = dtCL.getDepthTree();
             dt = ker.dekernelize(dt);
@@ -198,23 +198,13 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     };
 
 
-    double DENSITY_THRESHOLD = 3;
-    bool isDenseGraph = (double) GraphUtils::countEdges(*V) / (double)V->size() > DENSITY_THRESHOLD;
 
 
 
-    if( SEPARATOR_CREATORS_MODE == RAND ){
-        if( rand()%3 ) SEPARATOR_CREATORS_MODE |= ART_POINTS_CREATOR;
-        if( rand()%3 ) SEPARATOR_CREATORS_MODE |= BFS_CREATOR;
-        if( rand()%3 ) SEPARATOR_CREATORS_MODE |= COMP_EXP_CREATOR;
-
-        if( SEPARATOR_CREATORS_MODE == 0 ) SEPARATOR_CREATORS_MODE |= COMP_EXP_CREATOR;
-    }
 
 
-
-    if( SEPARATOR_CREATORS_MODE & ART_POINTS_CREATOR ){ // ARTICULATION POINTS
-        if( recDepth == 0 ) cerr << "\tcreating art-points" << flush;
+    if( cnf.sep_cr_to_use_mask & SepCr::ArtPointCr ){ // ARTICULATION POINTS
+        if( rec_depth == 0 ) cerr << "\t creating art-points" << flush;
         ArtPointSeparatorCreator apCr(cnf);
         vector<Separator>  apSeps = apCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(apSeps) );
@@ -225,16 +215,16 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( SEPARATOR_CREATORS_MODE & BFS_CREATOR ){ // BFS
-        if( recDepth == 0 ) cerr << "\tcreating bfs" << flush;
+    if( cnf.sep_cr_to_use_mask & SepCr::BfsCr ){ // BFS
+        if( rec_depth == 0 ) cerr << "\t creating bfs" << flush;
         BFSSeparatorCreator sepCr(*V,cnf);
         vector<Separator>  bfsSeps = sepCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(bfsSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
     }
 
-    if( SEPARATOR_CREATORS_MODE & FLOW_CREATOR){ // FLOW
-        if( recDepth == 0 ) cerr << "\tcreating flow" << flush;
+    if( cnf.sep_cr_to_use_mask & SepCr::FlowCr){ // FLOW
+        if( rec_depth == 0 ) cerr << "\t creating flow" << flush;
         GreedyNodeEdgeMinimizer minimizer(cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
         minimizer.sepEval = &sepEval;
         FlowSeparatorCreator sepFl(cnf,&minimizer);
@@ -245,18 +235,18 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     }
 
 
-    if( SEPARATOR_CREATORS_MODE & COMP_EXP_CREATOR ){ // ARTICULATION POINTS
-        if( recDepth == 0 ) cerr << "\tcreating component expansion" << flush;
+    if( cnf.sep_cr_to_use_mask & SepCr::CompExpCr ){ // ARTICULATION POINTS
+        if( rec_depth == 0 ) cerr << "\t creating component expansion" << flush;
         ComponentExpansionSeparatorCreator ceCr( sepEval, cnf );
 
 
 
         int D1 = 1, D2 = 3;
 
-        if( recDepth <= D1 ){
+        if( rec_depth <= D1 ){
             ceCr.setOrdersToCreate( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER + ceCr.BFS_ORDER );
             ceCr.setOrdersToOptimize( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
-        }else if( recDepth <= D2 ){
+        }else if( rec_depth <= D2 ){
             ceCr.setOrdersToCreate( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
             ceCr.setOrdersToOptimize( ceCr.TIGHTEST_NODE_ORDER + ceCr.LEAST_NEIGHBORS_ORDER );
         }
@@ -268,13 +258,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     }
 
 
-    if( SEPARATOR_CREATORS_MODE & CLIQUE_CREATOR ){ // ARTICULATION POINTS
-        if( recDepth == 0 ) cerr << "\tcreating clique separators" << flush;
-        CliqueSeparatorCreator clqCr(*V,cnf);
-        vector<Separator>  ceSeps = clqCr.createSeparators(*V, cnf.sep_cr_max_sources);
-        bestSeps.insert( bestSeps.end(), ALL(ceSeps) );
-        for( auto& sp : bestSeps ) sp.updatePointers(*V);
-    }
+
 
 
 
@@ -283,8 +267,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     sortAndResizeSeparatorsForMinimization();
 
     // section for correction of found separators
-    if( MINIMIZE_SEPARATORS ) {
-        if (recDepth == 0) cerr << "\tminimizing best separators" << flush;
+    if( cnf.sep_minim_to_use_mask != NoMinim ) {
+        if (rec_depth == 0) cerr << "\t minimizing best separators" << flush;
         int BSS = bestSeps.size();
         for (int i = 0; i < BSS; i++) {
             bestSep = bestSeps[i];
@@ -301,28 +285,23 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     bestSep = bestSeps[0];
 
-    double FC_THR = 1'200;
-    bool hardGraphCondition = ( bestSep.stats.size > 100  && bestSep.stats.size < 1500  && GraphUtils::countEdges(*V) < 100'000);
-    if(  (SEPARATOR_CREATORS_MODE & FLOWCUTTER_CREATOR)
-         &&   (  (recDepth <= 7
-                 && V->size() > 20
-                 && GraphUtils::countEdges(*V) < 7 * V->size()
-                 && bestSeps[0].stats.size > 1
-                 && SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep ) < FC_THR
-              )
-         || hardGraphCondition )
-     ){
 
 
-        if( recDepth == 0 ){ cerr << "\tflow cutter" << flush;  }
+
+
+
+
+
+    int est_depth = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep );
+    bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & SepCr::FlowCutterCr ) && est_depth <= cnf.max_estimated_treedepth_for_flowcutter
+        && rec_depth <= cnf.max_rec_depth_for_flowcutter && bestSeps[0].stats.size > 1;
+    if( flowcutter_cond ){
+
+        if( rec_depth == 0 ){ cerr << "\tflow cutter" << flush;  }
 
         FlowCutter fc(sepEval, cnf);
 
-        int ITERATIONS = 8;
-
-        if( hardGraphCondition ){
-            ITERATIONS = 8;
-        }
+        int ITERATIONS = cnf.sep_cr_max_sources;
 
         auto seps = fc.createSeparators( *V, min( ITERATIONS, (int)V->size() ) );
 
@@ -342,30 +321,11 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( PARTITION_SEPARATORS ){
 
-        int SEPARATOR_PARTITION_THRESHOLD = 15;
-        if (bestSep.stats.size >= SEPARATOR_PARTITION_THRESHOLD) {
-
-            cerr << "bestSep before partitioning: " << bestSep << endl;
-
-            VI nodes = bestSep.nodes;
-            random_shuffle(ALL(nodes));
-            double factor = 0.5;
-            nodes.resize( nodes.size() * factor);
-            bestSep = Separator(*V, nodes);
-            bestSep.createSeparatorStats();
-
-            cerr << "bestSep after partitioning: " << bestSep << endl;
-
-        }
-    }
-
-
-    if( V->size() > 500 && recDepth <= 10 ){
+    if( V->size() > 500 && rec_depth <= 10 ){
         cerr << endl;
-        for(int i=0; i<recDepth; i++) cerr << "  ";
-        cerr << recDepth << ": ";
+        for(int i=0; i<rec_depth; i++) cerr << "  ";
+        cerr << rec_depth << ": ";
         DEBUG(bestSep);
 
         ENDL(1);
@@ -393,12 +353,12 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         for( VI & cmp : comps ){
             InducedGraph compGraph = GraphInducer::induce( *V, cmp );
 
-            DepthTreeCreatorLarge dtCrL( compGraph.V, recDepth+1, cnf );
-            dtCrL.setSeparatorCreatorsMode( SEPARATOR_CREATORS_MODE );
-            dtCrL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-            dtCrL.USE_KERNELIZATION = USE_KERNELIZATION;
-            dtCrL.USE_DEG3_KERNELIZATION = USE_DEG3_KERNELIZATION;
-            dtCrL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION;
+            DepthTreeCreatorLarge dtCrL( compGraph.V, rec_depth+1, cnf );
+            // dtCrL.setSeparatorCreatorsMode( SEPARATOR_CREATORS_MODE );
+            // dtCrL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
+            // dtCrL.USE_KERNELIZATION = USE_KERNELIZATION;
+            // dtCrL.USE_DEG3_KERNELIZATION = USE_DEG3_KERNELIZATION;
+            // dtCrL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION;
 
             DepthTree cmpTree = dtCrL.getDepthTree();
             cmpTree.V = nullptr;
@@ -428,7 +388,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     DepthTree dt = getBestDTForSeparator( bestSep );
 
     int sepsToCheck = cnf.max_best_seps_for_recursion;
-    sepsToCheck = (int)ceil( (double) cnf.max_best_seps_for_recursion / (1 << min(30,recDepth)) );
+    sepsToCheck = (int)ceil( (double) cnf.max_best_seps_for_recursion / (1 << min(30,rec_depth)) );
     sepsToCheck = min( sepsToCheck, (int)bestSeps.size() );
 
     for( int i=1; i<sepsToCheck; i++ ){
@@ -445,7 +405,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
     {
-        if( recDepth <= 3 ) DepthTreeIrrelevantNodeShifter::shiftIrrelevantNodes(dt);
+        if( rec_depth <= 3 ) DepthTreeIrrelevantNodeShifter::shiftIrrelevantNodes(dt);
         assert( dt.isCorrect() );
     }
 
@@ -511,7 +471,7 @@ void DepthTreeCreatorLarge::testBridgesAndArtPoints() {
 void DepthTreeCreatorLarge::testVCorARTPOINTKernelization() {
 
     bool useVCKernelization = false;
-    if( useVCKernelization && recDepth == 0 ){
+    if( useVCKernelization && rec_depth == 0 ){
         PartitionSVC vcCreator(*V);
         vcCreator.setSupressAllLogs(true); vcCreator.setMaxIterations( 200 ); vcCreator.setMaxRunTime(5'000);vcCreator.getSvcParams().alpha = 0.5;
         vcCreator.getSvcParams().iterationsPerSubgraph = 200;vcCreator.getSvcParams().setInitialSolutionForSubgraph = false;vcCreator.setTakeFirstBestSolution(false);
@@ -552,7 +512,7 @@ void DepthTreeCreatorLarge::testVCorARTPOINTKernelization() {
 
         GraphUtils::writeBasicGraphStatistics(g.V);
 
-        DepthTreeCreatorLarge dtCr(g.V,recDepth+1, cnf);
+        DepthTreeCreatorLarge dtCr(g.V,rec_depth+1, cnf);
         auto dt = dtCr.getDepthTree();
 
         cerr << "depth tree height of a VC-like kernelized graph: " << dt.height << endl;
@@ -561,7 +521,7 @@ void DepthTreeCreatorLarge::testVCorARTPOINTKernelization() {
 
 
     bool useArtPointKernelization = false;
-    if( useArtPointKernelization && recDepth <= 1 ){
+    if( useArtPointKernelization && rec_depth <= 1 ){
         ArtPointSeparatorCreator apCr(cnf);
         vector<Separator>  apSeps = apCr.createSeparators(*V, cnf.sep_cr_max_sources);
         apSeps[0].updatePointers(*V);
@@ -577,7 +537,7 @@ void DepthTreeCreatorLarge::testVCorARTPOINTKernelization() {
             VI cmp = comps[0];
             cerr << "largestComponent has size: " << cmp.size() << endl;
             InducedGraph g = GraphInducer::induce( *V, cmp );
-            DepthTreeCreatorLarge dtCr(g.V,recDepth+1, cnf);
+            DepthTreeCreatorLarge dtCr(g.V,rec_depth+1, cnf);
             auto dt = dtCr.getDepthTree();
 
             cerr << "dt.height of art-point kernelized largest component: " << dt.height << endl;
@@ -688,7 +648,7 @@ void DepthTreeCreatorLarge::test() {
             centrDt.height = centrDt.calculateHeight();
 
             DepthTreeCreatorLarge dtcl(V,0, cnf);
-            dtcl.USE_KERNELIZATION = false;
+            dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
             DepthTree dt = dtcl.getDepthTree();
 
             if( centrDt.height < dt.height ){

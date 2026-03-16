@@ -19,7 +19,7 @@ public:
 
     DepthTreeCreator(VVI & V, int recurrenceDepth, Config c) : cnf(c){
         this->V = &V;
-        recDepth = recurrenceDepth;
+        rec_depth = recurrenceDepth;
     }
 
     /**
@@ -42,7 +42,7 @@ public:
 
     VVI * V;
 
-    int recDepth;
+    int rec_depth;
     Config cnf;
 };
 

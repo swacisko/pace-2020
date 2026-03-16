@@ -252,7 +252,7 @@ bool DepthTreeCreatorExact::branch() {
 }
 
 bool DepthTreeCreatorExact::branch( VI sep ) {
-    if( recDepth <= 2 ){
+    if( rec_depth <= 2 ){
 //        logSpacing(); cerr << "Branching on " << sep << endl << endl;
         logSpacing(); cerr << "Branching on original nodes "; for(int p : sep) cerr << originalGraphRemapper[p] << " "; cerr << endl << endl;
     }
@@ -267,7 +267,7 @@ bool DepthTreeCreatorExact::branch( VI sep ) {
 
     for( int i=0; i<comps.size(); i++ ){
         subgraphs.push_back( GraphInducer::induce(*V,comps[i]) );
-        creators.push_back( DepthTreeCreatorExact( subgraphs.back().V, K - sep.size(), recDepth+1, cnf ) );
+        creators.push_back( DepthTreeCreatorExact( subgraphs.back().V, K - sep.size(), rec_depth+1, cnf ) );
         for( int j=0; j<comps[i].size(); j++ ) creators.back().originalGraphRemapper[j] = originalGraphRemapper[ subgraphs.back().nodes[j] ];
         if( creators.back().checkLowerBounds() == false ) return false;
     }
@@ -519,7 +519,7 @@ DepthTree DepthTreeCreatorExact::getDTCLLowerBound() {
         // dtcl.USE_KERNELIZATION = false;
         dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
         // dtcl.SEPARATOR_CREATORS_MODE = DepthTreeCreatorLarge::COMP_EXP_CREATOR;
-        dtcl.cnf.sep_cr_to_use_mask = SepCr::ComponentExpansionCr;
+        dtcl.cnf.sep_cr_to_use_mask = SepCr::CompExpCr;
 
         DepthTree dtree = dtcl.getDepthTree();
         dtrees.push_back(dtree);
