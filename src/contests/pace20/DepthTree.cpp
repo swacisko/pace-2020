@@ -6,11 +6,7 @@
 
 #include <contests/pace20/DepthTree.h>
 #include <datastructures/FAU.h>
-#include <graphs/GraphReader.h>
-#include "graphs/GraphUtils.h"
 #include "graphs/trees/LCABinaryLifting.h"
-
-#include "contests/pace20/DepthTree.h"
 
 DepthTree::DepthTree(VVI& V){
     this->V = &V;
@@ -26,7 +22,6 @@ DepthTree::DepthTree( VVI& V, int rt, int h, unordered_map<int,int>& parent ){
 
 bool DepthTree::isCorrect(){
 
-//    cerr << "LCABinaryLifting isCorrect() check" << endl;
     VVI stdStr = getStandardStructure();
 
     if( stdStr.size() != par.size() ){
@@ -39,15 +34,11 @@ bool DepthTree::isCorrect(){
         return false;
     }
 
-//    assert( stdStr.size() == par.size() );
-//    assert( V->size() == par.size() );
-
     LCABinaryLifting lcabl( stdStr, stdStr, root, [](int a, int b){ return a+b; },0 );
 
     for( int i=0; i <V->size(); i++ ){
         for( int d : (*V)[i] ){
             int lca = lcabl.lca( i,d );
-//            assert( lca == i || lca == d );
             if( lca != i && lca != d ) return false;
         }
     }
@@ -75,22 +66,14 @@ VVI DepthTree::getStandardStructure() {
 }
 
 pair<VVI, vector<DepthTree::StretchStructureNode> > DepthTree::getStretchStructure() {
-//    cerr << "Entering getStretchStructure()" << endl;
     VVI T = getStandardStructure();
-
-//    DEBUG(T);
 
     int N = T.size();
     FAU fau(N);
 
     function< void(int,int) > dfsUnion = [=,&N, &dfsUnion,&T,&fau](int num, int par){
-//        DEBUG(num);
-//        DEBUG(par);
         if( (num == par && T[num].size() == 1) || ( num != par && T[num].size() == 2 ) ){
-//            cerr << "unifying, num = " << num << "   par = " << par << endl;
-            for( int p : T[num] ){
-                if( p != par ) fau.Union(num,p);
-            }
+            for( int p : T[num] ) if( p != par ) fau.Union(num,p);
         }
         if( T[num].size() == 1 && num != par ) return; // num is a leaf
         for( int p : T[num] ){
@@ -99,8 +82,6 @@ pair<VVI, vector<DepthTree::StretchStructureNode> > DepthTree::getStretchStructu
     };
 
     dfsUnion(root,root);
-
-//    for(int i=0; i<N; i++) cerr << "fau.Find(" << i << ") = " << fau.Find(i) << endl;
 
 
     VVI strStr(N);
@@ -127,29 +108,14 @@ pair<VVI, vector<DepthTree::StretchStructureNode> > DepthTree::getStretchStructu
 
     dfsContract(root,root);
 
-//    DEBUG(strStr);
-//    DEBUG(nodesInStretch);
-
     int cnt = 0;
-    for( int i=0; i<N; i++ ){
-//        if( !strStr[i].empty() ){
-        if( !nodesInStretch[i].empty() ){
-            cnt++;
-        }
-    }
-
+    for( int i=0; i<N; i++ ) if( !nodesInStretch[i].empty() ) cnt++;
 
     VVI resStr(cnt);
     VVI resNodesInStretch(cnt);
 
-//    DEBUG(N);
-//    DEBUG(cnt);
-
     cnt = -1;
     function< void(int,int,int) > dfsRemap = [&N,&dfsRemap,&strStr,&cnt,&resStr, &nodesInStretch, &resNodesInStretch](int num, int par, int cntPar){
-//        DEBUG(num);
-//        DEBUG(par);
-//        ENDL(1);
         cnt++;
         resNodesInStretch[cnt] = nodesInStretch[num];
         if( num != par ){
@@ -165,21 +131,14 @@ pair<VVI, vector<DepthTree::StretchStructureNode> > DepthTree::getStretchStructu
 
     };
 
-//    DEBUG(root);
-
     bool remapped = false;
     for( int i=0; i<N; i++ ){
         for( int d : nodesInStretch[i] ){
             if( d == root ){
-//                cerr << "remapping" << endl;
                 dfsRemap( i,i,-1 );
             }
         }
     }
-
-//    DEBUG(resStr);
-//    DEBUG(resNodesInStretch);
-
 
 
     int n = resStr.size();
@@ -206,11 +165,6 @@ pair<VVI, vector<DepthTree::StretchStructureNode> > DepthTree::getStretchStructu
 
     dfsCreateData(0,0);
 
-//    DEBUG(resStr);
-//    DEBUG(data);
-
-//    exit(1);
-//    cerr << "Leaving getStretchStructure()" << endl;
     return { resStr, data };
 }
 
@@ -220,7 +174,8 @@ int DepthTree::calculateHeight() {
     VVI V = getStandardStructure();
     if( V.size() == 1 ) return 1;
 
-    function< int(int,int) > dfs = [=,&dfs,&V](int num, int par){
+    // function< int(int,int) > dfs = [=,&dfs,&V](int num, int par){
+    function< int(int,int) > dfs = [&](int num, int par){
         if( num != root && V[num].size() == 1 ) return 1;
 
         int M = 0;
@@ -274,9 +229,7 @@ void DepthTree::writeBalanceStructure(int DEPTH) {
     calc(0,0);
 
     function< void(int,int,int) > writeDfs = [&tree, &segments, &subHeight, &subSize, &writeDfs, &DEPTH](int num, int par, int depth){
-//        DEBUG(tree[num]);
         sort( ALL( tree[num] ), [&subHeight]( int a, int b ){ return subHeight[a] > subHeight[b]; } );
-//        DEBUG(tree[num]);
 
         if( depth <= DEPTH ) {
             for (int i = 0; i < depth-1; i++) cerr << "     ";
@@ -286,7 +239,6 @@ void DepthTree::writeBalanceStructure(int DEPTH) {
             for( int d : tree[num] ){
                 if( d != par ){
                     for( int i=0; i<depth; i++ ) cerr << "     ";
-//                                                   cerr << "-----";
                     cerr << "\t\t" << segments[d] << endl;
                 }
             }

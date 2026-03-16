@@ -104,7 +104,8 @@ bool DepthTreeCreatorExact::checkGraphClass() {
     { // clique with single nodes attached
         VI nodes(N);
         iota(ALL(nodes), 0);
-        sort(ALL(nodes),  [=](int a, int b) { return (*V)[a].size() < (*V)[b].size(); }); // sorting by non-descending degrees
+        // sort(ALL(nodes),  [=](int a, int b) { return (*V)[a].size() < (*V)[b].size(); }); // sorting by non-descending degrees
+        sort(ALL(nodes),  [&](int a, int b) { return (*V)[a].size() < (*V)[b].size(); }); // sorting by non-descending degrees
 
 //        DEBUG(*V);
 //        DEBUG(nodes);
@@ -129,27 +130,16 @@ bool DepthTreeCreatorExact::checkGraphClass() {
         int clqSize = N - isSize; // if there is given decomposition, then clique has size N - isSize
         if (isDegSum + (clqSize * (clqSize - 1)) / 2 == E) isCliqueWithNodesAttached = true;
 
-//        DEBUG(N); DEBUG(E);DEBUG(isSize);DEBUG(isDegSum);DEBUG(clqSize);
-
         if (isCliqueWithNodesAttached) {
-//            logSpacing(); cerr << "Graph is a clique with nodes attached" << endl;
-//            DEBUG(*V); DEBUG(clqSize);
 
             VI clq;
             for (int i = 0; i < N; i++) if (!inIs[i]) clq.push_back(i);
-            sort(ALL(clq), [=](int a, int b) { return (*V)[a].size() > (*V)[b].size(); }); // sorting clique by largest degree first, then attaching is to lowest node
-
-//            DEBUG(clq);
+            // sort(ALL(clq), [=](int a, int b) { return (*V)[a].size() > (*V)[b].size(); }); // sorting clique by largest degree first, then attaching is to lowest node
+            sort(ALL(clq), [&](int a, int b) { return (*V)[a].size() > (*V)[b].size(); }); // sorting clique by largest degree first, then attaching is to lowest node
 
             int H = (  ( (*V)[clq.back()].size() == clqSize-1 )   ? clqSize : clqSize+1  );
 
-//            DEBUG(H); DEBUG(K);
-
-            if( H > K ){
-//                logSpacing(); cerr << "clique with nodes attached fails" << endl;
-                bestTreeFound = false;
-                return true;
-            }
+            if( H > K ){ bestTreeFound = false; return true; }
 
             bestTree.root = clq[0];
             bestTree.height = H;
@@ -183,9 +173,6 @@ void DepthTreeCreatorExact::createArtPointsAndUpdateBranchingPoints() {
     VI diff;
     set_difference( ALL(branchingNodes), ALL(artPoints), back_inserter(diff) );
 
-//    DEBUG(branchingNodes);
-//    DEBUG(artPoints);
-
     VB inOldBrN(V->size(),false);
     for(int p : branchingNodes) inOldBrN[p] = true;
 
@@ -208,34 +195,27 @@ void DepthTreeCreatorExact::createArtPointsAndUpdateBranchingPoints() {
     branchingNodes = diff;
     logSpacing(); cerr << "branchingNodes.size(): " << branchingNodes.size() << "  "; DEBUG(branchingNodes);
 
-//    partition( ALL(artPoints), [&inOldBrN](int a){ return inOldBrN[a]; } );
-
-
-
     logSpacing(); DEBUG(artPoints);
 }
 
 
 bool DepthTreeCreatorExact::branch() {
-//    cerr << "Branching!" << endl;
-    auto fun = [=]( VI subset ){
+    // auto fun = [=]( VI subset ){
+    auto fun = [&]( VI subset ){
         long long mask = 0;
         for(int p : subset) mask |= (1ll << p);
         if( minimalSubsets[mask] == false ) return false;
 
         for(int& p : subset) p = branchingNodes[p];
-//        DEBUG(mask);
         if( branch(subset) ) return true;
         else return false;
     };
 
-//    DEBUG(artPoints)
     for( int ap : artPoints ){
         if( branch( {ap} ) ) return true;
     }
 
 
-//    DEBUG(branchingNodes);
     int B = branchingNodes.size();
     for( int k=1; k<=B; k++ ){
         VI subs(k);
@@ -248,15 +228,12 @@ bool DepthTreeCreatorExact::branch() {
 
 
     return false;
-
 }
 
 bool DepthTreeCreatorExact::branch( VI sep ) {
     if( rec_depth <= 2 ){
-//        logSpacing(); cerr << "Branching on " << sep << endl << endl;
         logSpacing(); cerr << "Branching on original nodes "; for(int p : sep) cerr << originalGraphRemapper[p] << " "; cerr << endl << endl;
     }
-//    return false;
 
     VVI comps = ConnectedComponents::getConnectedComponents(*V,sep);
     sort( ALL(comps), [](auto& v1, auto& v2){return v1.size() > v2.size();} );
@@ -317,15 +294,16 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
     minimalSubsets = VB( 1 + (1ll)<<B, true );
 
     // returns true if V \ subset is connected, false otherwise
-    auto checkSubsetForConnectivity = [=,&B]( VI subset ){
+    // auto checkSubsetForConnectivity = [=,&B]( VI subset ){
+    auto checkSubsetForConnectivity = [&]( VI subset ){
 
         for(int& p : subset) p += C;
         int cnt = 0;
         VB was(componentGraph.size(),false);
         VB inSubset = StandardUtils::toVB(componentGraph.size(),subset);
 
-        function< void(int) > dfs = [=,&dfs,&cnt,&was, &inSubset](int num){
-//            DEBUG(num);
+        // function< void(int) > dfs = [=,&dfs,&cnt,&was, &inSubset](int num){
+        function< void(int) > dfs = [&](int num){
             was[num] = true;
             cnt++;
             for( int d : componentGraph[num] ){
@@ -342,15 +320,10 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
             }
         }
 
-//        assert( cnt <= (int)(componentGraph.size() - subset.size()) );
         if( cnt > (int)(componentGraph.size() - subset.size()) ){
-            DEBUG(*V);
-            DEBUG(subset);
-            DEBUG(cnt);
+            DEBUG(*V); DEBUG(subset); DEBUG(cnt);
             cerr << "After removing from V subset " << subset << " graph is " << ( cnt == componentGraph.size() - subset.size() ? "" : "not" ) << " connected" << endl;
-            ENDL(1);
-            DEBUG(dtrees);
-
+            ENDL(1); DEBUG(dtrees);
             exit(1);
         }
 
@@ -361,41 +334,31 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
     long long testCnt = 1;
     minimalSubsets[0] = false;
 
-    function< void(int) > markAllSupermasks = [=,&markAllSupermasks, &B, &testCnt]( long long mask ){
+    // function< void(int) > markAllSupermasks = [=,&markAllSupermasks, &B, &testCnt]( long long mask ){
+    function< void(int) > markAllSupermasks = [&]( long long mask ){
         if( mask > ( 1ll << B ) || minimalSubsets[mask] == false ) return;
         minimalSubsets[mask] = false;
         testCnt++;
 
-//        cerr << "\tmarking subset as not minimal: "; for( int i=0; i<B; i++ ) if( mask & (1ll << i) ) cerr << branchingNodes[i];
-//        cerr << endl;
-
         for( int i=0; i <= B; i++ ) markAllSupermasks( mask | (1ll << i) );
     };
 
-    auto fun = [=,&checkSubsetForConnectivity,&B, &markAllSupermasks, &testCnt](VI subset){
-//        cerr << "in fun, subset = " << subset << endl;
+    // auto fun = [=,&checkSubsetForConnectivity,&B, &markAllSupermasks, &testCnt](VI subset){
+    auto fun = [&](VI subset){
         long long mask = 0;
         for(int p : subset) mask |= (1ll << p);
 
         if( minimalSubsets[mask] && checkSubsetForConnectivity(subset) == false ){
-
-//            for(int& p : subset) p = branchingNodes[p];
-//            cerr << "subset " << subset << " is minimal" << endl;
-
             for( int i=0; i<=B; i++ ) if( (mask & (1ll << i)) == 0 ) markAllSupermasks( mask | (1ll << i) );
         }else{
             if( minimalSubsets[mask] ) testCnt++;
             minimalSubsets[mask] = false;
-//            DEBUG(subset);
-//            for(int& p : subset) p = branchingNodes[p];
-//            cerr << "subset " << subset << " does not disconnect graph" << endl;
         }
     };
 
 
 
     for( int k=1; k<=B; k++ ){
-//        DEBUG(k);
         for( int i = 1; i < (1ll << B); i++ ){
             if( minimalSubsets[i] && __builtin_popcount(i) == k ){
                 VI subs;
@@ -405,17 +368,6 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
         }
     }
 
-
-//    for( int k = 1; k <= B; k++ ){
-//        DEBUG(k);
-//        processAllSubsets( B-1,k,fun );
-//    }
-
-
-
-
-//    DEBUG( (1ll << B) );
-//    DEBUG(testCnt);
     logSpacing(); cerr << "There are " << ( ( 1ll << B ) - testCnt ) << " minimal subsets to branch on" << endl;
 
 }
@@ -452,8 +404,6 @@ void DepthTreeCreatorExact::createComponentGraph() {
         }
     }
 
-//    DEBUG(C);
-//    DEBUG(componentGraph);
 
 }
 
@@ -463,8 +413,6 @@ void DepthTreeCreatorExact::createDominationGraph() {
 
 void DepthTreeCreatorExact::preprocessDegreeLowerBound() {
     if( degreeLowerBound.empty() ){
-
-//        cerr << "degreeLowerBound not testes yet!" << endl;
 
         int maxN = 505;
         degreeLowerBound = VVI(maxN);
@@ -485,14 +433,6 @@ void DepthTreeCreatorExact::preprocessDegreeLowerBound() {
             }
         }
 
-//        cerr << "initial values of degreeLowerBound" << endl;
-//        for( int i=0; i<=16; i++ ){
-//            cerr << i << ": ";
-//            for( int k=0; k<degreeLowerBound[i].size(); k++ ){
-//                cerr << degreeLowerBound[i][k] << " ";
-//            }
-//            cerr << endl;
-//        }
     }
 }
 
@@ -583,24 +523,18 @@ bool DepthTreeCreatorExact::getPathLowerBound() {
 
         fill(ALL(was),false);
         for(int i=0; i<N; i++){
-            random_shuffle(ALL(V2[i]));
+            // random_shuffle(ALL(V2[i]));
+            IntGenerator rnd;
+            StandardUtils::shuffle(V2[i],rnd);
             tree[i].clear();
         }
 
         int a = rand() % N;
         dfs(a);
 
-//        DEBUG(tree);
         int diam = getDiameter() + 1;
-//        DEBUG(diam);
-
         int lB = (int)ceil( log2(diam+1) );
-//        DEBUG(lB);
-
-        if( lB > K ){
-//            DEBUG(diam);
-            return false;
-        }
+        if( lB > K ) return false;
     }
 
     return true;
@@ -696,7 +630,6 @@ void DepthTreeCreatorExact::createBranchingNodes() {
             if( tree[0].size() > 0 ) sepNodes.insert( ALL( data[ tree[0][0] ].sepNodes ) );
         }
 
-//        if(++cnt == 2) break;
     }
 
 
@@ -719,7 +652,6 @@ void DepthTreeCreatorExact::createBranchingNodes() {
             if (branchingNodes.size() >= THR) break;
             else branchingNodes.push_back(p);
         }
-
     }
 
 

@@ -5,8 +5,10 @@
 */
 
 #include "graphs/components/ConnectedComponents.h"
-#include "contests/pace20/Pace20Params.h"
 #include "contests/pace20/ComponentTreeMerger.h"
+
+#include "IntGenerator.h"
+#include "StandardUtils.h"
 
 ComponentTreeMerger::ComponentTreeMerger(VVI &V, Separator &sep, VVI &comps, vector<DepthTree> &subtrees, Config c) {
 
@@ -66,7 +68,8 @@ VI ComponentTreeMerger::getMergeOrder() {
         case LARGEST_FIRST:{
             // sorting trees bu height. If there is more than one tree with the same height, we sort them by greatest number of neighbors in separator sep
             // sorting only by height is enough to ensure optimality of DepthTree height, but we additionally sort it (in case of equal heights) by number of neighbors in separator
-            sort( ALL(bestOrder), [=]( int a, int b ){
+            // sort( ALL(bestOrder), [=]( int a, int b ){
+            sort( ALL(bestOrder), [&]( int a, int b ){
                 if( (*subtrees)[ a - sep->nodes.size() ].height != (*subtrees)[ b - sep->nodes.size() ].height ){
                     return (*subtrees)[ a - sep->nodes.size() ].height > (*subtrees)[ b - sep->nodes.size() ].height;
                 }else{
@@ -75,7 +78,8 @@ VI ComponentTreeMerger::getMergeOrder() {
             } );
 
             VI temp = bestOrder;
-            sort( ALL(temp), [=]( int a, int b ){
+            // sort( ALL(temp), [=]( int a, int b ){
+            sort( ALL(temp), [&]( int a, int b ){
                     return (*subtrees)[ a - sep->nodes.size() ].height + sepGraph[a].size()   >   (*subtrees)[ b - sep->nodes.size() ].height + sepGraph[b].size();
             } );
 
@@ -91,7 +95,9 @@ VI ComponentTreeMerger::getMergeOrder() {
 
             VI order = bestOrder;
             for( int r = 0; r < RANDOM_REPS; r++ ){
-                random_shuffle(ALL(order));
+                // random_shuffle(ALL(order));
+                IntGenerator rnd;
+                StandardUtils::shuffle(order,rnd);
                 int newHeight = getDTHeightForOrder( order );
                 if( newHeight < bestHeight ){
                     bestHeight = newHeight;
@@ -135,7 +141,8 @@ DepthTree ComponentTreeMerger::mergeForOrder(VI mergeOrder) {
     int prev = -1;
 
 
-    auto it = max_element( ALL(mergeOrder), [=]( int a, int b ) {
+    // auto it = max_element( ALL(mergeOrder), [=]( int a, int b ) {
+    auto it = max_element( ALL(mergeOrder), [&]( int a, int b ) {
         return (*subtrees)[a-sep->nodes.size()].par.size() < (*subtrees)[b-sep->nodes.size()].par.size();
     } );
 

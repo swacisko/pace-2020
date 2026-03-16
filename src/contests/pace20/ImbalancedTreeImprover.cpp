@@ -37,7 +37,8 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
     };
 
 
-    function< void(int,int) > getNodesToClose = [=,&tree,&T,&data, &nodesToClose, &getNodesToClose, &secondHighest, &nodesInSmallerParts,&rootsInSmallerParts]
+    // function< void(int,int) > getNodesToClose = [=,&tree,&T,&data, &nodesToClose, &getNodesToClose, &secondHighest, &nodesInSmallerParts,&rootsInSmallerParts]
+    function< void(int,int) > getNodesToClose = [&]
             (int num, int par){
         if( tree[num].size() <= 1 ) return; // if in a leaf or there is only one stretch (e.g in a clique)
         VI sons;
@@ -135,7 +136,8 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
 
 bool ImbalancedTreeImprover::isImbalanced(DepthTree &dt) {
     auto strStr = dt.getStretchStructure();
-
+    assert(false && "Function not implemented yet");
+    return false;
 }
 
 void ImbalancedTreeImprover::test() {

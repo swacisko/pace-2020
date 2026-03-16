@@ -18,16 +18,11 @@
 #include "graphs/vertex_cover/kernelization/KernelizerVC.h"
 #include "utils/RandomNumberGenerators.h"
 #include "utils/StandardUtils.h"
-//#include "../../GraphInducer.cpp"
-//#include "../SolutionVC.cpp"
-
-
 
 
 
 SwapVC::SwapVC(VVI &V) : StochasticApproximation(), candidatesChecked(0) {
     this->V = V;
-//    nodeWeights = VD( V.size(),1 );
     findMinWeighedVC = false;
 }
 
@@ -38,15 +33,11 @@ SwapVC::~SwapVC() {
 
 Solution *SwapVC::getInitialSolution() {
    VI vc = VCUtils::getRandomMinimalVC(V);
-//   VI bullsToChange = VCUtils::getVCGreedyMaxDegree(V);
-//   VI bullsToChange = VCUtils::getVCGreedyMaxItarativeDegree(V);
    SolutionVC * sol = new SolutionVC( vc );
    newBestSolutionFound();
 
 
     if( !supressAllLogs ) cerr << "initial VC of size: " << sol->size() << endl;
-//    exit(1);
-
 
    return sol;
 }
@@ -61,19 +52,10 @@ void SwapVC::makeInitialWork() {
 
     S = GraphUtils::getComplimentaryNodes( V, X );
 
-
-//    if( GraphUtils::isMaximalIndependentSet( V, S ) == false ){
-//        cerr << "S is not maximal!" << endl;
-//        exit(1);
-//    }else cerr << "S is maximal" << endl;
-
-
     sort( ALL(X) );
     sort( ALL(S) );
 
     if( !supressAllLogs ) cerr << "initial VC of size: " << X.size() << endl;
-
-//   cerr << "S = " << S << endl << "X = " << X << endl;
 }
 
 void SwapVC::nextIteration() {
@@ -88,14 +70,12 @@ void SwapVC::nextIteration() {
         nextIterationWithColoring();
     }
 
-
     if( params.useFluctuatingDegreesMaximization ){
         if( ( getIterationsDone() + 1 )  % max(  (int)( maxIterations / ( (LL)params.fluctuatingDegreesMaximizationFrequency + 1 ) ), 1 )  == 0 ){
             params.minimizeWeightOfMIS = !params.minimizeWeightOfMIS;
             cerr << endl << " SWAPPING DEGREE: MINIMIZATION: " << params.minimizeWeightOfMIS << endl;
         }
     }
-
 
     int vcWeight = 0;
     string vcWeightString = "";
@@ -110,14 +90,10 @@ void SwapVC::nextIteration() {
              << "   VC.size() = " << X.size() << vcWeightString << endl;
     }
 
-
-
-//    TimeMeasurer::startMeasurement("VC_check");
     if( VCUtils::isVertexCover( V,X ) == false ){ // checking whether it really is a vertex cover.
         cerr << "FAILURE!! X is not a vertex cover!" << endl;
         exit(1);
     }
-//    TimeMeasurer::stopMeasurement("VC_check");
 }
 
 bool SwapVC::updateBestSolution(Solution *sol) {
@@ -144,18 +120,11 @@ VI SwapVC::findSwapCandidate() {
 
     VI matching = matcher.getMaximumMatchingInBipartition(SIxInduced.V, bipartition, true);
 
-//    VPII matchingEdges = matcher.convertToPairs( matching );
-//    cerr << "Maximum matching found in SIx: " << matchingEdges << endl;
-
     VI hallViolator;
     if( findMinWeighedVC == false ) hallViolator = matcher.getMaximumHallViolator( SIxInduced.V, bipartition, matching );
 
     if( !hallViolator.empty() ){
         if( !supressAllLogs ) cerr << "------------->  HALL VIOLATOR found! |hallViolator| = " << hallViolator.size() << endl << endl;
-//        cerr << "S:" << endl << hallViolator << endl;
-//        VI neighborhood = GraphUtils::getNeighborhood( SIxInduced.V, hallViolator,true );
-//        cerr << "N(S):" << endl << neighborhood << endl;
-
         return hallViolator;
 
     }else{
@@ -171,14 +140,6 @@ VI SwapVC::findSwapCandidate() {
         if( !equalizer.empty() ){
             VI neighborhood = GraphUtils::getNeighborhood( SIxInduced.V, equalizer );
             if( !supressAllLogs ) cerr << "-----------------> Found EQUALIZER!  |equalizer| = " << equalizer.size() << endl << endl;
-
-//            if( neighborhood.size() > equalizer.size() ){
-//                cerr << "ERROR, equalizer = " << equalizer << endl << "neighborhood = " << neighborhood << endl;
-//                for( int d : neighborhood ){
-//                    cerr << "matching[" << d << "] = " << matching[d] << endl;
-//                }
-//                exit(1);
-//            }
 
             return equalizer;
         }
@@ -235,8 +196,6 @@ void SwapVC::nextIterationWithColoring() {
 
     if( currentSolution != nullptr ) delete currentSolution;
     currentSolution = new SolutionVC( X );
-
-
 }
 
 
@@ -255,38 +214,9 @@ void SwapVC::createInducedX() {
 
 void SwapVC::applySwapCandidate(VI swapCandidate, bool idsInSIx, VVI &SIxStructure) {
 
-
-//    cerr << "Before applying" << endl;
-//    if( VCUtils::isVertexCover( V,X ) == false ){ // checking whether it really is a vertex cover.
-//        cerr << "FAILURE!! X is not a vertex cover!" << endl;
-//        exit(1);
-//    }
-//    if( !VCUtils::isIndependentSet( V,swapCandidate ) ){
-//        ERROR(swapCandidate, "NOT A MIS!");
-//    }
-
-//    DEBUG(swapCandidate);
-//    DEBUG(SIxStructure);
-//    DEBUG(S);
-//    DEBUG(X);
-////    DEBUG(Ix);
-//    ENDL(2);
-
-//    for( int p : swapCandidate ){
-//        if( SIxStructure[p].size() != GraphUtils::getNeighborhoodOfAInB( V, swapCandidate,S ).size() ){
-//            DEBUG(p);
-//            DEBUG( SIxStructure[p].size() );
-//            DEBUG( GraphUtils::getNeighborhoodOfAInB( V, swapCandidate,S ).size() );
-//            ERROR("", "SHOULD BE THE SAME!" );
-//        }
-//    }
-
-
     VI neighborhood;
     if( params.useSmallHallViolatorFinder ) neighborhood = GraphUtils::getNeighborhoodOfAInB( V, swapCandidate,S,false );
     else neighborhood = GraphUtils::getNeighborhood( SIxStructure, swapCandidate ); // this should be neighborhood of swapCandidate that belongs to S
-
-
 
 
     if( idsInSIx ){
@@ -294,41 +224,8 @@ void SwapVC::applySwapCandidate(VI swapCandidate, bool idsInSIx, VVI &SIxStructu
         for(int & p : swapCandidate) p = SIxInduced.nodes[p];
     }
 
-
-
     sort( ALL(swapCandidate) );
     sort( ALL(neighborhood) );
-
-
-
-//    VI neigh2 = GraphUtils::getNeighborhoodOfAInB( V, swapCandidate,S,false );
-//    sort( ALL(neigh2) );
-//    VI sym_diff;
-//    set_symmetric_difference( ALL(neighborhood), ALL(neigh2), back_inserter( sym_diff ) );
-//    if( sym_diff.size() > 0 ){
-//        DEBUG(neighborhood);
-//        DEBUG(neigh2);
-////        ERROR(sym_diff, "NEIGHBORHOODS SHOULD BE EQUAL!");
-//    }
-
-//    VI inters;
-//    set_intersection( ALL(swapCandidate), ALL(neighborhood), inserter( inters, inters.begin() ) );
-//    if( inters.size() > 0 ){
-//        ERROR( inters, " INTERSECTION OF swapCandidate and neighborhood should be empty!" );
-//    }
-
-
-//    VI Sdiff(S.size());
-//    Sdiff.resize( set_difference( ALL(S), ALL(neighborhood), Sdiff.begin() ) - Sdiff.begin() );
-//
-//    VI Xdiff(X.size());
-//    Xdiff.resize( set_difference( ALL(X), ALL(swapCandidate), Xdiff.begin() ) - Xdiff.begin() );
-//
-//    S.resize( Sdiff.size() + swapCandidate.size() );
-//    merge( ALL(Sdiff), ALL(swapCandidate), S.begin() );
-//
-//    X.resize( Xdiff.size() + neighborhood.size() );
-//    merge( ALL(Xdiff), ALL(neighborhood), X.begin() );
 
 
     VI Sdiff;
@@ -343,27 +240,6 @@ void SwapVC::applySwapCandidate(VI swapCandidate, bool idsInSIx, VVI &SIxStructu
     X.clear();
     merge( ALL(Xdiff), ALL(neighborhood), inserter( X, X.begin() ) );
 
-
-
-
-//    cerr << "After applying" << endl;
-//
-//    if( !VCUtils::isIndependentSet( V,S ) ){
-//        ERROR(S, "NOT A MIS!");
-//    }
-//
-//    if( VCUtils::isVertexCover( V,X ) == false ){ // checking whether it really is a vertex cover.
-//        cerr << "FAIL AFTER APPLYING!!! X is not a vertex cover!" << endl;
-//        exit(1);
-//    }
-
-
-//    DEBUG(swapCandidate);
-//    DEBUG(SIxStructure);
-//    DEBUG(S);
-////    DEBUG(Ix);
-//    DEBUG(X);
-//    ENDL(2);
 }
 
 VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &nodeDegrees, VI mapper) {
@@ -391,14 +267,7 @@ VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &
         }
 
         if( !equalizer.empty() ) return equalizer;
-
-        // if( GraphUtils::isMaximalIndependentSet( V, S ) == false ){
-        //     cerr << "S is not maximal!" << endl;
-        //     exit(1);
-        // }
     }
-
-
 
 
     VI removeNodes;
@@ -416,9 +285,7 @@ VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &
         }
 
         if( findMinWeighedVC && inS.count( ( mapper.empty() )? i : mapper[i] ) > 0 && matching[i] == -1 && structure[i].size() > 0 ) nodesInNeighGraph.push_back(i);
-
     }
-
 
     VVI neighGraph( structure.size() ); // this is a neigh graph that will be used to create strongly-connected-component graph
 
@@ -439,19 +306,12 @@ VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &
     }
 
 
-//    DEBUG(neighGraph);
-//    DEBUG(structure);
-//    DEBUG(S);
-//    DEBUG(matching);
-
     GraphInducer inducer;
     InducedGraph neighGraphInduced = inducer.induce( neighGraph, nodesInNeighGraph );
 
 
     StronglyConnectedComponents sccCreator( neighGraphInduced.V );
     VVI sccGraph = sccCreator.getStronglyConnectedComponentGraph();
-
-//    DEBUG(sccGraph);
 
     VVI components = sccCreator.getComponents(); // components is the vector containing stronlgy connected components but with ids in structure
     for( VI & C : components ){
@@ -464,9 +324,6 @@ VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &
     //******************************************  NOW CHOOSING SET EQUALIZER MAXIMIZING THE ASSIGNED WEIGHTS.
     TopoSort sorter( sccGraph );
     VI topologicalOrder = sorter.sortTopologically();
-
-
-
 
 
     double maxWeight = -(double)Constants::INF;
@@ -593,9 +450,7 @@ VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &
                 equalizer.insert( equalizer.end(), ALL(components[c]) );
             }
             sccEqualizerComponents.insert( sccEqualizerComponents.end(), ALL(neigh) );
-
         }
-
     }
 
     if( findMinWeighedVC && params.useRandomEqualizerSwaps == false && maxWeight <= 0 ) equalizer.clear();
@@ -639,12 +494,10 @@ VI SwapVC::findHallEqualizer(VVI &structure, VI &matching, VB &bipartition, VI &
 
 
     if( findMinWeighedVC == false && neighborhood.size() != equalizer.size() ){
-//        cerr << "ERROR, equalizer = " << equalizer << endl << "neighborhood = " << neighborhood << endl;
         cerr << "ERROR!" << endl;
         DEBUG(equalizer.size());
         DEBUG(neighborhood.size());
         ENDL(1);
-//        exit(1);
     }
 
     return equalizer;
@@ -695,7 +548,6 @@ VI SwapVC::getNodesToRemoveFromEqualizerGraph(VVI &structure, VB &bipartition, V
         }
     }
 
-
     for(int i=0; i<neigh.size(); i++){
         int p = neigh[i];
         if( bipartition[p] == true ){
@@ -706,13 +558,11 @@ VI SwapVC::getNodesToRemoveFromEqualizerGraph(VVI &structure, VB &bipartition, V
                     was[d] = true;
                 }
             }
-
         }else{
             int d = matching[p];
             neigh.push_back(d);
             was[d] = true;
         }
-
     }
 
     VI nodesInX;
@@ -743,33 +593,19 @@ void SwapVC::nextIterationWithPermutingMis() {
 
     VI fillOrder = X;
 
-    random_shuffle(ALL(fillOrder));
+    IntGenerator rnd;
+    StandardUtils::shuffle(fillOrder,rnd);
     VI score( V.size(),0 );
 
     // HERE I MAKE score[i] = vertex_cover_support[i]
     // in order to make Ix contain nodes with possibly lowest VCS values, i should make negative score or reverse the table fill order after sorting
     UniformIntGenerator gen(0, Constants::INF);
     for( int p : X ){
-//        score[p] = gen.rand() % (  1 + iterationsDone - lastTimeVisit[p] );
-//        score[p] = gen.rand() % ( (int)ceil( 1 + sqrt( iterationsDone - lastTimeVisit[p] ) ) );
-//        score[p] = gen.rand() % ( (int)ceil( 1 + log ( iterationsDone - lastTimeVisit[p] ) ) );
-
         score[p] = iterationsDone - lastTimeVisit[p] + gen.rand() % (  1 + iterationsDone - lastTimeVisit[p] );
-
-//        score[p] = iterationsDone - lastTimeVisit[p];
-//        score[p] = sqrt( iterationsDone - lastTimeVisit[p] );
-//        score[p] = log( iterationsDone - lastTimeVisit[p] );
-
-//        score[p] -= V[p].size();
         for( int d : V[p] ) score[p] += V[d].size();
     }
 
     sort( ALL(fillOrder),  [&score](int a, int b){ return score[a] > score[b]; } ); // filling nodes, starting with that of greatest score.
-//    reverse( ALL(fillOrder) );
-
-//    if( !supressAllLogs ){
-//        for( int i=0; i<fillOrder.size(); i++ ) cerr << score[ fillOrder[i] ] << " "; cerr << endl;
-//    }
 
     Ix = VCUtils::fillRandomToMaximalIS( V,fillOrder, VI() );
 
@@ -808,25 +644,18 @@ void SwapVC::nextIterationWithPermutingMis() {
     candidatesChecked++; // this is only for statistics to compare two nextIteration methods
 
 
-//    DEBUG(Ix);
-//    DEBUG(SIxStructure);
 
     //********************* HERE I CHECK WHETHER THERE IS A HALL VIOLATOR in the first found randomly set Ix. If so, then i apply it and do not proceed to swapping
     VI swapCandidate;
     if( params.useSmallHallViolatorFinder && (iterationsDone & 1) ){
         SmallHallViolatorFinder finder( V,S );
-//        bool useEqualizers = true;
         swapCandidate = finder.findSwapCandidate( params.smallHallViolatorMaxDegree, params.useSmallHallViolatorEqualizers );
-
-//        cerr << endl << "RETURNED!!" << endl;
 
         if( !swapCandidate.empty() && !supressAllLogs ) cerr << "FOUND SMALL HALL VIOLATOR / EQUALIZER of size " << swapCandidate.size() << endl;
 
         if( !VCUtils::isIndependentSet( V,swapCandidate ) ){
             ERROR( swapCandidate, "NOT A MIS IN V!" );
         }
-//        DEBUG( swapCandidate );
-//        ERROR(swapCandidate, "swap candidate in SwapVC found");
     }else{
         matching = matcher.getMaximumMatchingInBipartition(SIxStructure, bipartition, true);
         swapCandidate = findSwapCandidatePermutingMIS(SIxStructure, matcher, matching, bipartition, addedNodes);
@@ -834,9 +663,7 @@ void SwapVC::nextIterationWithPermutingMis() {
 
 
     VI perm = X; // set of elements in X in random order
-    IntGenerator rnd;
     StandardUtils::shuffle(perm, rnd );
-    // random_shuffle(ALL(perm));
 
     if( !swapCandidate.empty() ){
         Ix.clear();
@@ -856,8 +683,6 @@ void SwapVC::nextIterationWithPermutingMis() {
             modifyDataAfterApplyingSwapCandidate( SIxStructure,swapCandidate,inIx,inS,degreeInIx,matching,bipartition );
             perm = X;
             StandardUtils::shuffle(perm, rnd );
-            // random_shuffle(ALL(perm));
-
         }
     }
 
@@ -911,14 +736,11 @@ void SwapVC::nextIterationWithPermutingMis() {
             if( !inS[d] ) degreeInIx[d]++;
         }
 
-
         fillIxToMIS( SIxStructure,removedNodes,addedNodes,matching,degreeInIx,inS,inIx,bipartition,p );
-
 
         // NOW Ix should be a maximal independent set (though the structure in vector Ix is not changed, it is in inIx stored).
 
         VI swapCandidate = findSwapCandidatePermutingMIS(SIxStructure, matcher, matching, bipartition, addedNodes);
-
 
         if( !swapCandidate.empty() ){
             Ix.clear();
@@ -928,38 +750,26 @@ void SwapVC::nextIterationWithPermutingMis() {
 
             applySwapCandidate(swapCandidate, false, SIxStructure);
 
-
-
             if( params.useLocalIterations == false ){
                 break;
             }else {
-
                   modifyDataAfterApplyingSwapCandidate( SIxStructure,swapCandidate,inIx,inS,degreeInIx,matching,bipartition );
                   perm = X;
-                  random_shuffle(ALL(perm));
+                  StandardUtils::shuffle(perm, rnd );
 
                   if( startNextLocalIteration( perm,i,localIterations ) ) continue;
                   else break;
-
-
             }
-
         }
 
         if( params.useLocalIterations ) {
-
             if( startNextLocalIteration( perm,i,localIterations ) ) continue;
             else break;
-
         }
-
-
-
     }
 
     if( currentSolution != nullptr ) delete currentSolution;
     currentSolution = new SolutionVC( X );
-
 }
 
 bool SwapVC::startNextLocalIteration(VI &perm, int &i, int &localIterations) {
@@ -968,7 +778,9 @@ bool SwapVC::startNextLocalIteration(VI &perm, int &i, int &localIterations) {
             cerr << "   local iterations = " << localIterations << "   perm-mis-local   perm.size() = " << perm.size() << "   candidates checked: "
                  << candidatesChecked << "   deg(S): " << getSumOfDegreesOfNodesInS() << "   VC.size(): " << X.size() << endl;
         }
-        random_shuffle(ALL(perm));
+        // random_shuffle(ALL(perm));
+        IntGenerator rnd;
+        StandardUtils::shuffle(perm,rnd);
         i = -1;
         localIterations++;
         if( localIterations >= getMaxIterations() || runTimeExceeded() ){
@@ -997,19 +809,6 @@ VI SwapVC::findSwapCandidatePermutingMIS(VVI &SIxStructure, MaxMatchBipartite &m
         }
     }
 
-    // this here is asymptotically faster, but for just a few nodes added it is probably slower than the dfs version
-    /*VVI augmentingPaths;
-    while( true ){
-        augmentingPaths = matcher.getMaximalSetOfDisjointAugmentingPaths( SIxStructure,bipartition, matching );
-        if( augmentingPaths.empty() ) break;
-        else{
-            for( VI & path : augmentingPaths ) matcher.applyAugmentingPath( matching, path );
-        }
-    }*/
-
-
-
-
     VI hallViolator;
     if( findMinWeighedVC == false ) hallViolator  = matcher.getMaximumHallViolator( SIxStructure, bipartition, matching );
 
@@ -1034,10 +833,6 @@ VI SwapVC::findSwapCandidatePermutingMIS(VVI &SIxStructure, MaxMatchBipartite &m
         if( !equalizer.empty() ){
             VI neighborhood = GraphUtils::getNeighborhood( SIxStructure, equalizer );
             if( !supressAllLogs ) cerr << "-----------------> Found EQUALIZER!  |equalizer| = " << equalizer.size() << endl << endl;
-//            DEBUG(SIxStructure);
-//            DEBUG(matching);
-//            DEBUG(equalizer);
-
 
             return equalizer;
         }
@@ -1065,9 +860,7 @@ VI SwapVC::moveNodeToSIxStructure(VVI &SIxStructure, int v, VI &degreeInIx, VB &
                 }
             }
 
-
             SIxStructure[d].clear();
-
         }
     }
 
@@ -1105,7 +898,6 @@ void SwapVC::modifyDataAfterApplyingSwapCandidate(VVI &SIxStructure, VI &swapCan
         inIx[d] = false;
     }
 
-
     //  CHANGING degreeInIx values for neighbors of removed nodes - here removed are all from swapCandidate
     VI removedNodes = swapCandidate;
     for( int d : removedNodes ){
@@ -1116,16 +908,13 @@ void SwapVC::modifyDataAfterApplyingSwapCandidate(VVI &SIxStructure, VI &swapCan
         }
     }
 
-
     // CHANGING SIxStructure
     VI neighborhoodT = GraphUtils::getNeighborhood( SIxStructure, swapCandidate ); // this is the neighborhood of T in S, where T is just swapCandidate (but shorter name).   N(T) \cup S
     VI neighborhoodNT = GraphUtils::getNeighborhood( SIxStructure, neighborhoodT ); // and this is N( N(T) \cup S )
 
-
     // I FILL Ix to random MIS
     VI addedNodes;
     fillIxToMIS( SIxStructure, removedNodes, addedNodes,matching,degreeInIx,inS,inIx,bipartition );
-
 
     // FINALLY I EXTEND matching to the matching saturating Ix.
     MaxMatchBipartite matcher;
@@ -1211,14 +1000,6 @@ void SwapVC::run() {
 
         if( !supressAllLogs ) cerr << "Found kernel of size " << kernel.first.size() << " out of altogether " << V.size() << " nodes " << flush;
 
-
-
-//        cerr << "Found kernel of size " << kernel.first.size() << " out of altogether " << V.size() << " nodes " << flush;
-
-//        for( int d : kernel.first ) GraphUtils::removeNodeFromGraph( V,d );
-
-//        cerr << "\tThere are " << GraphUtils::countNodesWithDegree(V,1,V.size()) << " nonisolated vertices after kernelization" << endl;
-
         VI nodes;
         for( int i=0; i<V.size(); i++ ){
             if( V[i].size() >= 1 ) nodes.push_back(i);
@@ -1226,7 +1007,6 @@ void SwapVC::run() {
 
         if( !supressAllLogs ) cerr << "    Subgraph is now induced by " << nodes.size() << " nodes" << endl;
 
-//        DEBUG(nodes.size());
         if( nodes.empty() ){
             currentSolution = new SolutionVC( kernel.first );
             newBestSolutionFound();
@@ -1237,22 +1017,10 @@ void SwapVC::run() {
 
 
 
-//        DEBUG(V.size());
-//        DEBUG(nodes.size());
-        // random_shuffle(ALL(nodes));
         IntGenerator rnd;
         StandardUtils::shuffle(nodes, rnd );
         kernelizedV = inducer.induce(V,nodes);
 
-
-
-//        DEBUG(kernelizedV.perm.size());
-//        DEBUG(kernelizedV.V);
-
-//        if( currentSolution != nullptr ){
-//            delete currentSolution;
-//            currentSolution = nullptr;
-//        }
 
         if( currentSolution != nullptr ){
             VI vc =  ( (SolutionVC*)currentSolution )->getVC();
@@ -1260,38 +1028,21 @@ void SwapVC::run() {
             sort(ALL(vc));
             sort(ALL(kernel.first));
 
-//            DEBUG(bullsToChange.size());
-//            DEBUG(bullsToChange);
-
             VI vc2;
-
-//            DEBUG(vc2.size());
-//            DEBUG(vc2);
 
             for( int d : vc ){
                 if( kernelizedV.perm.find(d) != kernelizedV.perm.end() ) vc2.push_back( kernelizedV.perm[d] );
             }
-
-//            DEBUG(vc2.size());
-//            DEBUG(vc2);
-
-//            DEBUG(kernelizedV.perm);
-//            DEBUG(kernelizedV.perm.size());
 
             delete currentSolution;
             currentSolution = new SolutionVC(vc2);
             updateBestSolution(currentSolution);
         }
 
-//        DEBUG(kernelizedV.V);
         V = kernelizedV.V;
     }
 
-//    if( !supressAllLogs )  cerr << "BEFORE RUN" << endl << V << endl;
-//    setV(V);
     if( !V.empty() ) StochasticApproximation::run();
-
-//    if( !supressAllLogs )  cerr << "AFTER RUN" << endl;
 
     if( params.useKernelization ){
         V = oldV;

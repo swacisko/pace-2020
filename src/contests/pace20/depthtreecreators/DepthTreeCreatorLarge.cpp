@@ -11,24 +11,16 @@
 #include <contests/pace20/separatorcreators/FlowSeparatorCreator.h>
 #include <contests/pace20/separatorcreators/ComponentExpansionSeparatorCreator.h>
 #include <contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h>
-#include <contests/pace20/separatorminimizers/SnapToNonpathNodesMinimizer.h>
-#include <contests/pace20/separatorminimizers/FlowMinimizer.h>
 #include <contests/pace20/SeparatorEvaluators.h>
 #include <contests/pace20/DepthTreeIrrelevantNodeShifter.h>
 #include <graphs/GraphInducer.h>
 #include <contests/pace20/ComponentTreeMerger.h>
-#include <contests/pace20/Pace20Params.h>
-#include <graphs/flow/MaxFlow.h>
-#include <graphs/landmarks/LandmarkCreator.h>
-#include <contests/pace20/separatorminimizers/NeighborhoodVCMinimizer.h>
 #include <contests/pace20/separatorminimizers/LargestComponentsVCMinimizer.h>
 #include <contests/pace20/DepthTreePivotMaker.h>
 #include <contests/pace20/separatorcreators/ArtPointSeparatorCreator.h>
 #include <graphs/GraphUtils.h>
-#include <graphs/cliques/CliqueExtension.h>
 #include <graphs/trees/Tree.h>
 #include <contests/pace20/separatorminimizers/TotalMinimizer.h>
-#include <contests/pace20/separatorcreators/CliqueSeparatorCreator.h>
 #include <graphs/vertex_cover/VCUtils.h>
 #include <contests/pace20/DTKernelizerDeg3.h>
 #include <contests/pace20/DTKernelizerDeg4.h>
@@ -41,9 +33,6 @@
 
 #include "graphs/components/ConnectedComponents.h"
 #include "graphs/components/BridgesAndArtPoints.h"
-#include "datastructures/FAU.h"
-#include "graphs/flow/DisjointPaths.h"
-#include "graphs/flow/UnitFlow.h"
 
 DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config c) : DepthTreeCreator(V,recurrenceDepth,c) { }
 
@@ -175,7 +164,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    auto sortAndResizeSeparatorsForRecursion = [=,&bestSeps, &sepEval](){
+    // auto sortAndResizeSeparatorsForRecursion = [=,&bestSeps, &sepEval](){
+    auto sortAndResizeSeparatorsForRecursion = [&](){
         sort( ALL(bestSeps), sepEval );
         auto it = unique( ALL(bestSeps), [&sepEval]( Separator& s1, Separator& s2 ){
             return s1.stats.size * (s1.stats.maxCompSize+1) * (s1.stats.maxCompEdges+1) == s2.stats.size * (s2.stats.maxCompSize+1) * (s2.stats.maxCompEdges+1);
@@ -186,7 +176,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         for(auto& sp : bestSeps) sp.updatePointers(*V);
     };
 
-    auto sortAndResizeSeparatorsForMinimization = [=,&bestSeps, &sepEval](){
+    // auto sortAndResizeSeparatorsForMinimization = [=,&bestSeps, &sepEval](){
+    auto sortAndResizeSeparatorsForMinimization = [&](){
         sort( ALL(bestSeps), sepEval );
         auto it = unique( ALL(bestSeps), [&sepEval]( Separator& s1, Separator& s2 ){
             return 1ll * s1.stats.size * (s1.stats.maxCompSize+1) * (s1.stats.maxCompEdges+1) == 1ll * s2.stats.size * (s2.stats.maxCompSize+1) * (s2.stats.maxCompEdges+1);
@@ -334,7 +325,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     sortAndResizeSeparatorsForRecursion();
 
-    auto getBestDTForSeparator = [=,&bestSeps]( Separator& bestSep ){
+    // auto getBestDTForSeparator = [=,&bestSeps]( Separator& bestSep ){
+    auto getBestDTForSeparator = [&]( Separator& bestSep ){
         if( bestSep.stats.size != bestSep.nodes.size() ){
             cerr << "in getBestDTForSeparator, stats.size() != nodes.size()" << endl;
             DEBUG(bestSep);
@@ -554,7 +546,8 @@ Separator DepthTreeCreatorLarge::testMatchingEdgesContraction() {
 
     VPII edges = GraphUtils::getGraphEdges(*V);
     VB was(V->size());
-    random_shuffle(ALL(edges));
+    IntGenerator rnd;
+    StandardUtils::shuffle(edges,rnd);
 
     VPII matching;
     VI matched(V->size(),-1);
