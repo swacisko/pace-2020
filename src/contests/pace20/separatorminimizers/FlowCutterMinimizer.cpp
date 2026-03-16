@@ -151,8 +151,10 @@ Separator FlowCutterMinimizer::getFurthestPointMinimizedSeparator(Separator &sep
 
     int cnt = 0;
     VI sources;
+    IntGenerator rnd;
     for( int i=(int)layers.size()-1; i>=0; i-- ){
-        random_shuffle( ALL(layers[i]) );
+        // random_shuffle( ALL(layers[i]) );
+        StandardUtils::shuffle(layers[i],rnd);
         for( int p : layers[i] ){
             if( inC0[p] ){
                 sources.push_back(p);
@@ -168,7 +170,8 @@ Separator FlowCutterMinimizer::getFurthestPointMinimizedSeparator(Separator &sep
     cnt = 0;
     VI targets;
     for( int i=(int)layers.size()-1; i>=0; i-- ){
-        random_shuffle( ALL(layers[i]) );
+        // random_shuffle( ALL(layers[i]) );
+        StandardUtils::shuffle( layers[i], rnd);
         for( int p : layers[i] ){
             if( inC1[p] ){
                 targets.push_back(p);

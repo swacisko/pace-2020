@@ -13,6 +13,8 @@
 #include <graphs/landmarks/LandmarkCreator.h>
 #include <contests/pace20/Pace20Params.h>
 #include "contests/pace20/separatorcreators/FlowSeparatorCreator.h"
+
+#include "StandardUtils.h"
 #include "contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h"
 #include "utils/TimeMeasurer.h"
 
@@ -29,11 +31,13 @@ vector<Separator> FlowSeparatorCreator::createSeparators(VVI &V, int repeats) {
 
     VI landmarks = lcr.getLandmarks( V, 0, LANDMARKS, 10 );
 
+    IntGenerator rnd;
     vector<Separator> res;
     for( int i=0; i < min( repeats, LANDMARKS * (LANDMARKS-1) / 2 ); i++ ){
         if( cnf.sw.tle("main") ) break;
         VI s = CombinatoricUtils::getRandomSubset( LANDMARKS-1,4 );
-        random_shuffle(ALL(s));
+        // random_shuffle(ALL(s));
+        StandardUtils::shuffle(s,rnd);
         for( int& d : s ) d = landmarks[d];
 
         VI sources = { s[0], s[1] };

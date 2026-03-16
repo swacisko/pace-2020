@@ -769,7 +769,9 @@ void ComponentExpansionSeparatorCreator::test() {
         DEBUG(V.size());
         DEBUG( GraphUtils::countEdges(V) );
 
-        for(int i=0 ;i<V.size(); i++) random_shuffle(ALL(V[i]));
+        // for(int i=0 ;i<V.size(); i++) random_shuffle(ALL(V[i]));
+        IntGenerator rnd;
+        for(int i=0 ;i<V.size(); i++) StandardUtils::shuffle(V[i],rnd);
 
         VI order = VI(V.size());
         iota(ALL(order),0);

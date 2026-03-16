@@ -6,6 +6,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 SET(CMAKE_CXX_FLAGS "-std=c++23 -lm -O3") # turbo fast
 
+include(cmake/deps_gtest_benchmark.cmake)
+
+
 #set(SOURCES main.cpp)
 include_directories(include
         include/combinatorics

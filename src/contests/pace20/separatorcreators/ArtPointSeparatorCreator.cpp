@@ -66,7 +66,7 @@ Separator ArtPointSeparatorCreator::getFirstBalancedArtPointSeparator(VVI &V) {
 
     //**********
 
-    auto countEdgesInComponent = [=,&forbidden]( int p ){
+    auto countEdgesInComponent = [&]( int p ){
         VI pComp = ConnectedComponents::getConnectedComponentForNode(apT,p,forbidden);
         for(int t : pComp) forbidden[t] = false;
         int pCompEdges = ConnectedComponents::countEdgeWeightsInComponent(apT,apW,p,forbidden);
@@ -208,7 +208,8 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
 
     int totalNodes = 0;
     int totalEdges = 0;
-    function< void(int) > dfsGetTotals = [=, &totalNodes, &totalEdges, &was, &dfsGetTotals]( int num ){
+    // function< void(int) > dfsGetTotals = [=, &totalNodes, &totalEdges, &was, &dfsGetTotals]( int num ){
+    function< void(int) > dfsGetTotals = [&]( int num ){
         was[num] = true;
         totalNodes += nodeWeights[num];
         totalEdges += 2*edgeWeights[num];
@@ -242,7 +243,8 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
 
     unordered_set<int> wasWithGivenLow;
     function< void(int, const int) > getNodesWithGivenLow =
-            [=,&getNodesWithGivenLow,&was,&forbidden, &wasWithGivenLow](int num,  const int givenLow){
+            // [=,&getNodesWithGivenLow,&was,&forbidden, &wasWithGivenLow](int num,  const int givenLow){
+            [&](int num,  const int givenLow){
 
         if( wasWithGivenLow.count(num) ) return;
         if( preOrder[num] <= givenLow ) return;
@@ -258,7 +260,8 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
     };
 
 
-    function< void(int,int,int, VB&, VI&) > propagate = [=, &propagate, &was, &forbidden](int num, int par, int lowVal, VB& visited, VI& path){
+    // function< void(int,int,int, VB&, VI&) > propagate = [=, &propagate, &was, &forbidden](int num, int par, int lowVal, VB& visited, VI& path){
+    function< void(int,int,int, VB&, VI&) > propagate = [&](int num, int par, int lowVal, VB& visited, VI& path){
         if( debug ) cerr << "Propagating from " << par << " to " << num << endl;
         visited[num] = true;
         path.push_back(num);
@@ -273,7 +276,8 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
     visitedPropagate[num] = true;
 
     int cnt = 0;
-    function< void(int,int) > dfsLow = [=, &dfsLow, &was, &forbidden, &cnt, &wasWithGivenLow, &propagate, &visitedPropagate](int num, int par){
+    // function< void(int,int) > dfsLow = [=, &dfsLow, &was, &forbidden, &cnt, &wasWithGivenLow, &propagate, &visitedPropagate](int num, int par){
+    function< void(int,int) > dfsLow = [&](int num, int par){
         was[num] = true;
         if( preOrder[num] == -1 ){
             preOrder[num] = cnt;
@@ -315,7 +319,8 @@ PII ArtPointSeparatorCreator::getMostBalancedArtInSubgraph(int num, VB &was, VB 
 
     for( int t : compNodes ) was[t] = false;
 
-    function< void(int,int) > dfsFindSizes = [=, &dfsFindSizes, &was, &forbidden, &cnt, &wasWithGivenLow](int num, int par){
+    // function< void(int,int) > dfsFindSizes = [=, &dfsFindSizes, &was, &forbidden, &cnt, &wasWithGivenLow](int num, int par){
+    function< void(int,int) > dfsFindSizes = [&](int num, int par){
         was[num] = true;
 
         for( int d : apT[num] ){

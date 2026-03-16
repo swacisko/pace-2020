@@ -6,10 +6,8 @@
 
 
 #include <contests/pace20/separatorminimizers/GreedyNodeEdgeMinimizer.h>
-#include <contests/pace20/Pace20Params.h>
 #include <contests/pace20/SeparatorEvaluators.h>
 #include <graphs/GraphUtils.h>
-#include "graphs/components/ConnectedComponents.h"
 #include "datastructures/Heap.h"
 #include "graphs/GraphReader.h"
 #include "utils/StandardUtils.h"
@@ -80,13 +78,15 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
     }
 
 
-    auto isBalanced = [=, &totalWeight, &neighCompSizesSum, &edgeCompSizesSum](int a){
+    // auto isBalanced = [=, &totalWeight, &neighCompSizesSum, &edgeCompSizesSum](int a){
+    auto isBalanced = [&](int a){
         double balance = cnf.sep_balance;
         if( minimizationType == MINIMIZE_NODES ) return neighCompSizesSum[a] <= balance * totalWeight;
         else return edgeCompSizesSum[a] + edgeWeightsSum[a] <= balance * totalWeight;
     };
 
-    auto comp = [=, &neighCompSizesSum, &edgeCompSizesSum, &degInComps, &edgeWeightsSum]( int a, int b ) {
+    // auto comp = [=, &neighCompSizesSum, &edgeCompSizesSum, &degInComps, &edgeWeightsSum]( int a, int b ) {
+    auto comp = [&]( int a, int b ) {
 
         /**
          * If there is a node that has no neighbors in any component, then i try to isolate it from separator and make it a new component.
@@ -116,7 +116,8 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
     VB nodesSet(N,false);
     VI totalEdges(N,0);
 
-    auto mergeNodes = [=,&edgeWeightsSum, &neighCompSizesSum, &edgeCompSizesSum, &totalWeight, &degInComps, &neighVec, &totalEdges, &sep]( VI &nodes, VI & neigh, VB & nodesSet ){
+    // auto mergeNodes = [=,&edgeWeightsSum, &neighCompSizesSum, &edgeCompSizesSum, &totalWeight, &degInComps, &neighVec, &totalEdges, &sep]( VI &nodes, VI & neigh, VB & nodesSet ){
+    auto mergeNodes = [&]( VI &nodes, VI & neigh, VB & nodesSet ){
 
         if(debug){
             DEBUG(nodes);
@@ -210,7 +211,8 @@ Separator GreedyNodeEdgeMinimizer::minimizeSeparator(Separator sep, VVPII &sepGr
             }
         }
 
-        auto removeNodesFromGraph = [=, &neigh, &nodesSet, &edgeWeightsSum](){
+        // auto removeNodesFromGraph = [=, &neigh, &nodesSet, &edgeWeightsSum](){
+        auto removeNodesFromGraph = [&](){
             for( int d : neigh ){
                 if( nodesSet[d]  ) continue;
                 for( int j = (int)gr[d].size()-1; j>=0; j-- ){

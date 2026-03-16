@@ -155,16 +155,12 @@ VI DTKernelizer::getAttachmentPoints(VI &treeNodes) {
 }
 
 
-VVI & DTKernelizer::getKernelizedGraph(int KERNEL_MODE) {
+VVI & DTKernelizer::getKernelizedGraph() {
     VI nodesToRemove;
+    auto KERNEL_MODE = getKernelMode();
     if( KERNEL_MODE & DANGLING_TREES ){
         createDanglingTrees();
         for( VI& tree : removedTreeNodes ) nodesToRemove.insert( nodesToRemove.end(), ALL(tree) );
-    }
-
-    VPII edgesToAdd;
-    if( KERNEL_MODE & EDGE_COMPRESSION ){
-        cerr << "NOT SUPPPORTED YET, SWITCHING TO DANGLING_TREES_MODE" << endl;
     }
 
     VI nodes = GraphUtils::getComplimentaryNodes(*V, nodesToRemove);
@@ -552,8 +548,9 @@ DepthTree DTKernelizer::dekernelizeSubgraphs(DepthTree dt) {
     return dt;
 }
 
-VVI &DTKernelizer::getKernelizedGraphSubgraphs(int KERNEL_MODE) {
+VVI &DTKernelizer::getKernelizedGraphSubgraphs() {
     VI nodesToRemove;
+    auto KERNEL_MODE = getKernelMode();
     if( KERNEL_MODE & DANGLING_TREES ){
         createDanglingSubgraphs(0);
         for( VI& tree : removedSubgraphsNodes ) nodesToRemove.insert( nodesToRemove.end(), ALL(tree) );

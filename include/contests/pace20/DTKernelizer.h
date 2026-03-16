@@ -20,7 +20,12 @@ public:
      *
      * @return graph after kernelization
      */
-    VVI & getKernelizedGraph(int KERNEL_MODE = DANGLING_TREES);
+    VVI & getKernelizedGraph();
+
+    auto getKernelMode() {
+        if ( cnf.preprocessing_to_use_mask & (1<<Prepr::DanglingTrees) ) return DANGLING_TREES;
+        return -1;
+    }
 
     /**
      * Function modifies depth tree created for kernelizedV.V to make it a depth tree for V
@@ -31,7 +36,7 @@ public:
 
 
 
-    VVI & getKernelizedGraphSubgraphs(int KERNEL_MODE = DANGLING_TREES);
+    VVI & getKernelizedGraphSubgraphs();
     DepthTree dekernelizeSubgraphs(DepthTree dt);
 
 
@@ -39,7 +44,6 @@ public:
     static void test();
 
     static const int DANGLING_TREES = 1;
-    static const int EDGE_COMPRESSION = 2;
 
     Config cnf;
 

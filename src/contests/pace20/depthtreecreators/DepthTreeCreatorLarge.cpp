@@ -89,10 +89,10 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
                 if (rec_depth == 0 && newDt.height - dt.height > 0) {
-                    cerr << "dt.height:    " << dt.height << endl;
-                    cerr << "newDt.height: " << newDt.height << endl;
-                    cerr << "height difference: " << newDt.height - dt.height << endl;
-                    ENDL(1);
+                    if (cnf.write_logs) clog << "dt.height:    " << dt.height << endl;
+                    if (cnf.write_logs) clog << "newDt.height: " << newDt.height << endl;
+                    if (cnf.write_logs) clog << "height difference: " << newDt.height - dt.height << endl;
+                    if (cnf.write_logs) ENDL(1);
                 }
 
                 newDt.V = V;
@@ -104,12 +104,12 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             }
 
 
-        } else if ( (cnf.preprocessing_to_use_mask & Prepr::IndSet3Prepr) && V->size() >= cnf.min_graph_size_for_kernelization &&
+        } else if ( (cnf.preprocessing_to_use_mask & (1<<Prepr::IndSet3Prepr)) && V->size() >= cnf.min_graph_size_for_kernelization &&
                     rec_depth == 0 && GraphUtils::countNodesWithDegree(*V, 3, 3) > 0) {
             DTKernelizerDeg3 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
-            cerr << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge with recDepth = 1" << endl;
+            if (cnf.write_logs) clog << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge with recDepth = 1" << endl;
             DepthTreeCreatorLarge dtCL(newV, rec_depth + 1,cnf);
             // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
             // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
@@ -128,11 +128,11 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             assert(dt.isCorrect());
 
             return dt;
-        } else if( (cnf.preprocessing_to_use_mask & Prepr::IndSet4Prepr) && V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
+        } else if( (cnf.preprocessing_to_use_mask & (1<<Prepr::IndSet4Prepr)) && V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
             DTKernelizerDeg4 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
-            cerr << "Kernelized degree4 nodes" << endl;
+            if (cnf.write_logs) clog << "Kernelized degree4 nodes" << endl;
             DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
             // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
             // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
@@ -194,8 +194,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( cnf.sep_cr_to_use_mask & SepCr::ArtPointCr ){ // ARTICULATION POINTS
-        if( rec_depth == 0 ) cerr << "\t creating art-points" << flush;
+    if( cnf.sep_cr_to_use_mask & (1<<SepCr::ArtPointCr) ){ // ARTICULATION POINTS
+        if( rec_depth == 0 && cnf.write_logs ) clog << "\t creating art-points" << endl;
         ArtPointSeparatorCreator apCr(cnf);
         vector<Separator>  apSeps = apCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(apSeps) );
@@ -206,16 +206,16 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( cnf.sep_cr_to_use_mask & SepCr::BfsCr ){ // BFS
-        if( rec_depth == 0 ) cerr << "\t creating bfs" << flush;
+    if( cnf.sep_cr_to_use_mask & (1<<SepCr::BfsCr) ){ // BFS
+        if( rec_depth == 0 && cnf.write_logs ) clog << "\t creating bfs" << endl;
         BFSSeparatorCreator sepCr(*V,cnf);
         vector<Separator>  bfsSeps = sepCr.createSeparators(*V, cnf.sep_cr_max_sources);
         bestSeps.insert( bestSeps.end(), ALL(bfsSeps) );
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
     }
 
-    if( cnf.sep_cr_to_use_mask & SepCr::FlowCr){ // FLOW
-        if( rec_depth == 0 ) cerr << "\t creating flow" << flush;
+    if( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCr)){ // FLOW
+        if( rec_depth == 0 && cnf.write_logs) clog << "\t creating flow" << endl;
         GreedyNodeEdgeMinimizer minimizer(cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
         minimizer.sepEval = &sepEval;
         FlowSeparatorCreator sepFl(cnf,&minimizer);
@@ -226,8 +226,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     }
 
 
-    if( cnf.sep_cr_to_use_mask & SepCr::CompExpCr ){ // ARTICULATION POINTS
-        if( rec_depth == 0 ) cerr << "\t creating component expansion" << flush;
+    if( cnf.sep_cr_to_use_mask & (1<<SepCr::CompExpCr) ){ // ARTICULATION POINTS
+        if( rec_depth == 0 && cnf.write_logs ) clog << "\t creating component expansion" << endl;
         ComponentExpansionSeparatorCreator ceCr( sepEval, cnf );
 
 
@@ -259,12 +259,13 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     // section for correction of found separators
     if( cnf.sep_minim_to_use_mask != NoMinim ) {
-        if (rec_depth == 0) cerr << "\t minimizing best separators" << flush;
+        if (rec_depth == 0 && cnf.write_logs) clog << "\t minimizing best separators" << endl;
         int BSS = bestSeps.size();
         for (int i = 0; i < BSS; i++) {
             bestSep = bestSeps[i];
 
             TotalMinimizer totMin(&sepEval, cnf);
+            totMin.cnf.cur_rec_depth = rec_depth;
             bestSep = totMin.minimizeSeparator(bestSep);
             bestSeps.push_back(bestSep);
         }
@@ -284,11 +285,11 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
     int est_depth = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep );
-    bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & SepCr::FlowCutterCr ) && est_depth <= cnf.max_estimated_treedepth_for_flowcutter
+    bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCutterCr) ) && est_depth <= cnf.max_estimated_treedepth_for_flowcutter
         && rec_depth <= cnf.max_rec_depth_for_flowcutter && bestSeps[0].stats.size > 1;
     if( flowcutter_cond ){
 
-        if( rec_depth == 0 ){ cerr << "\tflow cutter" << flush;  }
+        if( rec_depth == 0 && cnf.write_logs ){ clog << "\tflow cutter" << endl;  }
 
         FlowCutter fc(sepEval, cnf);
 
@@ -313,7 +314,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( V->size() > 500 && rec_depth <= 10 ){
+    if( V->size() > 500 && rec_depth <= 10 && cnf.write_logs ){
         cerr << endl;
         for(int i=0; i<rec_depth; i++) cerr << "  ";
         cerr << rec_depth << ": ";

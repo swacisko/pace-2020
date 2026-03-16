@@ -212,16 +212,7 @@ vector<Separator> FlowCutter::getSeparatorsForSourcesAndTargets(VVI &V, VVI &exp
             Separator res = ceCr.getBestSeparatorForExpansionOrder(V, optOrderV);
             res.updatePointers(V);
 
-            if (debug) {
-                DEBUG(res);
-            }
-
-            /*TotalMinimizer totMin(sepEval);
-            res = totMin.minimizeSeparator(res);
-
-            if (debug) {
-                DEBUG(res);
-            }*/
+            if (debug) DEBUG(res);
 
             seps.push_back(res);
         }
@@ -253,16 +244,14 @@ vector<Separator> FlowCutter::createSeparators(VVI &V, int repeats) {
     for( int i=0; i<subset.size(); i+=2 ) sourceTargets.emplace_back( subset[i], subset[i+1] );
 
 
-
-//    cerr << "Creating landmarks" << endl;
     LandmarkCreator lcr;
     int LANDMARKS = min( (int)V.size()-1, max( 50, 2*repeats )  );
     VI landmarks = lcr.getLandmarks( V, 0, LANDMARKS, 0 );
-    random_shuffle(ALL(landmarks));
+    // random_shuffle(ALL(landmarks));
+    IntGenerator rnd;
+    StandardUtils::shuffle(landmarks,rnd);
     sourceTargets.clear();
     for( int i=1; i< min( 2*repeats, LANDMARKS ) ; i+=2 ) sourceTargets.emplace_back( landmarks[i-1], landmarks[i] );
-//    cerr << "\tlandmarks created" << endl;
-
 
 
     vector<Separator> seps;
@@ -276,14 +265,6 @@ vector<Separator> FlowCutter::createSeparators(VVI &V, int repeats) {
         VI sources = {s};
         VI targets = { (int)V.size()+t};
 
-//        { // #TEST
-//            s = rand() % V.size();
-//            t = rand() % V.size();
-//            sources = {s};
-//            targets = {t + (int)V.size()};
-//        }
-
-
         auto iterSeps = getSeparatorsForSourcesAndTargets( V, expV, sources, targets );
         StandardUtils::append( seps, iterSeps );
 
@@ -296,10 +277,7 @@ vector<Separator> FlowCutter::createSeparators(VVI &V, int repeats) {
 
     for(auto& sp : seps) sp.updatePointers(V);
 
-//    exit(1);
-
     return seps;
-
 }
 
 VVI FlowCutter::getExpansionGraph(VVI &V) {
@@ -342,9 +320,7 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
     canBeAugmented = false;
 
     if( uf != nullptr ) delete uf;
-//    uf = new UnitFlow(V);
     uf = new UnitFlow2(V);
-//    uf->setUseDfsAugmentation(true); // seems that dfs augmentation usually works a tiny bit faster than layer bfs block flow creation
 
     for( int s : sources ) uf->addSource(s);
     for(int t : targets) uf->addTarget(t);
@@ -374,13 +350,10 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
     bool canExpandSources = true;
     bool canExpandTargets = true;
 
-//    cerr << "before" << endl;
-//    DEBUG( sources.size() );
-//    DEBUG( targets.size() );
-
     int augmentingTimes = 0;
 
-    auto augmentStep = [=, &augmentingTimes,&lastPNSourceSize, &lastPNTargetSize, &canExpandSources, &canExpandTargets](){
+    // auto augmentStep = [=, &augmentingTimes,&lastPNSourceSize, &lastPNTargetSize, &canExpandSources, &canExpandTargets](){
+    auto augmentStep = [&](){
         if( cnf.sw.tle("main") ) return;
 
         augmentingTimes++;
@@ -429,7 +402,8 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
     };
 
-    auto expandSourcesStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
+    // auto expandSourcesStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
+    auto expandSourcesStep = [&](){
         if( cnf.sw.tle("main") ) return;
 
         if(debug){
@@ -482,7 +456,8 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
         }
     };
 
-    auto expandTargetsStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
+    // auto expandTargetsStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
+    auto expandTargetsStep = [&](){
         if( cnf.sw.tle("main") ) return;
 
         if(debug){
@@ -705,7 +680,7 @@ int FlowCutter::getPiercingSourceNode() {
         DEBUG(nonAugmenting);
     }
 
-    auto comp = [=](int a, int b){
+    auto comp = [&](int a, int b){
         if( isTarget[a] != isTarget[b] ) return (isTarget[a] == true); // if a is target and b is not, then  b is LARGER than a, that is better, since we maximize values
         else if( getDistanceValueFrom( dstFromTargets, dstFromSources,a ) != getDistanceValueFrom( dstFromTargets, dstFromSources,a ) ){
             return getDistanceValueFrom( dstFromTargets, dstFromSources,a ) < getDistanceValueFrom( dstFromTargets, dstFromSources,a );
@@ -787,7 +762,7 @@ int FlowCutter::getPiercingTargetNode() {
         DEBUG(nonAugmenting);
     }
 
-    auto comp = [=](int a, int b){
+    auto comp = [&](int a, int b){
         if( isSource[a] != isSource[b] ) return (isSource[a] == true); // if a is source and b is not, then  b is LARGER than a, that is better, since we maximize values
         else if( getDistanceValueFrom( dstFromSources, dstFromTargets,a ) != getDistanceValueFrom( dstFromSources, dstFromTargets,a ) ){
             return getDistanceValueFrom( dstFromSources, dstFromTargets,a ) < getDistanceValueFrom( dstFromSources, dstFromTargets,a );

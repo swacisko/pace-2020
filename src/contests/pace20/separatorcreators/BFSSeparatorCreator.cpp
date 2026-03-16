@@ -9,8 +9,6 @@
 #include <graphs/GraphInducer.h>
 #include <datastructures/FAU.h>
 #include <contests/pace20/SeparatorEvaluators.h>
-#include <contests/pace20/Pace20Params.h>
-#include <contests/pace20/separatorminimizers/LargestComponentsVCMinimizer.h>
 #include "graphs/vertex_cover/BipartiteGraphVertexCover.h"
 #include "graphs/GraphUtils.h"
 #include "numbertheory/Binom.h"
@@ -27,7 +25,6 @@ vector<Separator> BFSSeparatorCreator::createSeparators(VVI &V, int max_sources)
     source_quantities[1] = MAX_SOURCES;
     for( int i=2; i <= MAX_SOURCES; i++ ) source_quantities[i] = source_quantities[i-1] / 2;
     while( source_quantities.back() == 0 ) source_quantities.pop_back();
-    // sourceQuantities = { 0, 16, 8, 4 };
 
     VVI sourcesSets = getRandomSources(V.size(),source_quantities);
 
@@ -99,7 +96,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
 
 
-    auto createLayerData = [=,&L,&N]( VVI & layers, VVVI& compBorder, VI& nodesInComp, VI& edgesInComp, VI& componentId ){
+    auto createLayerData = [&]( VVI & layers, VVVI& compBorder, VI& nodesInComp, VI& edgesInComp, VI& componentId ){
 
         if(debug) DEBUG(layers);
 
@@ -294,7 +291,7 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
     for( int i=0; i<L; i++ ) for(int d : layers[i]) inLayer[d] = i;
 
     const int ORIGINAL_GRAPH_EDGES = GraphUtils::countEdges(V);
-    auto createSeparatorForLayer = [=,&edgesInCompL, &edgesInCompR, &nodesInCompL, &nodesInCompR, &compBorderL, &compBorderR]( int i ){
+    auto createSeparatorForLayer = [&]( int i ){
 
 
         Separator sep( V,layers[i] );
@@ -346,13 +343,12 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
     if(debug) DEBUG(separators);
 
     const bool USE_GREEDY_MINIMIZER = false;
-//    DEBUG(USE_GREEDY_MINIMIZER);
 
     if(USE_GREEDY_MINIMIZER) {
 
         vector<unordered_map<int, int> > W(N);
         VI mapper(N, -1);
-        auto getSeparatorGraph = [=, &compBorderL, &compBorderR, &nodesInCompL, &edgesInCompL, &edgesInCompR, &nodesInCompR, &W, &mapper](
+        auto getSeparatorGraph = [&](
                 Separator &sep, int i, VI &nodeW, VI &edgeW) {
 
             bool debug = false;
@@ -467,7 +463,8 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
         //***************** SECTION WITH FAST MINIMIZER
 
-        auto createLargestComponentsSeparatorForLayer = [=, &edgesInCompL, &edgesInCompR, &nodesInCompL, &nodesInCompR, &compBorderL, &compBorderR]
+        // auto createLargestComponentsSeparatorForLayer = [=, &edgesInCompL, &edgesInCompR, &nodesInCompL, &nodesInCompR, &compBorderL, &compBorderR]
+        auto createLargestComponentsSeparatorForLayer = [&]
                 (int i, VB &was, FAU &fau, bool useVC = false) {
 
             struct Comp {
