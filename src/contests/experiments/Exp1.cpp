@@ -12,8 +12,133 @@
 #include "../../../include/contests/experiments/Config.h"
 
 #include "DTKernelizer.h"
+#include "IntGenerator.h"
 #include "SeparatorEvaluators.h"
 
+vector<pair<double, bool>> Exp1::createNSFS() {
+    vector<pair<double,bool>> nsfs;
+    for (int i=0; i<cnf.main_repetitions; i++) nsfs.emplace_back(1.0 * i / (cnf.main_repetitions-1), i & 1);
+    ranges::sort(nsfs,[&](auto a, auto b){ return abs(0.5 - a.first) < abs(0.5 - b.first); });
+    return nsfs;
+}
+
+void Exp1::assignExpData(auto &trees, auto & sep_stats) {
+    ranges::sort(trees, [&](auto &t1, auto & t2){ return t1.second < t2.second; });
+
+    clog << "Found trees: " << endl;
+    for (int t : views::transform( trees, [&](auto & tr){ return tr.first.height; } )) clog << t << " ";
+    clog << endl;
+
+
+
+    clog << "Found avg separator sizes, before minimization: " << endl;
+    for (double t : views::transform( sep_stats, [&](auto & vec) {
+        double avg_size = accumulate( ALL(vec), 0.0, [&](double s, auto & b) { return s + b.first.size; } ) / vec.size();
+        return avg_size;
+    } )) clog << t << " ";
+    clog << endl;
+
+    clog << "Found avg estimated tree depth based on separator stats, before minimization: " << endl;
+    for (double t : views::transform( sep_stats, [&](auto & vec) {
+        double avg_td = accumulate( ALL(vec), 0.0, [&](double s, auto & b) {
+            return s + b.first.estimated_td_edge_plus_node;
+        } ) / vec.size();
+        return avg_td;
+    } )) clog << t << " ";
+    clog << endl;
+
+
+
+    clog << "Found avg separator sizes, after minimization: " << endl;
+    for (double t : views::transform( sep_stats, [&](auto & vec) {
+        double avg_size = accumulate( ALL(vec), 0.0, [&](double s, auto & b) { return s + b.second.size; } ) / vec.size();
+        return avg_size;
+    } )) clog << t << " ";
+    clog << endl;
+
+    clog << "Found avg estimated tree depth based on separator stats, after minimization: " << endl;
+    for (double t : views::transform( sep_stats, [&](auto & vec) {
+        double avg_td = accumulate( ALL(vec), 0.0, [&](double s, auto & b) {
+            return s + b.second.estimated_td_edge_plus_node;
+        } ) / vec.size();
+        return avg_td;
+    } )) clog << t << " ";
+    clog << endl;
+
+}
+
+void Exp1::runForConfiguration() {
+    clog << "Exp1 -> running for configuration" << endl;
+
+    vector<pair<DepthTree,double>> trees;
+    vector<vector<pair<SeparatorStats,SeparatorStats>>> sep_stats;
+
+    auto nsfs = createNSFS();
+    if ( cnf.node_scale_factor != -1.0 ) std::ranges::for_each(nsfs, [&](auto & a){a.first = cnf.node_scale_factor;});
+    DEBUG(nsfs);
+
+    Config cnf = this->cnf;
+    cnf.write_logs = false;
+    if (cnf.experiment_name == "sep_cr" || cnf.experiment_name == "sep_minim") {
+        cnf.find_valid_dtree = false;
+    }
+    cnf.startMain();
+    if ( cnf.predefined_config_id ) cnf.setPredefinedConfig(cnf.predefined_config_id);
+
+    while ( !cnf.sw.tle("main") ) {
+        for(auto [nsf, min_node_iter] : nsfs) {
+            if (cnf.sw.tle("main")) {
+                unordered_map<int,int> par;
+                // for (int i=1; i<V.size(); i++) par[i] = i-1;
+                trees.emplace_back(DepthTree(V,0,V.size(),par), nsf); // path 0->1->2...
+                continue;
+            }
+
+            initPreprocessing();
+
+            SeparatorEvaluators::nodeScaleFactor = nsf;
+            SeparatorEvaluators::edgeScaleFactor = 1.0 - nsf;
+            cnf.minimize_nodes_iteration = min_node_iter;
+
+            DepthTreeCreatorLarge creator( V,0, cnf );
+            auto dtree = creator.getDepthTree();
+            if (cnf.find_valid_dtree) liftSolution(dtree);
+
+            for (auto &sd: creator.sep_data) {
+                sd.first.estimated_td_edge_plus_node =
+                    SeparatorEvaluators::edgeScaleFactor * SeparatorEvaluators::estimateDepthBasedOnEdges(sd.first)
+                    + SeparatorEvaluators::nodeScaleFactor * SeparatorEvaluators::estimateDepthBasedOnNodes(sd.first);
+
+                sd.second.estimated_td_edge_plus_node =
+                    SeparatorEvaluators::edgeScaleFactor * SeparatorEvaluators::estimateDepthBasedOnEdges(sd.second)
+                    + SeparatorEvaluators::nodeScaleFactor * SeparatorEvaluators::estimateDepthBasedOnNodes(sd.second);
+
+                DEBUG2(sd.first, sd.second);
+            }
+
+            trees.emplace_back(dtree,nsf);
+            sep_stats.push_back(creator.sep_data);
+        }
+
+        if ( !cnf.run_until_time_limit ) break;
+
+        // if running until tle, we keep only the best tree for given nfs
+        sort(ALL(trees), [&](auto & a, auto & b) {
+            if (a.second != b.second) return a.second < b.second;
+            return a.first.height < b.first.height;
+        });
+        decltype(trees) new_trees;
+        for ( int i=0; i<trees.size(); ) {
+            int p = i+1;
+            while ( trees[i].second == trees[p].second && p < trees.size() ) p++;
+            new_trees.push_back(trees[i]);
+            i = p;
+        }
+        if ( trees.size() > cnf.main_repetitions ) assert( new_trees.size()+cnf.main_repetitions == trees.size() );
+    }
+
+    assignExpData(trees, sep_stats);
+}
 
 void Exp1::runPreprocessingExperiments() {
     clog << "Exp1 -> running preprocessing experiments" << endl;
@@ -23,35 +148,8 @@ void Exp1::runPreprocessingExperiments() {
 
 void Exp1::runSeparatorCreatorExperiments() {
     clog << "Exp1 -> running separator creator experiments" << endl;
+    initPreprocessing();
 
-
-    vector<DepthTree> trees;
-
-    // auto creators = VI{ SepCr::ArtPointCr, SepCr::BfsCr, SepCr::FlowCr, SepCr::FlowCutterCr, SepCr::CompExpCr };
-
-    // for ( auto sep_cr : creators ) if ( popcount((unsigned)sep_cr) == 1 ) if ( cnf.sep_cr_to_use_mask & sep_cr ) {
-        Config cnf = this->cnf;
-        // cnf.sep_cr_to_use_mask = sep_cr;
-        cnf.startMain();
-
-        for(int r=0; r<cnf.main_repetitions; r++) {
-            initPreprocessing();
-
-            SeparatorEvaluators::nodeScaleFactor = 1.0 * r / (cnf.max_time_millis-1);
-            SeparatorEvaluators::edgeScaleFactor = 1.0 - SeparatorEvaluators::nodeScaleFactor;
-            cnf.minimize_nodes_iteration = r&1;
-
-            DepthTreeCreatorLarge creator( V,0, cnf );
-            auto dtree = creator.getDepthTree();
-            liftSolution(dtree);
-            trees.push_back(dtree);
-        }
-    // }
-
-    ranges::sort(trees, [&](auto &t1, auto & t2){ return t1.height < t2.height; });
-    clog << "Found trees: " << endl;
-    for (int t : views::transform( trees, [&](auto & tr){ return tr.height; } )) clog << t << " ";
-    clog << endl;
 }
 
 void Exp1::runSeparatorMinimizerExperiments() {
@@ -89,14 +187,19 @@ void Exp1::runAllExperiments() {
 
     string en = cnf.experiment_name;
 
-    if (en == "pivots") runPreprocessingExperiments();
-    else if (en == "sep_cr") runSeparatorCreatorExperiments();
-    else if (en == "sep_minim") runSeparatorMinimizerExperiments();
-    else if (en == "sep_eval") runPivotExperiments();
-    else if (en == "prepr") runSeparatorEvaluatorExperiments();
-    else if (en == "predefined_configs") runPredefinedConfigurationsExperiments();
-    else if (en == "fixed_time") runFixedTimeExperiments();
-    else throw runtime_error("Unknown experiment name: " + en);
+    if (en == "cur_config") runForConfiguration();
+    if (en == "sep_cr") runForConfiguration();
+    if (en == "sep_minim") runForConfiguration();
+
+
+    // else if (en == "pivots") runPivotExperiments(); // done in runForConfiguration
+    // else if (en == "sep_cr") runSeparatorCreatorExperiments(); // done in runForConfiguration
+    // else if (en == "sep_minim") runSeparatorMinimizerExperiments(); // done in runForConfiguration
+    // else if (en == "prepr") runPreprocessingExperiments(); // done in runForConfiguration
+    // else if (en == "predefined_configs") runPredefinedConfigurationsExperiments(); // done in runForConfiguration
+    // else if (en == "fixed_time") runFixedTimeExperiments(); // done in runForConfiguration
+    // else throw runtime_error("Unknown experiment name: " + en);
+    // else if (en == "sep_eval") runSeparatorEvaluatorExperiments(); // do not do that at all - it can be extracted from almost all other experiments
 }
 
 void Exp1::runExtensiveConfigurationExperiments() {
@@ -105,7 +208,7 @@ void Exp1::runExtensiveConfigurationExperiments() {
 void Exp1::initPreprocessing() {
     tie(data.N0, data.M0) = PII(V0.size(), GraphUtils::countEdges(V0));
 
-    if (cnf.preprocessing_to_use_mask != Prepr::NoPrepr) {
+    if (cnf.use_init_prepr) {
         V = V0;
         init_kernelizer = DTKernelizer(V,cnf);
         if (cnf.write_logs) clog << "Starting initial kernelization" << endl;
@@ -114,10 +217,12 @@ void Exp1::initPreprocessing() {
             clog << "\t initial kernelization done, V.size(): " << V.size() << ", edges: "
                  << GraphUtils::countEdges(V) << endl;
     }
-    tie(data.N0, data.M0) = PII(V.size(), GraphUtils::countEdges(V));
+
+    tie(data.N, data.M) = PII(V.size(), GraphUtils::countEdges(V));
 }
 
 void Exp1::liftSolution(DepthTree & dtree) {
+    if (!cnf.use_init_prepr) return;
     dtree = init_kernelizer.dekernelizeSubgraphs(dtree);
     dtree.V = &V0;
 }
@@ -125,6 +230,8 @@ void Exp1::liftSolution(DepthTree & dtree) {
 void Exp1::updateBestTree(DepthTree &best, DepthTree &dtree) {
     if (dtree.height < best.height) best = dtree;
 }
+
+
 
 
 Config parseArguments(int argc, char ** argv) {
@@ -249,7 +356,7 @@ Config parseArguments(int argc, char ** argv) {
     ap.addOption("time", true);
     ap.addOption("mtd", true);
     ap.addOption("run_until_tle", false);
-    ap.addOption("config_id", false);
+    ap.addOption("pred_conf", false);
     ap.addOption("main_reps", false);
 
 
@@ -258,7 +365,8 @@ Config parseArguments(int argc, char ** argv) {
     ap.addOption("sep_cr_mask", false);
     ap.addOption("sep_minim_mask", false);
     ap.addOption("prepr_mask", false);
-    ap.addOption("node_scale_factor", false);
+    ap.addOption("nsf", false);
+    ap.addOption("init_prepr", false);
 
     ap.parse(argc, argv);
     for ( string opt : ap.required_options ) if( !ap.hasProvidedOption(opt) ) {
@@ -273,8 +381,10 @@ Config parseArguments(int argc, char ** argv) {
     ap.findAndAssign("mtd", "string", &cnf.metadata_filepath);
     ap.findAndAssign("experiment_name", "string", &cnf.experiment_name);
     ap.findAndAssign("run_until_tle", "bool", &cnf.run_until_time_limit);
-    ap.findAndAssign("config_id", "int", &cnf.predefined_config_id);
-    ap.findAndAssign("main_reps", "double", &cnf.node_scale_factor);
+    ap.findAndAssign("pred_conf", "int", &cnf.predefined_config_id);
+    ap.findAndAssign("main_reps", "int", &cnf.main_repetitions);
+    ap.findAndAssign("nsf", "double", &cnf.node_scale_factor);
+    ap.findAndAssign("init_prepr", "bool", &cnf.use_init_prepr);
 
 
     assert( cnf.allowed_experiments.contains(cnf.experiment_name) );
@@ -306,7 +416,7 @@ int main(int argc, char* argv[]) {
     // writing data to the cnf.metadata_filepath file
     auto data = exp_runner.data;
     ofstream f(cnf.metadata_filepath);
-    data.writeData(f);
+    data.writeData(f,cnf);
     f.close();
 
     return 0;

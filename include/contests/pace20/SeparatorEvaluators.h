@@ -21,8 +21,8 @@ namespace SeparatorEvaluators{
     extern bool sizeTimesMaxCompEdges( Separator&, Separator& );
 
 
-    extern double estimateDepthBasedOnNodes(const Separator& sep);
-    extern double estimateDepthBasedOnEdges(const Separator& sep);
+    extern double estimateDepthBasedOnNodes(const SeparatorStats& sep_stats);
+    extern double estimateDepthBasedOnEdges(const SeparatorStats& sep_stats);
 
     extern bool estimatedDepthTreeNode(const Separator &sep1, const Separator &sep2);
     extern bool estimatedDepthTreeEdge(const Separator &sep1, const Separator &sep2);

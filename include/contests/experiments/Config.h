@@ -66,7 +66,7 @@ public:
 
     set<string> allowed_experiments = {
         "pivots", "sep_cr", "sep_minim", "sep_eval", "prepr",
-        "predefined_configs", "fixed_time"
+        "predefined_configs", "fixed_time", "cur_config"
     };
     string experiment_name = "";
 
@@ -78,7 +78,8 @@ public:
     bool run_until_time_limit = false;
     int predefined_config_id = 0;
     int main_repetitions = 10;
-    double node_scale_factor = 0.5;
+    bool find_valid_dtree = true;
+    double node_scale_factor = -1.0;
 
     void setPredefinedConfig(int id);
 
@@ -89,8 +90,8 @@ public:
 
     double ct_merger_small_size = 4;
 
-    int max_best_seps_for_recursion = 1;
-    int max_rec_depth_for_best_seps = 0;
+    int max_best_seps_for_recursion = 1; // this number of calls for separators will be made - exponential growth!
+    // int max_rec_depth_for_best_seps = 0;
 
 
     //************************** General config
@@ -127,13 +128,15 @@ public:
     //************************** Preprocessing config
 
     int preprocessing_to_use_mask = (1<<Prepr::AllPrepr)-1;
+    bool use_init_prepr = true;
 
 
     //************************** Pivots config
 
     int pivots_to_use_mask = (1<<Pivots::AllPivots)-1;
-    vector<double> pivot_balances_large_graph = { 0.60, 0.45, 0.30, 0.15 };
+    vector<double> pivot_balances_large_graph = { 0.75, 0.60, 0.45, 0.30, 0.15 };
     vector<double> pivot_balances_small_graph = { 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1 };
+    vector<double> pivot_balances_full = { 0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05 };
     vector<double> pivot_balances = pivot_balances_small_graph;
 
 

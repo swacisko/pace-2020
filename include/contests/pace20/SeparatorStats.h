@@ -29,6 +29,8 @@ public:
 
         approximateMaxTreeHeightNode = -1;
         approximateMaxTreeHeightEdge = -1;
+
+        estimated_td_edge_plus_node = -1;
     }
 
     Separator* sep;
@@ -68,6 +70,8 @@ public:
     double approximateMaxTreeHeightNode;
 
     double approximateMaxTreeHeightEdge;
+
+    double estimated_td_edge_plus_node;
 
     friend ostream& operator<<(ostream& str, SeparatorStats& stats);
 

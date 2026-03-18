@@ -63,25 +63,25 @@ SeparatorEvaluators::estimateHeightsOfSepBasedOnBest(const Separator &sep, const
 
 
 
-double SeparatorEvaluators::estimateDepthBasedOnNodes(const Separator &sep) {
-    if( sep.stats.maxCompSize <= 2 ) return sep.stats.size + sep.stats.maxCompSize;
-    double addFactor = (1 - (double)sep.stats.maxCompSize / sep.stats.originalGraphSize) * 0.9;
-    double beta = ((double)sep.stats.maxCompSize+addFactor) / sep.stats.originalGraphSize;
-    double logBetaN = log( sep.stats.originalGraphSize ) / log( 1 / beta );
+double SeparatorEvaluators::estimateDepthBasedOnNodes(const SeparatorStats &sep_stats) {
+    if( sep_stats.maxCompSize <= 2 ) return sep_stats.size + sep_stats.maxCompSize;
+    double addFactor = (1 - (double)sep_stats.maxCompSize / sep_stats.originalGraphSize) * 0.9;
+    double beta = ((double)sep_stats.maxCompSize+addFactor) / sep_stats.originalGraphSize;
+    double logBetaN = log( sep_stats.originalGraphSize ) / log( 1 / beta );
     double fact = ( 1 - pow(beta,logBetaN) ) / ( 1 - beta );
-    return (double)sep.stats.size * (fact+Constants::EPS);
+    return (double)sep_stats.size * (fact+Constants::EPS);
 }
 
 
-double SeparatorEvaluators::estimateDepthBasedOnEdges(const Separator &sep) {
-    if( sep.stats.maxCompEdges == 0 ) return sep.stats.size + 1;
-    else if( sep.stats.maxCompEdges <= 2 ) return sep.stats.size + 2;
+double SeparatorEvaluators::estimateDepthBasedOnEdges(const SeparatorStats &sep_stats) {
+    if( sep_stats.maxCompEdges == 0 ) return sep_stats.size + 1;
+    else if( sep_stats.maxCompEdges <= 2 ) return sep_stats.size + 2;
 
-    double addFactor = (1 - (double)sep.stats.maxCompEdges / sep.stats.originalGraphEdges) * 0.9;
-    double beta = ((double)sep.stats.maxCompEdges+addFactor) / sep.stats.originalGraphEdges;
-    double logBetaN =  log( sep.stats.originalGraphEdges ) / log( 1 / beta ); //
+    double addFactor = (1 - (double)sep_stats.maxCompEdges / sep_stats.originalGraphEdges) * 0.9;
+    double beta = ((double)sep_stats.maxCompEdges+addFactor) / sep_stats.originalGraphEdges;
+    double logBetaN =  log( sep_stats.originalGraphEdges ) / log( 1 / beta ); //
     double fact = ( 1 - pow(beta,logBetaN) ) / ( 1 - beta );
-    return (double)sep.stats.size * (fact + Constants::EPS);
+    return (double)sep_stats.size * (fact + Constants::EPS);
 }
 
 
@@ -98,7 +98,7 @@ bool SeparatorEvaluators::estimatedDepthTreeNode(const Separator &sep1, const Se
     if( perc1 > THR && perc2 <= THR ) return false;
     if( perc1 <= THR && perc2 > THR ) return true;
 
-    return estimateDepthBasedOnNodes(sep1) < estimateDepthBasedOnNodes(sep2);
+    return estimateDepthBasedOnNodes(sep1.stats) < estimateDepthBasedOnNodes(sep2.stats);
 }
 
 
@@ -115,7 +115,7 @@ bool SeparatorEvaluators::estimatedDepthTreeEdge(const Separator &sep1, const Se
     if( perc1 > THR && perc2 <= THR ) return false;
     if( perc1 <= THR && perc2 > THR ) return true;
 
-    return estimateDepthBasedOnEdges(sep1) < estimateDepthBasedOnEdges(sep2);
+    return estimateDepthBasedOnEdges(sep1.stats) < estimateDepthBasedOnEdges(sep2.stats);
 }
 
 
@@ -136,9 +136,9 @@ bool SeparatorEvaluators::estimatedDepthTreeEdgePlusNode(const Separator &sep1, 
     if( perc1 <= THR && perc2 > THR ) return true;
 
     return
-    edgeScaleFactor * estimateDepthBasedOnEdges(sep1) + nodeScaleFactor * estimateDepthBasedOnNodes(sep1)
+    edgeScaleFactor * estimateDepthBasedOnEdges(sep1.stats) + nodeScaleFactor * estimateDepthBasedOnNodes(sep1.stats)
     <
-    edgeScaleFactor * estimateDepthBasedOnEdges(sep2) + nodeScaleFactor * estimateDepthBasedOnNodes(sep2) ;
+    edgeScaleFactor * estimateDepthBasedOnEdges(sep2.stats) + nodeScaleFactor * estimateDepthBasedOnNodes(sep2.stats);
 }
 
 
@@ -153,9 +153,9 @@ bool SeparatorEvaluators::estimatedDepthTreeMaxNodeEdge(const Separator &sep1, c
     }
 
     return
-    max( estimateDepthBasedOnEdges(sep1), estimateDepthBasedOnNodes(sep1) )
+    max( estimateDepthBasedOnEdges(sep1.stats), estimateDepthBasedOnNodes(sep1.stats) )
     <
-    max( estimateDepthBasedOnEdges(sep2), estimateDepthBasedOnNodes(sep2) );
+    max( estimateDepthBasedOnEdges(sep2.stats), estimateDepthBasedOnNodes(sep2.stats) );
 }
 
 bool SeparatorEvaluators::estimatedDepthTreeMinNodeEdge(const Separator &sep1, const Separator &sep2) {
@@ -165,9 +165,9 @@ bool SeparatorEvaluators::estimatedDepthTreeMinNodeEdge(const Separator &sep1, c
     }
 
     return
-    min( estimateDepthBasedOnEdges(sep1), estimateDepthBasedOnNodes(sep1) )
+    min( estimateDepthBasedOnEdges(sep1.stats), estimateDepthBasedOnNodes(sep1.stats) )
     <
-    min( estimateDepthBasedOnEdges(sep2), estimateDepthBasedOnNodes(sep2) );
+    min( estimateDepthBasedOnEdges(sep2.stats), estimateDepthBasedOnNodes(sep2.stats) );
 }
 
 bool SeparatorEvaluators::isBalanced(const Separator &sep, double balance) {

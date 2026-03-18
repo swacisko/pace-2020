@@ -108,7 +108,7 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                     }
 
                     auto estDepth = SeparatorEvaluators::estimateDepthBasedOnEdges;
-                    if( estDepth( bestSep ) - estDepth(bfsSep) < 1 ){ bestSep = bfsSep; break; }
+                    if( estDepth( bestSep.stats ) - estDepth(bfsSep.stats) < 1 ){ bestSep = bfsSep; break; }
 
                     bestSep = bfsSep;
                     bfsSep = bfsMin.minimizeSeparator(bestSep);
@@ -149,9 +149,10 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
 
         if( cnf.sw.tle("main") ) return bestSep; // disabling flow-cutter distance minimizer - we use furthest-point minimization at the end
         if (cnf.sep_minim_to_use_mask & (1<<SepMinim::FlowCutterDstMinim)) {
+            if ( cnf.write_logs && cnf.cur_rec_depth == 0 ) clog << "\t running FlowCutterDstMinim" << endl;
             if( debug ) DEBUG(index);
             index++; if( foundBetterIndex == index ) break;
-            int est_td = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep );
+            int est_td = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep.stats) + SeparatorEvaluators::estimateDepthBasedOnNodes(bestSep.stats);
             if( est_td <= cnf.max_estimated_treedepth_for_flowcutter ) {
                 if(debug) clog << "FC minimizer" << endl;
 
@@ -194,7 +195,7 @@ Separator TotalMinimizer::minimizeSeparator(Separator bestSep) {
                     }
 
                     auto estDepth = SeparatorEvaluators::estimateDepthBasedOnEdges;
-                    if( V->size() > 1'000 && estDepth( bestSep ) - estDepth(exSep) < 1 ){
+                    if( V->size() > 1'000 && estDepth( bestSep.stats ) - estDepth(exSep.stats) < 1 ){
                         bestSep = exSep;
                         break;
                     }

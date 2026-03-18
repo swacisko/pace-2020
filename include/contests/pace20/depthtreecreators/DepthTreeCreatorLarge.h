@@ -15,10 +15,12 @@ public:
 
     DepthTree getDepthTree();
 
+    vector<pair<SeparatorStats,SeparatorStats>> sep_data;
 
     static void test();
 
 private:
+
     void testBridgesAndArtPoints();
 
     void testVCorARTPOINTKernelization();

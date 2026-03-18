@@ -4,7 +4,7 @@ project(ExTREEm)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-SET(CMAKE_CXX_FLAGS "-std=c++23 -lm -O3") # turbo fast
+SET(CMAKE_CXX_FLAGS "-std=c++23 -lm -O0") # turbo fast
 
 include(cmake/deps_gtest_benchmark.cmake)
 

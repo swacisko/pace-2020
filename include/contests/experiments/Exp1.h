@@ -28,7 +28,7 @@ struct ExpData {
         return res;
     }
 
-    void writeData(ostream & str) {
+    void writeData(ostream & str, Config cnf) {
 
     }
 };
@@ -40,6 +40,8 @@ public:
         this->V0 = this->V = V;
         this->cnf = cnf;
     }
+
+    void runForConfiguration();
 
     void runPreprocessingExperiments();
     void runSeparatorCreatorExperiments();
@@ -62,6 +64,11 @@ public:
     void liftSolution(DepthTree & dtree);
     void updateBestTree(DepthTree & best, DepthTree & dtree);
     DTKernelizer init_kernelizer;
+
+
+    vector<pair<double,bool>> createNSFS();
+    void assignExpData(auto & trees, auto & sep_stats);
+
 };
 
 

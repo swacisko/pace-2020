@@ -51,26 +51,70 @@ void Config::writeBasicInfo() {
 
 void Config::setPredefinedConfig(int id) {
     if (id == 1) { // fastest and weakest
-
-
-
+        sep_cr_max_sources = 5;
+        pivots_to_use_mask = AllPivots;
+        preprocessing_to_use_mask = AllPrepr;
+        sep_cr_to_use_mask = FullSepCr;
+        sep_minim_to_use_mask = (TotalMinim ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim) ^ (1<<FlowCutterMinim));
+        main_repetitions = 10;
+        max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 500;
+        max_rec_depth_for_flowcutter = 5;
+        max_estimated_treedepth_for_flowcutter = 500;
+        max_best_seps_for_minimizers = 5;
+        max_best_seps_for_recursion = 1;
+        pivot_balances = pivot_balances_large_graph;
     }
 
     if (id == 2) { // trade-off
-
-
-
+        sep_cr_max_sources = 15;
+        pivots_to_use_mask = AllPivots;
+        preprocessing_to_use_mask = AllPrepr;
+        sep_cr_to_use_mask = FullSepCr;
+        sep_minim_to_use_mask = (TotalMinim ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim));
+        main_repetitions = 15;
+        max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 1'000;
+        max_rec_depth_for_flowcutter = 10;
+        max_estimated_treedepth_for_flowcutter = 1'000;
+        max_best_seps_for_minimizers = 5;
+        max_best_seps_for_recursion = 1;
+        pivot_balances = pivot_balances_large_graph;
     }
 
-    if (id == 3) { // slowest, but most robust
-
-
-
+    if (id == 3) { // trade-off
+        sep_cr_max_sources = 20;
+        pivots_to_use_mask = AllPivots;
+        preprocessing_to_use_mask = AllPrepr;
+        sep_cr_to_use_mask = FullSepCr;
+        sep_minim_to_use_mask = TotalMinim;
+        main_repetitions = 20;
+        max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 3'000;
+        max_rec_depth_for_flowcutter = 15;
+        max_estimated_treedepth_for_flowcutter = 3'000;
+        max_best_seps_for_minimizers = 10;
+        max_best_seps_for_recursion = 1;
+        pivot_balances = pivot_balances_small_graph;
     }
+
+    if (id == 4) { // slowest, but most robust
+        sep_cr_max_sources = 30;
+        pivots_to_use_mask = AllPivots;
+        preprocessing_to_use_mask = AllPrepr;
+        sep_cr_to_use_mask = FullSepCr;
+        sep_minim_to_use_mask = TotalMinim;
+        main_repetitions = 30;
+        max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 10'000;
+        max_rec_depth_for_flowcutter = 1e9;
+        max_estimated_treedepth_for_flowcutter = 10'000;
+        max_best_seps_for_minimizers = sep_cr_max_sources;
+        max_best_seps_for_recursion = 4;
+        pivot_balances = pivot_balances_full;
+    }
+
+    // max_time_millis = 5 * 3600'000; // 1 hour limit
 }
 
 void Config::disableAll() {
-    preprocessing_to_use_mask = Prepr::NoPrepr;
+    preprocessing_to_use_mask = NoPrepr;
     sep_cr_to_use_mask = NoCr;
     pivots_to_use_mask = NoPivots;
     sep_minim_to_use_mask = NoMinim;

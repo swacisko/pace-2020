@@ -168,7 +168,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     auto sortAndResizeSeparatorsForRecursion = [&](){
         sort( ALL(bestSeps), sepEval );
         auto it = unique( ALL(bestSeps), [&sepEval]( Separator& s1, Separator& s2 ){
-            return s1.stats.size * (s1.stats.maxCompSize+1) * (s1.stats.maxCompEdges+1) == s2.stats.size * (s2.stats.maxCompSize+1) * (s2.stats.maxCompEdges+1);
+            return 1ll * s1.stats.size * (s1.stats.maxCompSize+1) * (s1.stats.maxCompEdges+1) == 1ll * s2.stats.size * (s2.stats.maxCompSize+1) * (s2.stats.maxCompEdges+1);
         } );
 
         int SS = min( (int)( it - bestSeps.begin() ), cnf.max_best_seps_for_recursion);
@@ -248,44 +248,45 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     }
 
-
-
-
-
-
-
-
     sortAndResizeSeparatorsForMinimization();
 
-    // section for correction of found separators
-    if( cnf.sep_minim_to_use_mask != NoMinim ) {
-        if (rec_depth == 0 && cnf.write_logs) clog << "\t minimizing best separators" << endl;
-        int BSS = bestSeps.size();
-        for (int i = 0; i < BSS; i++) {
-            bestSep = bestSeps[i];
 
-            TotalMinimizer totMin(&sepEval, cnf);
-            totMin.cnf.cur_rec_depth = rec_depth;
-            bestSep = totMin.minimizeSeparator(bestSep);
-            bestSeps.push_back(bestSep);
+
+
+    auto minimizeSeparators = [&](bool create_sep_stats = false) {
+        sortAndResizeSeparatorsForMinimization();
+        // section for correction of found separators
+        if( cnf.sep_minim_to_use_mask != NoMinim ) {
+            if (rec_depth == 0 && cnf.write_logs) clog << "\t minimizing best separators" << endl;
+            int BSS = bestSeps.size();
+            for (int i = 0; i < BSS; i++) {
+                bestSep = bestSeps[i];
+
+                TotalMinimizer totMin(&sepEval, cnf);
+                totMin.cnf.cur_rec_depth = rec_depth;
+
+                if (rec_depth == 0 && create_sep_stats) sep_data.emplace_back(bestSep.stats, bestSep.stats);
+                bestSep = totMin.minimizeSeparator(bestSep);
+                if (rec_depth == 0 && create_sep_stats) sep_data.back().second = bestSep.stats;
+
+                bestSeps.push_back(bestSep);
+            }
+
+            for (auto &sp : bestSeps) sp.updatePointers(*V);
         }
 
-        for (auto &sp : bestSeps) sp.updatePointers(*V);
-    }
+        sortAndResizeSeparatorsForMinimization();
+    };
 
-    sortAndResizeSeparatorsForMinimization();
-
+    // minimizeSeparators(true);
     bestSep = bestSeps[0];
 
 
 
 
 
-
-
-
-    int est_depth = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep );
-    bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCutterCr) ) && est_depth <= cnf.max_estimated_treedepth_for_flowcutter
+    int est_depth = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep.stats) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep.stats );
+    bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCutterCr) ) && 0.8 * est_depth <= cnf.max_estimated_treedepth_for_flowcutter
         && rec_depth <= cnf.max_rec_depth_for_flowcutter && bestSeps[0].stats.size > 1;
     if( flowcutter_cond ){
 
@@ -311,16 +312,13 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         sortAndResizeSeparatorsForMinimization();
     }
 
-
+    minimizeSeparators(true);
+    if (!cnf.find_valid_dtree) return DepthTree{*V};
 
 
     if( V->size() > 500 && rec_depth <= 10 && cnf.write_logs ){
-        cerr << endl;
-        for(int i=0; i<rec_depth; i++) cerr << "  ";
-        cerr << rec_depth << ": ";
-        DEBUG(bestSep);
-
-        ENDL(1);
+        cerr << endl; for(int i=0; i<rec_depth; i++) cerr << "  "; cerr << rec_depth << ": ";
+        DEBUG(bestSep); ENDL(1);
     }
 
 

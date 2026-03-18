@@ -18,9 +18,9 @@ ostream& operator<<(ostream& str, SeparatorStats& stats){
 //        << "  |  maxCompDensity: " << stats.maxCompDensity
 //        << "  |  origEdges: " << stats.originalGraphEdges
 //        << "  |  approxHeightNode: " << ( stats.approximateMaxTreeHeightNode != -1 ? stats.approximateMaxTreeHeightNode : SeparatorEvaluators::estimateDepthBasedOnNodes(*stats.sep) )
-        << " | ahNode: " <<  SeparatorEvaluators::estimateDepthBasedOnNodes(*stats.sep)
+        << " | ahNode: " <<  SeparatorEvaluators::estimateDepthBasedOnNodes(stats)
 //        << "  |  approxHeightEdge: " << ( stats.approximateMaxTreeHeightEdge != -1 ? stats.approximateMaxTreeHeightEdge : SeparatorEvaluators::estimateDepthBasedOnEdges(*stats.sep) );
-        << " | ahEdge: " <<SeparatorEvaluators::estimateDepthBasedOnEdges(*stats.sep);
+        << " | ahEdge: " <<SeparatorEvaluators::estimateDepthBasedOnEdges(stats);
 
     return str;
 }
