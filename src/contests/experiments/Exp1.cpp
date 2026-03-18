@@ -166,7 +166,7 @@ void Exp1::runForConfiguration() {
     if ( cnf.node_scale_factor != -1.0 ) std::ranges::for_each(nsfs, [&](auto & a){a.first = cnf.node_scale_factor;});
     DEBUG(nsfs);
 
-    Config cnf = this->cnf;
+    Config cnf0 = this->cnf;
     if ( cnf.predefined_config_id ) cnf.setPredefinedConfig(cnf.predefined_config_id);
     cnf.startMain();
 
@@ -175,6 +175,9 @@ void Exp1::runForConfiguration() {
         sep_stats.clear();
 
         for(auto [nsf, min_node_iter] : nsfs) {
+            // clog << "\rRunning for nsf: " << nsf << flush;
+            clog << "\nRunning for nsf: " << nsf << flush;
+
             if (cnf.sw.tle("main")) {
                 unordered_map<int,int> par;
                 // for (int i=1; i<V.size(); i++) par[i] = i-1;
@@ -206,6 +209,8 @@ void Exp1::runForConfiguration() {
 
             trees.emplace_back(dtree,nsf);
             sep_stats.emplace_back(nsf, creator.sep_data);
+
+            clog << ",\t dtree.heigh: " << dtree.height << flush;
         }
 
         if ( !cnf.run_until_time_limit ) break;
@@ -225,6 +230,7 @@ void Exp1::runForConfiguration() {
         if ( trees.size() > cnf.main_repetitions ) assert( new_trees.size()+cnf.main_repetitions == trees.size() );
     }
 
+    cnf = cnf0;
     assignExpData(trees, sep_stats);
 }
 
@@ -298,7 +304,7 @@ void Exp1::initPreprocessing() {
 
     if (cnf.use_init_prepr) {
         V = V0;
-        init_kernelizer = DTKernelizer(V,cnf);
+        init_kernelizer = DTKernelizer(V0,cnf);
         if (cnf.write_logs) clog << "Starting initial kernelization" << endl;
         V = init_kernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
         if (cnf.write_logs)
@@ -494,10 +500,11 @@ int main(int argc, char* argv[]) {
     cnf.writeBasicInfo();
     cnf.write_logs = false;
 
-    // auto V = GraphReader::readGraphStandardEdges(cin);
-    auto V = GraphReader::readGraphDIMACSWunweighed(cin);
+    auto V = GraphReader::readGraphStandardEdges(cin);
+    // auto V = GraphReader::readGraphDIMACSWunweighed(cin);
     clog << "Graph read, V.size() = " << V.size() << ", edges: " << GraphUtils::countEdges(V) << endl;
 
+    assert(GraphUtils::isConnected(V));
 
     // running experiments
     Exp1 exp_runner(V,cnf);

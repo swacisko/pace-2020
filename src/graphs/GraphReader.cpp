@@ -16,7 +16,7 @@ namespace GraphReader{
             int a,b;
             cin >> a >> b;
 
-            clog << "CAUTION - changed readGraphStandardEdges()" << endl;
+            // clog << "CAUTION - changed readGraphStandardEdges()" << endl;
             a++, b++;
 
             V[a-1].push_back(b-1);

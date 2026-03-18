@@ -509,7 +509,7 @@ DepthTree DTKernelizer::dekernelizeSubgraphs(DepthTree dt) {
     }
 
     unordered_map<int,int> nodeDepth;
-    function< void(int,int,int) > calcDepthDfs = [ &dt, &stdStruct, &nodeDepth, &calcDepthDfs ]( int num, int par, int depth ){
+    function< void(int,int,int) > calcDepthDfs = [&]( int num, int par, int depth ){
         nodeDepth[num] = depth;
         for( int p : stdStruct[num] ) if( p != par ) calcDepthDfs( p,num,depth+1 );
     };

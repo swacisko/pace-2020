@@ -55,7 +55,7 @@ vector<Separator> FlowSeparatorCreator::createSeparators(VVI &V, int repeats) {
 Separator FlowSeparatorCreator::getSeparatorForFlow(VVI &V, VI sources, VI ends) {
     VVI paths = DisjointPaths::getSetOfDisjointPaths( V, sources, ends, true ); // using unit flow
 
-    DEBUG(paths.size());
+    // DEBUG(paths.size());
 
     VI nodes;
     nodes.reserve( accumulate( ALL(paths), 0, []( int s, VI& pth ){ return s + pth.size(); } ) );
