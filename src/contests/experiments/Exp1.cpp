@@ -12,6 +12,7 @@
 #include "../../../include/contests/experiments/Config.h"
 
 #include "DTKernelizer.h"
+#include "GraphUtils.h"
 #include "IntGenerator.h"
 #include "SeparatorEvaluators.h"
 
@@ -26,7 +27,7 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
     ranges::sort(trees, [&](auto &t1, auto & t2){ return t1.second < t2.second; });
     ranges::sort(sep_stats, [&](auto &s1, auto & s2){ return s1.first < s2.first; });
 
-    stringstream str;
+    stringstream str, str2;
 
     clog << "Found trees: " << endl;
     for (int t : views::transform( trees, [&](auto & tr){ return tr.first.height; } )) {
@@ -43,14 +44,23 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
     for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
         if (vec.empty()) return -1.0;
         double avg_size = accumulate( ALL(vec), 0.0, [&](double s, auto & b) { return s + b.first.size; } ) / vec.size();
+        for ( auto [i,a] : views::keys(vec) | views::enumerate  ) {
+            if (i) str2 << " ";
+            str2 << a.size;
+        }
+        str2 << " | ";
         return avg_size;
     } )) {
+        data.avg_avg_sep_sizes_before_minim += t;
         clog << t << " ";
         str << t << " ";
     }
     clog << endl;
+    data.sep_sizes_before_minim = str2.str();
+    str2.str(""); str2.clear();
     data.avg_sep_sizes_before_minim = str.str();
     str.str(""); str.clear();
+    data.avg_avg_sep_sizes_before_minim /= sep_stats.size();
 
     clog << "Found avg estimated tree depth based on separator stats, before minimization: " << endl;
     for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
@@ -58,14 +68,23 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
         double avg_td = accumulate( ALL(vec), 0.0, [&](double s, auto & b) {
             return s + b.first.estimated_td_edge_plus_node;
         } ) / vec.size();
+        for ( auto [i,a] : views::keys(vec) | views::enumerate  ) {
+            if (i) str2 << " ";
+            str2 << a.estimated_td_edge_plus_node;
+        }
+        str2 << " | ";
         return avg_td;
     } )) {
+        data.avg_avg_estimated_td_before_minim += t;
         clog << t << " ";
         str << t << " ";
     }
     clog << endl;
+    data.estimated_td_before_minim = str2.str();
+    str2.str(""); str2.clear();
     data.avg_estimated_td_before_minim = str.str();
     str.str(""); str.clear();
+    data.avg_avg_estimated_td_before_minim /= sep_stats.size();
     //***************************************************************************************************************
 
 
@@ -74,14 +93,23 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
     for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
         if (vec.empty()) return -1.0;
         double avg_size = accumulate( ALL(vec), 0.0, [&](double s, auto & b) { return s + b.second.size; } ) / vec.size();
+        for ( auto [i,a] : views::values(vec) | views::enumerate  ) {
+            if (i) str2 << " ";
+            str2 << a.size;
+        }
+        str2 << " | ";
         return avg_size;
     } )) {
+        data.avg_avg_sep_sizes_after_minim += t;
         clog << t << " ";
         str << t << " ";
     }
     clog << endl;
+    data.sep_sizes_after_minim = str2.str();
+    str2.str(""); str2.clear();
     data.avg_sep_sizes_after_minim = str.str();
     str.str(""); str.clear();
+    data.avg_avg_sep_sizes_after_minim /= sep_stats.size();
 
     clog << "Found avg estimated tree depth based on separator stats, after minimization: " << endl;
     for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
@@ -89,21 +117,42 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
         double avg_td = accumulate( ALL(vec), 0.0, [&](double s, auto & b) {
             return s + b.second.estimated_td_edge_plus_node;
         } ) / vec.size();
+        for ( auto [i,a] : views::values(vec) | views::enumerate  ) {
+            if (i) str2 << " ";
+            str2 << a.estimated_td_edge_plus_node;
+        }
+        str2 << " | ";
         return avg_td;
     } )) {
+        data.avg_avg_estimated_td_after_minim += t;
         clog << t << " ";
         str << t << " ";
     }
     clog << endl;
+    data.estimated_td_after_minim = str2.str();
+    str2.str(""); str2.clear();
     data.avg_estimated_td_after_minim = str.str();
     str.str(""); str.clear();
+    data.avg_avg_estimated_td_after_minim /= sep_stats.size();
     //***************************************************************************************************************
 
     ENDL(3);
+
+    DEBUG(data.sep_sizes_before_minim);
     DEBUG(data.avg_sep_sizes_before_minim);
+    DEBUG(data.avg_avg_sep_sizes_before_minim);
+    DEBUG(data.estimated_td_before_minim);
     DEBUG(data.avg_estimated_td_before_minim);
+    DEBUG(data.avg_avg_estimated_td_before_minim);
+
+    ENDL(1);
+
+    DEBUG(data.sep_sizes_after_minim);
     DEBUG(data.avg_sep_sizes_after_minim);
+    DEBUG(data.avg_avg_sep_sizes_after_minim);
+    DEBUG(data.estimated_td_after_minim);
     DEBUG(data.avg_estimated_td_after_minim);
+    DEBUG(data.avg_avg_estimated_td_after_minim);
 
 }
 
@@ -118,11 +167,8 @@ void Exp1::runForConfiguration() {
     DEBUG(nsfs);
 
     Config cnf = this->cnf;
-    cnf.write_logs = false;
-    // if (cnf.experiment_name == "sep_cr" || cnf.experiment_name == "sep_minim") cnf.find_valid_dtree = false;
-
-    cnf.startMain();
     if ( cnf.predefined_config_id ) cnf.setPredefinedConfig(cnf.predefined_config_id);
+    cnf.startMain();
 
     while ( !cnf.sw.tle("main") ) {
 
@@ -446,6 +492,7 @@ int main(int argc, char* argv[]) {
 
     Config cnf = parseArguments(argc, argv);
     cnf.writeBasicInfo();
+    cnf.write_logs = false;
 
     // auto V = GraphReader::readGraphStandardEdges(cin);
     auto V = GraphReader::readGraphDIMACSWunweighed(cin);
