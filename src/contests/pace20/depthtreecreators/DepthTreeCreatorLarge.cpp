@@ -72,12 +72,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
                 DepthTree dt((*V));
                 if (!newV.empty()) {
                     DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
-                    // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
-                    // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-                    // dtCL.USE_KERNELIZATION = USE_KERNELIZATION; // here it will always be true, since we are in kernelization section
-                    // dtCL.USE_DEG3_KERNELIZATION = USE_DEG3_KERNELIZATION; // here it will always be true, since we are in kernelization section
-                    // dtCL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION; // here it will always be true, since we are in kernelization section
-
                     dt = dtCL.getDepthTree();
                     assert(dt.root >= 0 && dt.root < newV.size());
                 } else dt.root = -1;
@@ -111,11 +105,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             DepthTree dt((*V));
             if (cnf.write_logs) clog << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge with recDepth = 1" << endl;
             DepthTreeCreatorLarge dtCL(newV, rec_depth + 1,cnf);
-            // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
-            // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-            // dtCL.USE_KERNELIZATION = USE_KERNELIZATION;
-            // dtCL.USE_DEG3_KERNELIZATION = false;
-            // dtCL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION;
             dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, Prepr::IndSet3Prepr);
 
             dt = dtCL.getDepthTree();
@@ -134,11 +123,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             DepthTree dt((*V));
             if (cnf.write_logs) clog << "Kernelized degree4 nodes" << endl;
             DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
-            // dtCL.setSeparatorCreatorsMode(SEPARATOR_CREATORS_MODE);
-            // dtCL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-            // dtCL.USE_KERNELIZATION = USE_KERNELIZATION;
-            // dtCL.USE_DEG3_KERNELIZATION = false;
-            // dtCL.USE_DEG4_KERNELIZATION = false;
             dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, Prepr::IndSet3Prepr | Prepr::IndSet4Prepr);
 
             dt = dtCL.getDepthTree();
@@ -164,7 +148,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    // auto sortAndResizeSeparatorsForRecursion = [=,&bestSeps, &sepEval](){
     auto sortAndResizeSeparatorsForRecursion = [&](){
         sort( ALL(bestSeps), sepEval );
         auto it = unique( ALL(bestSeps), [&sepEval]( Separator& s1, Separator& s2 ){
@@ -176,7 +159,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         for(auto& sp : bestSeps) sp.updatePointers(*V);
     };
 
-    // auto sortAndResizeSeparatorsForMinimization = [=,&bestSeps, &sepEval](){
     auto sortAndResizeSeparatorsForMinimization = [&](){
         sort( ALL(bestSeps), sepEval );
         auto it = unique( ALL(bestSeps), [&sepEval]( Separator& s1, Separator& s2 ){
@@ -324,7 +306,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     sortAndResizeSeparatorsForRecursion();
 
-    // auto getBestDTForSeparator = [=,&bestSeps]( Separator& bestSep ){
     auto getBestDTForSeparator = [&]( Separator& bestSep ){
         if( bestSep.stats.size != bestSep.nodes.size() ){
             cerr << "in getBestDTForSeparator, stats.size() != nodes.size()" << endl;
@@ -345,12 +326,6 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             InducedGraph compGraph = GraphInducer::induce( *V, cmp );
 
             DepthTreeCreatorLarge dtCrL( compGraph.V, rec_depth+1, cnf );
-            // dtCrL.setSeparatorCreatorsMode( SEPARATOR_CREATORS_MODE );
-            // dtCrL.MINIMIZE_SEPARATORS = MINIMIZE_SEPARATORS;
-            // dtCrL.USE_KERNELIZATION = USE_KERNELIZATION;
-            // dtCrL.USE_DEG3_KERNELIZATION = USE_DEG3_KERNELIZATION;
-            // dtCrL.USE_DEG4_KERNELIZATION = USE_DEG4_KERNELIZATION;
-
             DepthTree cmpTree = dtCrL.getDepthTree();
             cmpTree.V = nullptr;
 

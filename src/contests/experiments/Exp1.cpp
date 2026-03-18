@@ -24,46 +24,86 @@ vector<pair<double, bool>> Exp1::createNSFS() {
 
 void Exp1::assignExpData(auto &trees, auto & sep_stats) {
     ranges::sort(trees, [&](auto &t1, auto & t2){ return t1.second < t2.second; });
+    ranges::sort(sep_stats, [&](auto &s1, auto & s2){ return s1.first < s2.first; });
+
+    stringstream str;
 
     clog << "Found trees: " << endl;
-    for (int t : views::transform( trees, [&](auto & tr){ return tr.first.height; } )) clog << t << " ";
+    for (int t : views::transform( trees, [&](auto & tr){ return tr.first.height; } )) {
+        clog << t << " ";
+        str << t << " ";
+    }
     clog << endl;
+    data.tree_heights = str.str();
+    str.str(""); str.clear();
 
 
-
+    //***************************************************************************************************************
     clog << "Found avg separator sizes, before minimization: " << endl;
-    for (double t : views::transform( sep_stats, [&](auto & vec) {
+    for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
+        if (vec.empty()) return -1.0;
         double avg_size = accumulate( ALL(vec), 0.0, [&](double s, auto & b) { return s + b.first.size; } ) / vec.size();
         return avg_size;
-    } )) clog << t << " ";
+    } )) {
+        clog << t << " ";
+        str << t << " ";
+    }
     clog << endl;
+    data.avg_sep_sizes_before_minim = str.str();
+    str.str(""); str.clear();
 
     clog << "Found avg estimated tree depth based on separator stats, before minimization: " << endl;
-    for (double t : views::transform( sep_stats, [&](auto & vec) {
+    for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
+        if (vec.empty()) return -1.0;
         double avg_td = accumulate( ALL(vec), 0.0, [&](double s, auto & b) {
             return s + b.first.estimated_td_edge_plus_node;
         } ) / vec.size();
         return avg_td;
-    } )) clog << t << " ";
+    } )) {
+        clog << t << " ";
+        str << t << " ";
+    }
     clog << endl;
+    data.avg_estimated_td_before_minim = str.str();
+    str.str(""); str.clear();
+    //***************************************************************************************************************
 
 
-
+    //***************************************************************************************************************
     clog << "Found avg separator sizes, after minimization: " << endl;
-    for (double t : views::transform( sep_stats, [&](auto & vec) {
+    for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
+        if (vec.empty()) return -1.0;
         double avg_size = accumulate( ALL(vec), 0.0, [&](double s, auto & b) { return s + b.second.size; } ) / vec.size();
         return avg_size;
-    } )) clog << t << " ";
+    } )) {
+        clog << t << " ";
+        str << t << " ";
+    }
     clog << endl;
+    data.avg_sep_sizes_after_minim = str.str();
+    str.str(""); str.clear();
 
     clog << "Found avg estimated tree depth based on separator stats, after minimization: " << endl;
-    for (double t : views::transform( sep_stats, [&](auto & vec) {
+    for (double t : views::values(sep_stats) | views::transform( [&](auto & vec) {
+        if (vec.empty()) return -1.0;
         double avg_td = accumulate( ALL(vec), 0.0, [&](double s, auto & b) {
             return s + b.second.estimated_td_edge_plus_node;
         } ) / vec.size();
         return avg_td;
-    } )) clog << t << " ";
+    } )) {
+        clog << t << " ";
+        str << t << " ";
+    }
     clog << endl;
+    data.avg_estimated_td_after_minim = str.str();
+    str.str(""); str.clear();
+    //***************************************************************************************************************
+
+    ENDL(3);
+    DEBUG(data.avg_sep_sizes_before_minim);
+    DEBUG(data.avg_estimated_td_before_minim);
+    DEBUG(data.avg_sep_sizes_after_minim);
+    DEBUG(data.avg_estimated_td_after_minim);
 
 }
 
@@ -71,7 +111,7 @@ void Exp1::runForConfiguration() {
     clog << "Exp1 -> running for configuration" << endl;
 
     vector<pair<DepthTree,double>> trees;
-    vector<vector<pair<SeparatorStats,SeparatorStats>>> sep_stats;
+    vector<pair<double,vector<pair<SeparatorStats,SeparatorStats>>>> sep_stats;
 
     auto nsfs = createNSFS();
     if ( cnf.node_scale_factor != -1.0 ) std::ranges::for_each(nsfs, [&](auto & a){a.first = cnf.node_scale_factor;});
@@ -79,13 +119,15 @@ void Exp1::runForConfiguration() {
 
     Config cnf = this->cnf;
     cnf.write_logs = false;
-    if (cnf.experiment_name == "sep_cr" || cnf.experiment_name == "sep_minim") {
-        cnf.find_valid_dtree = false;
-    }
+    // if (cnf.experiment_name == "sep_cr" || cnf.experiment_name == "sep_minim") cnf.find_valid_dtree = false;
+
     cnf.startMain();
     if ( cnf.predefined_config_id ) cnf.setPredefinedConfig(cnf.predefined_config_id);
 
     while ( !cnf.sw.tle("main") ) {
+
+        sep_stats.clear();
+
         for(auto [nsf, min_node_iter] : nsfs) {
             if (cnf.sw.tle("main")) {
                 unordered_map<int,int> par;
@@ -113,11 +155,11 @@ void Exp1::runForConfiguration() {
                     SeparatorEvaluators::edgeScaleFactor * SeparatorEvaluators::estimateDepthBasedOnEdges(sd.second)
                     + SeparatorEvaluators::nodeScaleFactor * SeparatorEvaluators::estimateDepthBasedOnNodes(sd.second);
 
-                DEBUG2(sd.first, sd.second);
+                // DEBUG2(sd.first, sd.second);
             }
 
             trees.emplace_back(dtree,nsf);
-            sep_stats.push_back(creator.sep_data);
+            sep_stats.emplace_back(nsf, creator.sep_data);
         }
 
         if ( !cnf.run_until_time_limit ) break;
@@ -367,6 +409,7 @@ Config parseArguments(int argc, char ** argv) {
     ap.addOption("prepr_mask", false);
     ap.addOption("nsf", false);
     ap.addOption("init_prepr", false);
+    ap.addOption("find_valid_dtree", false);
 
     ap.parse(argc, argv);
     for ( string opt : ap.required_options ) if( !ap.hasProvidedOption(opt) ) {
@@ -385,6 +428,7 @@ Config parseArguments(int argc, char ** argv) {
     ap.findAndAssign("main_reps", "int", &cnf.main_repetitions);
     ap.findAndAssign("nsf", "double", &cnf.node_scale_factor);
     ap.findAndAssign("init_prepr", "bool", &cnf.use_init_prepr);
+    ap.findAndAssign("find_valid_dtree", "bool", &cnf.find_valid_dtree);
 
 
     assert( cnf.allowed_experiments.contains(cnf.experiment_name) );

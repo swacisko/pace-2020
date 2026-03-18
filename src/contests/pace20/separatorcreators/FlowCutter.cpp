@@ -352,7 +352,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
     int augmentingTimes = 0;
 
-    // auto augmentStep = [=, &augmentingTimes,&lastPNSourceSize, &lastPNTargetSize, &canExpandSources, &canExpandTargets](){
     auto augmentStep = [&](){
         if( cnf.sw.tle("main") ) return;
 
@@ -402,7 +401,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
     };
 
-    // auto expandSourcesStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
     auto expandSourcesStep = [&](){
         if( cnf.sw.tle("main") ) return;
 
@@ -456,7 +454,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
         }
     };
 
-    // auto expandTargetsStep = [=, &lastPNSourceSize, &lastPNTargetSize,&canExpandSources, &canExpandTargets](){
     auto expandTargetsStep = [&](){
         if( cnf.sw.tle("main") ) return;
 
@@ -490,7 +487,6 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
         if( isSource[pN] ){
             canExpandTargets = false;
-//            continue;
             return;
         }
 
@@ -521,14 +517,10 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
 
 
         if( canBeAugmented ){
-
             augmentStep();
-
         }else{
 
             if( !canExpandSources && !canExpandTargets ) break; // all sources and targets already form a separator, each piercing node is either a source or target
-
-
 
 
             bool expandSources;
@@ -560,21 +552,15 @@ VI FlowCutter::getFlowCutterExpansionOrder(VVI &V, VI src, VI ends) {
             }
 
 
-
             if( expandSources ){ // original version
                 expandSourcesStep();
             }else{
                 expandTargetsStep();
             }
-
         }
     }
 
-    if(debug){
-        DEBUG(sources);
-        DEBUG(targets);
-        DEBUG(expansionOrder);
-    }
+    if(debug){ DEBUG(sources); DEBUG(targets); DEBUG(expansionOrder); }
 
     return expansionOrder;
 }
@@ -605,9 +591,7 @@ void FlowCutter::bGrow(int t) {
     if( t == -1 ) reachable = uf->getTargetReachableNodes();
     else reachable = uf->getTargetReachableNodes( t, isTargetReachable );
 
-    if(debug){
-        cerr << "bGrow  "; DEBUG(reachable);
-    }
+    if(debug){ cerr << "bGrow  "; DEBUG(reachable); }
 
     targetReachable.insert( targetReachable.end(), ALL(reachable) );
     for(int d : reachable){
@@ -627,9 +611,7 @@ int FlowCutter::getDistanceValueFrom(VI &dst1, VI &dst2, int p) {
 
 int FlowCutter::getPiercingSourceNode() {
     bool debug = false;
-    if(debug){
-        cerr << "Getting piercing source node" << endl;
-    }
+    if(debug){ cerr << "Getting piercing source node" << endl; }
 
     VI piercingSourceNodes;
     for( int i = (int)sourceBorder.size()-1; i>=0; i-- ){
@@ -675,10 +657,7 @@ int FlowCutter::getPiercingSourceNode() {
         }
     }
 
-    if(debug){
-        DEBUG(augmenting);
-        DEBUG(nonAugmenting);
-    }
+    if(debug){ DEBUG(augmenting); DEBUG(nonAugmenting); }
 
     auto comp = [&](int a, int b){
         if( isTarget[a] != isTarget[b] ) return (isTarget[a] == true); // if a is target and b is not, then  b is LARGER than a, that is better, since we maximize values

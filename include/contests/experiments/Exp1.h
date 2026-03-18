@@ -15,11 +15,19 @@
 struct ExpData {
     int N0,M0, N,M, treedepth;
 
-    map<string,string> pivot_data;
-    map<string,string> preprocessing_data;
-    map<string,string> sep_minim_data;
-    map<string,string> sep_cr_data;
-    map<string,string> sep_eval_data;
+    // map<string,string> pivot_data;
+    // map<string,string> preprocessing_data;
+    // map<string,string> sep_minim_data;
+    // map<string,string> sep_cr_data;
+    // map<string,string> sep_eval_data;
+
+    string tree_heights;
+
+    string avg_sep_sizes_before_minim;
+    string avg_sep_sizes_after_minim;
+
+    string avg_estimated_td_before_minim;
+    string avg_estimated_td_after_minim;
 
     static vector<string> getHeader() {
         vector<string> fields{"N0", "M0", "N", "M", "td" };

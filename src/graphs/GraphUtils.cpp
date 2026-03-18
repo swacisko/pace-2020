@@ -561,15 +561,6 @@ void GraphUtils::removeEdges(VVI &V, VPII &edges, bool directed) {
 }
 
 bool GraphUtils::isConnected(VVI &V) {
-    // VB was(V.size(),false);
-    // int cnt = 0;
-    // function< void(int) > dfs = [&V,&was, &dfs, &cnt](int num){
-    //     was[num] = true;
-    //     cnt++;
-    //     for( int d : V[num] ) if( !was[d] ) dfs(d);
-    // };
-    // dfs(0);
-    // return (cnt == V.size());
 
     // below is the equivalent to the code above, but does not use recursion (and hence has no issues with small
     // stack size in IDE connected to WSL).

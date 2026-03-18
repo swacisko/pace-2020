@@ -572,7 +572,6 @@ DepthTree DepthTreePivotMaker::makeHallSetPivotsSinglePass(DepthTree &dt, bool u
             for( int i=1; i<tree[num].size(); i++ ) addSubtree( tree[num][i] );
         };
 
-        // function< void(int) > dfs = [&dt, &tree, &data, &subtrees, &N, &V, &onDeepestPath, &P, &P2, &T0, &dfs, &addSubtree](int num){
         function< void(int) > dfs = [&](int num){
             if( tree[num].size() >= 2 ) { // num has sons
                 onDeepestPath.insert(ALL(data[num].sepNodes));
@@ -660,7 +659,7 @@ DepthTree DepthTreePivotMaker::makeHallSetPivotsSinglePass(DepthTree &dt, bool u
         }
     };
 
-    auto checkPivotForImprovement = [&dt, &N, &T, &P, &P2, &neighP2, &isInT0, &data, &tree, &V, &heightOfNodeStretch, &nodeDepths, &nodeNeighInSubtree](){
+    auto checkPivotForImprovement = [&](){
 
         if( P2.size() + neighP2.size() >= dt.height ) return false;
 
@@ -691,8 +690,7 @@ DepthTree DepthTreePivotMaker::makeHallSetPivotsSinglePass(DepthTree &dt, bool u
         return true;
     };
 
-    auto makePivot =
-            [&dt, &N, &T, &P, &P2, &neighP2, &isInT0, &data, &tree, &V, &heightOfNodeStretch, &nodeDepths, &isInP2, &isInP, &isInNeighP2, &subtrees, &T0](){
+    auto makePivot = [&](){
 
         VI vecP( ALL(P) ), vecP2(ALL(P2)), vecNeighP2(ALL(neighP2)), PNoP2;
 

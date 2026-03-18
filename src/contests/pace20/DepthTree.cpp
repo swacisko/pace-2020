@@ -174,7 +174,6 @@ int DepthTree::calculateHeight() {
     VVI V = getStandardStructure();
     if( V.size() == 1 ) return 1;
 
-    // function< int(int,int) > dfs = [=,&dfs,&V](int num, int par){
     function< int(int,int) > dfs = [&](int num, int par){
         if( num != root && V[num].size() == 1 ) return 1;
 

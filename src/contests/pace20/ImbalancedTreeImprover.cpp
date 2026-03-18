@@ -32,12 +32,10 @@ DepthTree ImbalancedTreeImprover::improve(DepthTree &t) {
 
     function< void(int,int) > addToSmallerParts = [&tree, &data, &nodesInSmallerParts, &addToSmallerParts, &rootsInSmallerParts](int num, int par){
         StandardUtils::append( nodesInSmallerParts.back(), data[num].sepNodes );
-//        rootsInSmallerParts.push_back( data[num].sepNodes[0] );
         for( int d : tree[num] ) if( d != par ) addToSmallerParts(d,num);
     };
 
 
-    // function< void(int,int) > getNodesToClose = [=,&tree,&T,&data, &nodesToClose, &getNodesToClose, &secondHighest, &nodesInSmallerParts,&rootsInSmallerParts]
     function< void(int,int) > getNodesToClose = [&]
             (int num, int par){
         if( tree[num].size() <= 1 ) return; // if in a leaf or there is only one stretch (e.g in a clique)

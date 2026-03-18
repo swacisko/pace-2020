@@ -52,8 +52,6 @@ public:
 
     Separator* sep;
 
-//    function<bool(Separator&, Separator&)>* sepEval; // function to evaluate separator
-
     int n,N;
 
     const int minimizationType;

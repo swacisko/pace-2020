@@ -463,7 +463,6 @@ vector<Separator> BFSSeparatorCreator::createLayerSeparators(VI sources){
 
         //***************** SECTION WITH FAST MINIMIZER
 
-        // auto createLargestComponentsSeparatorForLayer = [=, &edgesInCompL, &edgesInCompR, &nodesInCompL, &nodesInCompR, &compBorderL, &compBorderR]
         auto createLargestComponentsSeparatorForLayer = [&]
                 (int i, VB &was, FAU &fau, bool useVC = false) {
 

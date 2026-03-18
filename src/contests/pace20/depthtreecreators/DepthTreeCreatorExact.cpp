@@ -200,7 +200,6 @@ void DepthTreeCreatorExact::createArtPointsAndUpdateBranchingPoints() {
 
 
 bool DepthTreeCreatorExact::branch() {
-    // auto fun = [=]( VI subset ){
     auto fun = [&]( VI subset ){
         long long mask = 0;
         for(int p : subset) mask |= (1ll << p);
@@ -294,7 +293,6 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
     minimalSubsets = VB( 1 + (1ll)<<B, true );
 
     // returns true if V \ subset is connected, false otherwise
-    // auto checkSubsetForConnectivity = [=,&B]( VI subset ){
     auto checkSubsetForConnectivity = [&]( VI subset ){
 
         for(int& p : subset) p += C;
@@ -302,7 +300,6 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
         VB was(componentGraph.size(),false);
         VB inSubset = StandardUtils::toVB(componentGraph.size(),subset);
 
-        // function< void(int) > dfs = [=,&dfs,&cnt,&was, &inSubset](int num){
         function< void(int) > dfs = [&](int num){
             was[num] = true;
             cnt++;
@@ -334,7 +331,6 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
     long long testCnt = 1;
     minimalSubsets[0] = false;
 
-    // function< void(int) > markAllSupermasks = [=,&markAllSupermasks, &B, &testCnt]( long long mask ){
     function< void(int) > markAllSupermasks = [&]( long long mask ){
         if( mask > ( 1ll << B ) || minimalSubsets[mask] == false ) return;
         minimalSubsets[mask] = false;
@@ -343,7 +339,6 @@ void DepthTreeCreatorExact::createMinimalSubsets() {
         for( int i=0; i <= B; i++ ) markAllSupermasks( mask | (1ll << i) );
     };
 
-    // auto fun = [=,&checkSubsetForConnectivity,&B, &markAllSupermasks, &testCnt](VI subset){
     auto fun = [&](VI subset){
         long long mask = 0;
         for(int p : subset) mask |= (1ll << p);
