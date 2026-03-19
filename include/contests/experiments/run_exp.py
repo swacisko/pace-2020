@@ -61,7 +61,7 @@ separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCr', 'FlowCutterC
 separator_minmizers = [ 'BfsMinim', 'ExpansionMinim', 'FlowCutterMinim', 'FlowCutterDstMinim', 'FlowMinim', 'GNEMinim', 'NeighVCCMinim']
 preprocessing_types = [ 'ArtPointsPrepr', 'IndSet3Prepr', 'IndSet4Prepr', 'DanglingTrees',]
 pivot_types = ['BlockPivots', 'HallSetPivots']
-
+def_time = 5 * 3600 # default time of 5h
 def parseSepCr(x):
     if x == -1: return 'no'
     if x == len(separator_creators):
@@ -95,7 +95,7 @@ def createPreprocessingCommands():
         cmd = getDefaultCommand()
         cmd += ' --run_name=prepr__' + parsePreprocessing(x)
         solver_params = '--experiment_name=prepr' + \
-                        ' --time=3600' + \
+                        ' --time=' + str(def_time) + \
                         ' --pred_conf=1' + \
                         ' --init_prepr=true' + \
                         ' --prepr_mask=' + str(y)
@@ -109,12 +109,12 @@ def createPreprocessingCommands():
 
 
 def createInitPreprocessingAndPredefinedConfigsCommands():
-    for init_prepr in [0,1]:
-        for pred_conf in [1,2,3,4]:
+    for pred_conf in [4,3,2,1]:
+        for init_prepr in [0,1]:
             cmd = getDefaultCommand()
             cmd += ' --run_name=init_prepr_and_pred_conf__' + str(init_prepr) + '_' + str(pred_conf)
             solver_params = '--experiment_name=init_prepr_and_pred_conf' + \
-                            ' --time=3600' + \
+                            ' --time=' + str(def_time) + \
                             ' --pred_conf=' + str(pred_conf) + \
                             ' --init_prepr=' + str(init_prepr)
             cmd += ' --solver_params=\'' + solver_params + '\''
@@ -125,10 +125,10 @@ def createPivotsCommands():
         cmd = getDefaultCommand()
         cmd += ' --run_name=pivots__' + parsePivots(x)
         solver_params = '--experiment_name=pivots' + \
-                        ' --time=3600' + \
+                        ' --time=' + str(def_time) + \
                         ' --pivots_mask=' + str(y) + \
                         ' --init_prepr=true' + \
-                        ' --pred_conf=2'
+                        ' --pred_conf=1'
         cmd += ' --solver_params=\'' + solver_params + '\''
         return cmd
 
@@ -143,7 +143,7 @@ def createSepMinimCommands():
         cmd = getDefaultCommand()
         cmd += ' --run_name=sep_minim__' + parseSepMinim(x)
         solver_params = '--experiment_name=sep_minim' + \
-                        ' --time=3600' + \
+                        ' --time=' + str(def_time) + \
                         ' --sep_minim_mask=' + str(y) + \
                         ' --pred_conf=1' + \
                         ' --pivots_mask=0' + \
@@ -180,8 +180,8 @@ def createTestsCommands():
     createSepCrCommands()
     createSepMinimCommands()
     createPivotsCommands()
-    createInitPreprocessingAndPredefinedConfigsCommands()
     createPreprocessingCommands()
+    createInitPreprocessingAndPredefinedConfigsCommands()
 
 
 
