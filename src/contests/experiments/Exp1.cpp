@@ -291,9 +291,11 @@ void Exp1::runAllExperiments() {
 
     string en = cnf.experiment_name;
 
-    if (en == "cur_config") runForConfiguration();
-    if (en == "sep_cr") runForConfiguration();
-    if (en == "sep_minim") runForConfiguration();
+    runForConfiguration();
+
+    // if (en == "cur_config") runForConfiguration();
+    // if (en == "sep_cr") runForConfiguration();
+    // if (en == "sep_minim") runForConfiguration();
 
 
     // else if (en == "pivots") runPivotExperiments(); // done in runForConfiguration

@@ -38,8 +38,9 @@ DepthTreeCreatorLarge::DepthTreeCreatorLarge(VVI &V, int recurrenceDepth, Config
 
 DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
-    bool use_only_art_points = ( cnf.preprocessing_to_use_mask == ArtPointsPrepr );
-    if( cnf.sw.tle("main") || ( use_only_art_points && rec_depth > 50 ) ){
+    // bool use_only_art_points = ( cnf.preprocessing_to_use_mask == ArtPointsPrepr );
+    // if( cnf.sw.tle("main") || ( use_only_art_points && rec_depth > 50 ) ){
+    if( cnf.sw.tle("main") ){
         DepthTree dt(*V);
         dt.root = 0;
         dt.par[0] = -1;

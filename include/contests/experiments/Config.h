@@ -33,8 +33,8 @@ enum SepMinim {
 
 enum Prepr {
     // NoPrepr = 0,
-    ArtPointsPrepr=0,
-    IndSet3Prepr,
+    // ArtPointsPrepr=0,
+    IndSet3Prepr=0,
     IndSet4Prepr,
     DanglingTrees,
     AllPrepr,

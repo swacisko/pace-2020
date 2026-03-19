@@ -20,7 +20,7 @@ void Config::writeBasicInfo() {
     for (int i=0; i<30; i++) {
         if (preprocessing_to_use_mask & (1<<i) & (1<<IndSet3Prepr)) clog << "indset-3 ";
         if (preprocessing_to_use_mask & (1<<i) & (1<<IndSet4Prepr)) clog << "indset-4 ";
-        if (preprocessing_to_use_mask & (1<<i) & (1<<ArtPointsPrepr)) clog << "art-points ";
+        // if (preprocessing_to_use_mask & (1<<i) & (1<<ArtPointsPrepr)) clog << "art-points ";
         if (preprocessing_to_use_mask & (1<<i) & (1<<Prepr::DanglingTrees)) clog << "dangling-trees ";
     }
     clog << endl;
@@ -44,6 +44,13 @@ void Config::writeBasicInfo() {
         if (sep_minim_to_use_mask & (1<<i) & (1<<FlowCutterMinim)) clog << "flow-cutter ";
         if (sep_minim_to_use_mask & (1<<i) & (1<<FlowCutterDstMinim)) clog << "flow-cutter-dst ";
         if (sep_minim_to_use_mask & (1<<i) & (1<<GNEMinim)) clog << "gne ";
+    }
+    clog << endl;
+
+    clog << "\t pivots: ";
+    for (int i=0; i<30; i++) {
+        if (sep_cr_to_use_mask & (1<<i) & (1<<BlockPivots)) clog << "block ";
+        if (sep_cr_to_use_mask & (1<<i) & (1<<HallSetPivots)) clog << "hall-set ";
     }
     clog << endl;
 
