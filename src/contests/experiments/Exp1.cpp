@@ -30,12 +30,15 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
     stringstream str, str2;
 
     clog << "Found trees: " << endl;
+    data.avg_tree_height = 0;
     for (int t : views::transform( trees, [&](auto & tr){ return tr.first.height; } )) {
+        data.avg_tree_height += t;
         clog << t << " ";
         str << t << " ";
     }
     clog << endl;
     data.tree_heights = str.str();
+    data.avg_tree_height /= trees.size();
     str.str(""); str.clear();
 
 
@@ -138,6 +141,13 @@ void Exp1::assignExpData(auto &trees, auto & sep_stats) {
 
     ENDL(3);
 
+    DEBUG2(data.N0,data.M0);
+    DEBUG2(data.N, data.M);
+    DEBUG(data.tree_heights);
+    DEBUG(data.avg_tree_height);
+
+    ENDL(1);
+
     DEBUG(data.sep_sizes_before_minim);
     DEBUG(data.avg_sep_sizes_before_minim);
     DEBUG(data.avg_avg_sep_sizes_before_minim);
@@ -167,7 +177,7 @@ void Exp1::runForConfiguration() {
     DEBUG(nsfs);
 
     Config cnf0 = this->cnf;
-    if ( cnf.predefined_config_id ) cnf.setPredefinedConfig(cnf.predefined_config_id);
+    // if ( cnf.predefined_config_id ) cnf.setPredefinedConfig(cnf.predefined_config_id);
     cnf.startMain();
 
     while ( !cnf.sw.tle("main") ) {
@@ -234,47 +244,47 @@ void Exp1::runForConfiguration() {
     assignExpData(trees, sep_stats);
 }
 
-void Exp1::runPreprocessingExperiments() {
-    clog << "Exp1 -> running preprocessing experiments" << endl;
-    initPreprocessing();
-
-}
-
-void Exp1::runSeparatorCreatorExperiments() {
-    clog << "Exp1 -> running separator creator experiments" << endl;
-    initPreprocessing();
-
-}
-
-void Exp1::runSeparatorMinimizerExperiments() {
-    clog << "Exp1 -> running separator minimizer experiments" << endl;
-    initPreprocessing();
-
-}
-
-void Exp1::runPivotExperiments() {
-    clog << "Exp1 -> running pivot experiments" << endl;
-    initPreprocessing();
-
-}
-
-void Exp1::runSeparatorEvaluatorExperiments() {
-    clog << "Exp1 -> running separator evaluator experiments" << endl;
-    initPreprocessing();
-
-}
-
-void Exp1::runPredefinedConfigurationsExperiments() {
-    clog << "Exp1 -> running predefined configurations experiments" << endl;
-    initPreprocessing();
-
-}
-
-void Exp1::runFixedTimeExperiments() {
-    clog << "Exp1 -> running fixed time experiments" << endl;
-    initPreprocessing();
-
-}
+// void Exp1::runPreprocessingExperiments() {
+//     clog << "Exp1 -> running preprocessing experiments" << endl;
+//     initPreprocessing();
+//
+// }
+//
+// void Exp1::runSeparatorCreatorExperiments() {
+//     clog << "Exp1 -> running separator creator experiments" << endl;
+//     initPreprocessing();
+//
+// }
+//
+// void Exp1::runSeparatorMinimizerExperiments() {
+//     clog << "Exp1 -> running separator minimizer experiments" << endl;
+//     initPreprocessing();
+//
+// }
+//
+// void Exp1::runPivotExperiments() {
+//     clog << "Exp1 -> running pivot experiments" << endl;
+//     initPreprocessing();
+//
+// }
+//
+// void Exp1::runSeparatorEvaluatorExperiments() {
+//     clog << "Exp1 -> running separator evaluator experiments" << endl;
+//     initPreprocessing();
+//
+// }
+//
+// void Exp1::runPredefinedConfigurationsExperiments() {
+//     clog << "Exp1 -> running predefined configurations experiments" << endl;
+//     initPreprocessing();
+//
+// }
+//
+// void Exp1::runFixedTimeExperiments() {
+//     clog << "Exp1 -> running fixed time experiments" << endl;
+//     initPreprocessing();
+//
+// }
 
 void Exp1::runAllExperiments() {
     clog << "Exp1 -> running all experiments" << endl;
@@ -296,8 +306,8 @@ void Exp1::runAllExperiments() {
     // else if (en == "sep_eval") runSeparatorEvaluatorExperiments(); // do not do that at all - it can be extracted from almost all other experiments
 }
 
-void Exp1::runExtensiveConfigurationExperiments() {
-}
+// void Exp1::runExtensiveConfigurationExperiments() {
+// }
 
 void Exp1::initPreprocessing() {
     tie(data.N0, data.M0) = PII(V0.size(), GraphUtils::countEdges(V0));
@@ -470,17 +480,24 @@ Config parseArguments(int argc, char ** argv) {
     for ( string opt : ap.required_options ) assert( ap.hasProvidedOption(opt) );
 
 
+    ap.findAndAssign("pred_conf", "int", &cnf.predefined_config_id);
+    if (cnf.predefined_config_id != -1) cnf.setPredefinedConfig(cnf.predefined_config_id);
+
     ap.findAndAssign("time", "int", &cnf.max_time_millis);
     cnf.max_time_millis *= 1000;
 
     ap.findAndAssign("mtd", "string", &cnf.metadata_filepath);
     ap.findAndAssign("experiment_name", "string", &cnf.experiment_name);
     ap.findAndAssign("run_until_tle", "bool", &cnf.run_until_time_limit);
-    ap.findAndAssign("pred_conf", "int", &cnf.predefined_config_id);
     ap.findAndAssign("main_reps", "int", &cnf.main_repetitions);
     ap.findAndAssign("nsf", "double", &cnf.node_scale_factor);
     ap.findAndAssign("init_prepr", "bool", &cnf.use_init_prepr);
     ap.findAndAssign("find_valid_dtree", "bool", &cnf.find_valid_dtree);
+
+    ap.findAndAssign("pivots_mask", "int", &cnf.pivots_to_use_mask);
+    ap.findAndAssign("sep_cr_mask", "int", &cnf.sep_cr_to_use_mask);
+    ap.findAndAssign("sep_minim_mask", "int", &cnf.sep_minim_to_use_mask);
+    ap.findAndAssign("prepr_mask", "int", &cnf.preprocessing_to_use_mask);
 
 
     assert( cnf.allowed_experiments.contains(cnf.experiment_name) );

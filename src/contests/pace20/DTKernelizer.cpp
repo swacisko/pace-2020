@@ -439,11 +439,10 @@ VVI DTKernelizer::createDanglingSubgraphs(int recDepth) {
 
             DepthTreeCreatorLarge dtCr( g.V,1, cnf );
             dtCr.cnf.sep_cr_to_use_mask = SepCr::ArtPointCr;
-            // dtCr.setSeparatorCreatorsMode( DepthTreeCreatorLarge::ART_POINTS_CREATOR );
-            dtCr.cnf.sep_minim_to_use_mask = NoMinim;
-            // dtCr.MINIMIZE_SEPARATORS = false;
-            dtCr.cnf.preprocessing_to_use_mask = NoPrepr;
-            // dtCr.USE_KERNELIZATION = false;
+            // dtCr.cnf.sep_minim_to_use_mask = NoMinim;
+            dtCr.cnf.sep_minim_to_use_mask = 0;
+            // dtCr.cnf.preprocessing_to_use_mask = NoPrepr;
+            dtCr.cnf.preprocessing_to_use_mask = 0;
 
             assert( g.V.size() < V->size() );
 

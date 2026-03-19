@@ -10,8 +10,8 @@
 
 
 enum SepCr {
-    NoCr = 0,
-    ArtPointCr,
+    // NoCr = 0,
+    ArtPointCr=0,
     BfsCr,
     CompExpCr,
     FlowCr,
@@ -20,8 +20,8 @@ enum SepCr {
 };
 
 enum SepMinim {
-    NoMinim = 0,
-    BfsMinim,
+    // NoMinim = 0,
+    BfsMinim=0,
     ExpansionMinim,
     FlowCutterMinim,
     FlowCutterDstMinim,
@@ -32,8 +32,8 @@ enum SepMinim {
 };
 
 enum Prepr {
-    NoPrepr = 0,
-    ArtPointsPrepr,
+    // NoPrepr = 0,
+    ArtPointsPrepr=0,
     IndSet3Prepr,
     IndSet4Prepr,
     DanglingTrees,
@@ -42,8 +42,8 @@ enum Prepr {
 };
 
 enum Pivots {
-    NoPivots = 0,
-    BlockPivots,
+    // NoPivots = 0,
+    BlockPivots=0,
     HallSetPivots,
     AllPivots,
 };
@@ -76,7 +76,7 @@ public:
     int cur_rec_depth = 0;
 
     bool run_until_time_limit = false;
-    int predefined_config_id = 0;
+    int predefined_config_id = -1;
     int main_repetitions = 10;
     bool find_valid_dtree = true;
     double node_scale_factor = -1.0;

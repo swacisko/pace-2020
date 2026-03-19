@@ -23,6 +23,7 @@ struct ExpData {
     // map<string,string> sep_eval_data;
 
     string tree_heights;
+    double avg_tree_height;
 
     string sep_sizes_before_minim;
     string avg_sep_sizes_before_minim;
@@ -112,16 +113,15 @@ public:
 
     void runForConfiguration();
 
-    void runPreprocessingExperiments();
-    void runSeparatorCreatorExperiments();
-    void runSeparatorMinimizerExperiments();
-    void runPivotExperiments();
-    void runSeparatorEvaluatorExperiments();
-    void runPredefinedConfigurationsExperiments();
-    void runFixedTimeExperiments();
+    // void runPreprocessingExperiments();
+    // void runSeparatorCreatorExperiments();
+    // void runSeparatorMinimizerExperiments();
+    // void runPivotExperiments();
+    // void runSeparatorEvaluatorExperiments();
+    // void runPredefinedConfigurationsExperiments();
+    // void runFixedTimeExperiments();
     void runAllExperiments();
-
-    void runExtensiveConfigurationExperiments();
+    // void runExtensiveConfigurationExperiments();
 
 
     VVI V0, V;

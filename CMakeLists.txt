@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #SET(CMAKE_CXX_FLAGS "-D_GLIBCXX_DEBUG -std=c++20 -Wreturn-type -O0") # compilation for debugging
-SET(CMAKE_CXX_FLAGS "-std=c++23 -lm -O3") # turbo fast
+SET(CMAKE_CXX_FLAGS "-std=c++23 -O3 -march=native ") # turbo fast
 
 include(cmake/deps_gtest_benchmark.cmake)
 

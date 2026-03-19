@@ -114,7 +114,8 @@ namespace Pace20{
             }
 
 
-            useInitialKernelization = ( cnf.preprocessing_to_use_mask != Prepr::NoPrepr && V.size() >= cnf.min_graph_size_for_kernelization );
+            // useInitialKernelization = ( cnf.preprocessing_to_use_mask != Prepr::NoPrepr && V.size() >= cnf.min_graph_size_for_kernelization );
+            useInitialKernelization = ( cnf.preprocessing_to_use_mask != 0 && V.size() >= cnf.min_graph_size_for_kernelization );
             DepthTreeCreatorLarge *creator = nullptr;
             if( useInitialKernelization ) creator = new DepthTreeCreatorLarge( initKernV ,0, cnf );
             else creator = new DepthTreeCreatorLarge( V ,0, cnf );

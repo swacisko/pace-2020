@@ -14,7 +14,7 @@ void Config::writeBasicInfo() {
         << "\t node_scale_factor: " << node_scale_factor << endl
         << "\t min_graph_size_for_kernelization: " << min_graph_size_for_kernelization << endl
         << "\t main_repetitions: " << main_repetitions << endl
-        << "\t main_repetitions: " << main_repetitions << endl;
+        << "\t predefined_config: " << predefined_config_id << endl;
 
     clog << "\t preprocessing: ";
     for (int i=0; i<30; i++) {
@@ -47,9 +47,12 @@ void Config::writeBasicInfo() {
     }
     clog << endl;
 
+    clog << endl;
 }
 
 void Config::setPredefinedConfig(int id) {
+    if (id == 0) disableAll();
+
     if (id == 1) { // fastest and weakest
         sep_cr_max_sources = 5;
         pivots_to_use_mask = AllPivots;
@@ -114,10 +117,14 @@ void Config::setPredefinedConfig(int id) {
 }
 
 void Config::disableAll() {
-    preprocessing_to_use_mask = NoPrepr;
-    sep_cr_to_use_mask = NoCr;
-    pivots_to_use_mask = NoPivots;
-    sep_minim_to_use_mask = NoMinim;
+    // preprocessing_to_use_mask = NoPrepr;
+    // sep_cr_to_use_mask = NoCr;
+    // pivots_to_use_mask = NoPivots;
+    // sep_minim_to_use_mask = NoMinim;
+    preprocessing_to_use_mask = 0;
+    sep_cr_to_use_mask = 0;
+    pivots_to_use_mask = 0;
+    sep_minim_to_use_mask = 0;
 }
 
 double Config::sep_balance = 0.97;

@@ -58,7 +58,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-    if( cnf.preprocessing_to_use_mask != NoPrepr ) {
+    // if( cnf.preprocessing_to_use_mask != NoPrepr ) {
+    if( cnf.preprocessing_to_use_mask != 0 ) {
         if( V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0) {
             DTKernelizer dtKernelizer(*V,cnf);
             VVI newV;
@@ -238,7 +239,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     auto minimizeSeparators = [&](bool create_sep_stats = false) {
         sortAndResizeSeparatorsForMinimization();
         // section for correction of found separators
-        if( cnf.sep_minim_to_use_mask != NoMinim ) {
+        // if( cnf.sep_minim_to_use_mask != NoMinim ) {
+        if( cnf.sep_minim_to_use_mask != 0 ) {
             if (rec_depth == 0 && cnf.write_logs) clog << "\t minimizing best separators" << endl;
             int BSS = bestSeps.size();
             for (int i = 0; i < BSS; i++) {
@@ -255,6 +257,10 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             }
 
             for (auto &sp : bestSeps) sp.updatePointers(*V);
+        }else {
+            for (auto & bs : bestSeps) {
+                if (rec_depth == 0 && create_sep_stats) sep_data.emplace_back(bs.stats, bs.stats);
+            }
         }
 
         sortAndResizeSeparatorsForMinimization();
@@ -615,7 +621,8 @@ void DepthTreeCreatorLarge::test() {
             centrDt.height = centrDt.calculateHeight();
 
             DepthTreeCreatorLarge dtcl(V,0, cnf);
-            dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
+            // dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
+            dtcl.cnf.preprocessing_to_use_mask = 0;
             DepthTree dt = dtcl.getDepthTree();
 
             if( centrDt.height < dt.height ){

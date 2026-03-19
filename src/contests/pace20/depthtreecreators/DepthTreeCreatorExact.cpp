@@ -449,11 +449,10 @@ DepthTree DepthTreeCreatorExact::getDTCLLowerBound() {
         }
 
         DepthTreeCreatorLarge dtcl(*V, 1,cnf); // recDepth is set to 1 just to disable logs
-        // dtcl.MINIMIZE_SEPARATORS = false;
-        dtcl.cnf.sep_minim_to_use_mask = NoMinim;
-        // dtcl.USE_KERNELIZATION = false;
-        dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
-        // dtcl.SEPARATOR_CREATORS_MODE = DepthTreeCreatorLarge::COMP_EXP_CREATOR;
+        // dtcl.cnf.sep_minim_to_use_mask = NoMinim;
+        dtcl.cnf.sep_minim_to_use_mask = 0;
+        // dtcl.cnf.preprocessing_to_use_mask = NoPrepr;
+        dtcl.cnf.preprocessing_to_use_mask = 0;
         dtcl.cnf.sep_cr_to_use_mask = SepCr::CompExpCr;
 
         DepthTree dtree = dtcl.getDepthTree();
