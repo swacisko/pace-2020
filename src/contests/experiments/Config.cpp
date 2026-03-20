@@ -72,10 +72,10 @@ void Config::setPredefinedConfig(int id) {
 
     if (id == 1) { // fastest and weakest
         sep_cr_max_sources = 5;
-        pivots_to_use_mask = AllPivots;
-        preprocessing_to_use_mask = AllPrepr;
-        sep_cr_to_use_mask = FullSepCr;
-        sep_minim_to_use_mask = (TotalMinim ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim) ^ (1<<FlowCutterMinim));
+        pivots_to_use_mask = (1<<AllPivots)-1;
+        preprocessing_to_use_mask = (1<<AllPrepr)-1;
+        sep_cr_to_use_mask = (1<<FullSepCr)-1;
+        sep_minim_to_use_mask = (((1<<TotalMinim)-1) ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim) ^ (1<<FlowCutterMinim));
         main_repetitions = 5;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 500;
         max_rec_depth_for_flowcutter = 5;
@@ -87,10 +87,10 @@ void Config::setPredefinedConfig(int id) {
 
     if (id == 2) { // trade-off
         sep_cr_max_sources = 15;
-        pivots_to_use_mask = AllPivots;
-        preprocessing_to_use_mask = AllPrepr;
-        sep_cr_to_use_mask = FullSepCr;
-        sep_minim_to_use_mask = (TotalMinim ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim));
+        pivots_to_use_mask = (1<<AllPivots)-1;
+        preprocessing_to_use_mask = (1<<AllPrepr)-1;
+        sep_cr_to_use_mask = (1<<FullSepCr)-1;
+        sep_minim_to_use_mask = (((1<<TotalMinim)-1) ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim));
         main_repetitions = 10;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 1'000;
         max_rec_depth_for_flowcutter = 10;
@@ -102,10 +102,10 @@ void Config::setPredefinedConfig(int id) {
 
     if (id == 3) { // trade-off
         sep_cr_max_sources = 20;
-        pivots_to_use_mask = AllPivots;
-        preprocessing_to_use_mask = AllPrepr;
-        sep_cr_to_use_mask = FullSepCr;
-        sep_minim_to_use_mask = TotalMinim;
+        pivots_to_use_mask = (1<<AllPivots)-1;
+        preprocessing_to_use_mask = (1<<AllPrepr)-1;
+        sep_cr_to_use_mask = (1<<FullSepCr)-1;
+        sep_minim_to_use_mask = (1<<TotalMinim)-1;
         main_repetitions = 15;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 3'000;
         max_rec_depth_for_flowcutter = 15;
@@ -117,10 +117,10 @@ void Config::setPredefinedConfig(int id) {
 
     if (id == 4) { // slowest, but most robust
         sep_cr_max_sources = 30;
-        pivots_to_use_mask = AllPivots;
-        preprocessing_to_use_mask = AllPrepr;
-        sep_cr_to_use_mask = FullSepCr;
-        sep_minim_to_use_mask = TotalMinim;
+        pivots_to_use_mask = (1<<AllPivots)-1;
+        preprocessing_to_use_mask = (1<<AllPrepr)-1;
+        sep_cr_to_use_mask = (1<<FullSepCr)-1;
+        sep_minim_to_use_mask = (1<<TotalMinim)-1;
         main_repetitions = 30;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 10'000;
         max_rec_depth_for_flowcutter = 1e9;

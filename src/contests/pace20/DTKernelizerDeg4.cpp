@@ -134,7 +134,7 @@ VVI DTKernelizerDeg4::kernelize() {
 
 
 //    DEBUG(deg4AddedEdges);
-    DEBUG(deg4RemovedNodes.size());
+    // DEBUG(deg4RemovedNodes.size());
 
     return kernelizedV.V;
 

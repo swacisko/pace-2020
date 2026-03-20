@@ -12,18 +12,22 @@ import argparse
 import numpy as np
 import itertools
 
-inst_dir = 'input_small_for_tests'
-output_root_dir = 'results_small_tests'
+RUN_TESTS = True
+
+inst_dir = 'input_small_tests' if RUN_TESTS else 'extreem-instances'
+output_root_dir = 'results_small_tests' if RUN_TESTS else 'results'
+
+# inst_dir = 'input_small_for_tests'
+# output_root_dir = 'results_small_tests'
 # inst_dir = "extreem-instances"
 # output_root_dir = 'results'
 solver_name = 'extreem'
 
-# results will be printed to a separate file
 
 # this program will run [thread_cnt] processes, each running TestsRunner, which runs tests_runner_threads processes,
 # each of which calls the solver process...
-thread_cnt = 4
-tests_runner_threads = 2
+thread_cnt = 4 if not RUN_TESTS else 4
+tests_runner_threads = 2 if not RUN_TESTS else 5
 
 def getDefaultCommand():
     cmd = 'python3 TestsRunner.py' + \
@@ -210,7 +214,7 @@ def createTestsCommands():
     createInitPreprocessingAndPredefinedConfigsCommands()
     createMainRepsCommands()
 
-
+    print(f'\nThere are {len(all_tests_commands)} commands to run')
 
 def runTestForCommand(cmd):
     print('Running command', cmd)
@@ -222,8 +226,11 @@ if __name__ == '__main__':
 
     createTestsCommands()
 
-    print('#CAUTION! Taking only a fraction of all tests, just to test if it works as intended...')
-    all_tests_commands = all_tests_commands[0:5]
+    if RUN_TESTS:
+        print('#CAUTION! Taking only a fraction of all tests, just to test if it works as intended...')
+        # all_tests_commands = all_tests_commands[0:5] # take first 5 elements
+        all_tests_commands = all_tests_commands[0::10] # take every fifth element
+
     print("All commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
 
     p = multiprocessing.Pool(thread_cnt)

@@ -43,6 +43,7 @@ struct ExpData {
         vector<string> fields{
             "N0", "M0", "N", "M",
             "tree heights",
+            "avg tree height",
 
             "avg sep sizes before minim",
             "avg sep sizes after minim",
@@ -83,6 +84,7 @@ struct ExpData {
         auto writeDataInternal = [&]() {
             str << N0 << "," << M0 << "," << N << "," << M << ","
             << tree_heights << ","
+            << avg_tree_height << ","
 
             << avg_sep_sizes_before_minim << ","
             << avg_sep_sizes_after_minim << ","
