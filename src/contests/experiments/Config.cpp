@@ -4,57 +4,67 @@
 
 #include "../../../include/contests/experiments/Config.h"
 
+vector<pair<string, string>> Config::getConfigEntries() {
+    vector<pair<string, string>> entries;
+
+    entries.emplace_back("max_time", to_string(max_time_millis / 1000));
+    entries.emplace_back("metadata_filepath", metadata_filepath);
+    entries.emplace_back("experiment_name", experiment_name);
+    entries.emplace_back("run_until_time_limit", to_string(run_until_time_limit));
+    entries.emplace_back("main_repetitions", to_string(main_repetitions));
+    entries.emplace_back("node_scale_factor", to_string(node_scale_factor));
+    entries.emplace_back("min_graph_size_for_kernelization", to_string(min_graph_size_for_kernelization));
+    entries.emplace_back("predefined_config_id", to_string(predefined_config_id));
+    entries.emplace_back("use_init_prepr", to_string(use_init_prepr));
+    entries.emplace_back("max_rec_depth_for_flowcutter", to_string(max_rec_depth_for_flowcutter));
+    entries.emplace_back("max_estimated_treedepth_for_flowcutter", to_string(max_estimated_treedepth_for_flowcutter));
+
+    stringstream str;
+    for (int i=0; i<30; i++) {
+        if (preprocessing_to_use_mask & (1<<i) & (1<<IndSet3Prepr)) str << "indset-3 ";
+        if (preprocessing_to_use_mask & (1<<i) & (1<<IndSet4Prepr)) str << "indset-4 ";
+        // if (preprocessing_to_use_mask & (1<<i) & (1<<ArtPointsPrepr)) str << "art-points ";
+        if (preprocessing_to_use_mask & (1<<i) & (1<<Prepr::DanglingTrees)) str << "dangling-trees ";
+    }
+    entries.emplace_back("preprocessing", str.str());
+    str.clear(); str.str("");
+
+    for (int i=0; i<30; i++) {
+        if (sep_cr_to_use_mask & (1<<i) & (1<<ArtPointCr)) str << "art-point ";
+        if (sep_cr_to_use_mask & (1<<i) & (1<<BfsCr)) str << "bfs ";
+        if (sep_cr_to_use_mask & (1<<i) & (1<<CompExpCr)) str << "comp-exp ";
+        // if (sep_cr_to_use_mask & (1<<i) & (1<<FlowCr)) str << "flow ";
+        if (sep_cr_to_use_mask & (1<<i) & (1<<FlowCutterCr)) str << "flow-cutter ";
+    }
+    entries.emplace_back("creators", str.str());
+    str.clear(); str.str("");
+
+    for (int i=0; i<30; i++) {
+        if (sep_minim_to_use_mask & (1<<i) & (1<<BfsMinim)) str << "bfs ";
+        if (sep_minim_to_use_mask & (1<<i) & (1<<NeighVCCMinim)) str << "neigh-vc ";
+        if (sep_minim_to_use_mask & (1<<i) & (1<<ExpansionMinim)) str << "exp ";
+        if (sep_minim_to_use_mask & (1<<i) & (1<<FlowMinim)) str << "flow ";
+        if (sep_minim_to_use_mask & (1<<i) & (1<<FlowCutterMinim)) str << "flow-cutter ";
+        if (sep_minim_to_use_mask & (1<<i) & (1<<FlowCutterDstMinim)) str << "flow-cutter-dst ";
+        if (sep_minim_to_use_mask & (1<<i) & (1<<GNEMinim)) str << "gne ";
+    }
+    entries.emplace_back("minimizers", str.str());
+    str.clear(); str.str("");
+
+    for (int i=0; i<30; i++) {
+        if (pivots_to_use_mask & (1<<i) & (1<<BlockPivots)) str << "block ";
+        if (pivots_to_use_mask & (1<<i) & (1<<HallSetPivots)) str << "hall-set ";
+    }
+    entries.emplace_back("pivots", str.str());
+    str.clear(); str.str("");
+
+    return entries;
+}
+
 void Config::writeBasicInfo() {
-    clog << "Config:" << endl
-        << "\t max_time: " << max_time_millis / 1000 << endl
-        << "\t metadata_filepath: " << metadata_filepath << endl
-        << "\t experiment_name: " << experiment_name << endl
-        << "\t run_until_time_limit: " << run_until_time_limit << endl
-        << "\t main_repetitions: " << main_repetitions << endl
-        << "\t node_scale_factor: " << node_scale_factor << endl
-        << "\t min_graph_size_for_kernelization: " << min_graph_size_for_kernelization << endl
-        << "\t main_repetitions: " << main_repetitions << endl
-        << "\t predefined_config: " << predefined_config_id << endl;
-
-    clog << "\t preprocessing: ";
-    for (int i=0; i<30; i++) {
-        if (preprocessing_to_use_mask & (1<<i) & (1<<IndSet3Prepr)) clog << "indset-3 ";
-        if (preprocessing_to_use_mask & (1<<i) & (1<<IndSet4Prepr)) clog << "indset-4 ";
-        // if (preprocessing_to_use_mask & (1<<i) & (1<<ArtPointsPrepr)) clog << "art-points ";
-        if (preprocessing_to_use_mask & (1<<i) & (1<<Prepr::DanglingTrees)) clog << "dangling-trees ";
-    }
-    clog << endl;
-
-    clog << "\t creators: ";
-    for (int i=0; i<30; i++) {
-        if (sep_cr_to_use_mask & (1<<i) & (1<<ArtPointCr)) clog << "art-point ";
-        if (sep_cr_to_use_mask & (1<<i) & (1<<BfsCr)) clog << "bfs ";
-        if (sep_cr_to_use_mask & (1<<i) & (1<<CompExpCr)) clog << "comp-exp ";
-        if (sep_cr_to_use_mask & (1<<i) & (1<<FlowCr)) clog << "flow ";
-        if (sep_cr_to_use_mask & (1<<i) & (1<<FlowCutterCr)) clog << "flow-cutter ";
-    }
-    clog << endl;
-
-    clog << "\t minimizers: ";
-    for (int i=0; i<30; i++) {
-        if (sep_minim_to_use_mask & (1<<i) & (1<<BfsMinim)) clog << "bfs ";
-        if (sep_minim_to_use_mask & (1<<i) & (1<<NeighVCCMinim)) clog << "neigh-vc ";
-        if (sep_minim_to_use_mask & (1<<i) & (1<<ExpansionMinim)) clog << "exp ";
-        if (sep_minim_to_use_mask & (1<<i) & (1<<FlowMinim)) clog << "flow ";
-        if (sep_minim_to_use_mask & (1<<i) & (1<<FlowCutterMinim)) clog << "flow-cutter ";
-        if (sep_minim_to_use_mask & (1<<i) & (1<<FlowCutterDstMinim)) clog << "flow-cutter-dst ";
-        if (sep_minim_to_use_mask & (1<<i) & (1<<GNEMinim)) clog << "gne ";
-    }
-    clog << endl;
-
-    clog << "\t pivots: ";
-    for (int i=0; i<30; i++) {
-        if (sep_cr_to_use_mask & (1<<i) & (1<<BlockPivots)) clog << "block ";
-        if (sep_cr_to_use_mask & (1<<i) & (1<<HallSetPivots)) clog << "hall-set ";
-    }
-    clog << endl;
-
-    clog << endl;
+    auto entries = Config::getConfigEntries();
+    clog << "Config: " << endl;
+    for (auto [k,v] : entries) clog << "\t" << k << ": " << v << endl;
 }
 
 void Config::setPredefinedConfig(int id) {

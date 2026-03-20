@@ -465,8 +465,6 @@ Config parseArguments(int argc, char ** argv) {
     ap.addOption("pred_conf", false);
     ap.addOption("main_reps", false);
 
-
-    // ap.addOption("imb_impr", false); // imbalanced improver
     ap.addOption("pivots_mask", false);
     ap.addOption("sep_cr_mask", false);
     ap.addOption("sep_minim_mask", false);
@@ -505,6 +503,12 @@ Config parseArguments(int argc, char ** argv) {
     // assert( cnf.allowed_experiments.contains(cnf.experiment_name) );
     // if (cnf.experiment_name == "predefined_configs") assert( cnf.predefined_config_id != 0 );
 
+
+    // we cannot have the only separator creator be ArtPoints nor FlowCutter - art points might not find even a single
+    // separator, while FlowCutter might not even be run for graphs that do not contain small separators
+    if ( cnf.sep_cr_to_use_mask == (1<<ArtPointCr) ) cnf.sep_cr_to_use_mask |= (1<<BfsCr);
+    if ( cnf.sep_cr_to_use_mask == (1<<FlowCutterCr) ) cnf.sep_cr_to_use_mask |= (1<<BfsCr);
+
     return cnf;
 }
 
@@ -518,6 +522,9 @@ int main(int argc, char* argv[]) {
     Config cnf = parseArguments(argc, argv);
     cnf.writeBasicInfo();
     cnf.write_logs = false;
+
+    Stopwatch sw;
+    sw.start("main");
 
     auto V = GraphReader::readGraphStandardEdges(cin);
     // auto V = GraphReader::readGraphDIMACSWunweighed(cin);
@@ -535,6 +542,9 @@ int main(int argc, char* argv[]) {
     ofstream f(cnf.metadata_filepath);
     data.writeData(f,cnf);
     f.close();
+
+    sw.stop("main");
+    sw.writeAll();
 
     return 0;
 }

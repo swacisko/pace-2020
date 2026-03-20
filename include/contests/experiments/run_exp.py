@@ -58,11 +58,12 @@ def createTablesAndRankings():
 all_tests_commands = []
 
 
-separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCr', 'FlowCutterCr']
+# separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCr', 'FlowCutterCr']
+separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCutterCr']
 separator_minmizers = [ 'BfsMinim', 'ExpansionMinim', 'FlowCutterMinim', 'FlowCutterDstMinim', 'FlowMinim', 'GNEMinim', 'NeighVCCMinim']
 preprocessing_types = [ 'ArtPointsPrepr', 'IndSet3Prepr', 'IndSet4Prepr', 'DanglingTrees',]
 pivot_types = ['BlockPivots', 'HallSetPivots']
-def_time = 3 * 3600 # default time of 5h
+def_time = 2 * 3600 # default time of 5h
 def parseSepCr(x):
     if x == -1: return 'no'
     if x == len(separator_creators):
@@ -174,7 +175,7 @@ def createSepCrCommands():
         cmd = getDefaultCommand()
         cmd += ' --run_name=sep_cr__' + parseSepCr(x)
         solver_params = '--experiment_name=sep_cr' + \
-                        ' --time=3600' + \
+                        ' --time=' + str(def_time) + \
                         ' --sep_cr_mask=' + str(y) + \
                         ' --pred_conf=0' + \
                         ' --init_prepr=true'
@@ -209,6 +210,6 @@ print('#CAUTION! Taking only a fraction of all tests, just to test if it works a
 all_tests_commands = all_tests_commands[0:5]
 print("All commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
 
-# p = multiprocessing.Pool(thread_cnt)
-# dss = p.map(runTestForCommand, all_tests_commands, chunksize=1)
-# createTablesAndRankings()
+p = multiprocessing.Pool(thread_cnt)
+dss = p.map(runTestForCommand, all_tests_commands, chunksize=1)
+createTablesAndRankings()

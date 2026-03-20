@@ -189,8 +189,9 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
     }
 
 
+    bool use_bfs_creator = (cnf.sep_cr_to_use_mask & (1<<SepCr::BfsCr));
 
-    if( cnf.sep_cr_to_use_mask & (1<<SepCr::BfsCr) ){ // BFS
+    if( use_bfs_creator ){ // BFS
         if( rec_depth == 0 && cnf.write_logs ) clog << "\t creating bfs" << endl;
         BFSSeparatorCreator sepCr(*V,cnf);
         vector<Separator>  bfsSeps = sepCr.createSeparators(*V, cnf.sep_cr_max_sources);
@@ -198,19 +199,19 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
         for( auto& sp : bestSeps ) sp.updatePointers(*V);
     }
 
-    if( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCr)){ // FLOW
-        if( rec_depth == 0 && cnf.write_logs) clog << "\t creating flow" << endl;
-        GreedyNodeEdgeMinimizer minimizer(cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
-        minimizer.sepEval = &sepEval;
-        FlowSeparatorCreator sepFl(cnf,&minimizer);
-        int repeats = cnf.sep_cr_max_sources;
-        vector<Separator> flowSeps = sepFl.createSeparators( *V, repeats );
-        bestSeps.insert( bestSeps.end(), ALL(flowSeps) );
-        for( auto& sp : bestSeps ) sp.updatePointers(*V);
-    }
+    // if( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCr)){ // FLOW
+    //     if( rec_depth == 0 && cnf.write_logs) clog << "\t creating flow" << endl;
+    //     GreedyNodeEdgeMinimizer minimizer(cnf, cnf.minimize_nodes_iteration ? GreedyNodeEdgeMinimizer::MINIMIZE_NODES : GreedyNodeEdgeMinimizer::MINIMIZE_EDGES );
+    //     minimizer.sepEval = &sepEval;
+    //     FlowSeparatorCreator sepFl(cnf,&minimizer);
+    //     int repeats = cnf.sep_cr_max_sources;
+    //     vector<Separator> flowSeps = sepFl.createSeparators( *V, repeats );
+    //     bestSeps.insert( bestSeps.end(), ALL(flowSeps) );
+    //     for( auto& sp : bestSeps ) sp.updatePointers(*V);
+    // }
 
 
-    if( cnf.sep_cr_to_use_mask & (1<<SepCr::CompExpCr) ){ // ARTICULATION POINTS
+    if( cnf.sep_cr_to_use_mask & (1<<SepCr::CompExpCr) ){ // component expansion creator
         if( rec_depth == 0 && cnf.write_logs ) clog << "\t creating component expansion" << endl;
         ComponentExpansionSeparatorCreator ceCr( sepEval, cnf );
 
@@ -276,7 +277,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     int est_depth = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep.stats) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep.stats );
     bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCutterCr) ) && 0.8 * est_depth <= cnf.max_estimated_treedepth_for_flowcutter
-        && rec_depth <= cnf.max_rec_depth_for_flowcutter && bestSeps[0].stats.size > 1;
+        && rec_depth <= cnf.max_rec_depth_for_flowcutter; // && bestSeps[0].stats.size > 1;
     if( flowcutter_cond ){
 
         if( rec_depth == 0 && cnf.write_logs ){ clog << "\tflow cutter" << endl;  }

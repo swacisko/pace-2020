@@ -14,7 +14,7 @@ enum SepCr {
     ArtPointCr=0,
     BfsCr,
     CompExpCr,
-    FlowCr,
+    // FlowCr,
     FlowCutterCr,
     FullSepCr
 };
@@ -51,6 +51,7 @@ enum Pivots {
 class Config {
 public:
     void writeBasicInfo();
+    vector<pair<string,string>> getConfigEntries();
 
     static constexpr int inf = 1e9+1;
 
