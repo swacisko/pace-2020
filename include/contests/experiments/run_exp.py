@@ -21,8 +21,8 @@ solver_name = 'extreem'
 
 # this program will run [thread_cnt] processes, each running TestsRunner, which runs tests_runner_threads processes,
 # each of which calls the solver process...
-thread_cnt = 1
-tests_runner_threads = 8
+thread_cnt = 2
+tests_runner_threads = 4
 
 def getDefaultCommand():
     cmd = 'python3 TestsRunner.py' + \
