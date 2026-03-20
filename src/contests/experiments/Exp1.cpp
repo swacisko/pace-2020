@@ -458,8 +458,8 @@ Config parseArguments(int argc, char ** argv) {
 
 
     ArgParser ap;
-    ap.addOption("experiment_name",true);
-    ap.addOption("time", true);
+    ap.addOption("experiment_name",false);
+    ap.addOption("time", false);
     ap.addOption("mtd", true);
     ap.addOption("run_until_tle", false);
     ap.addOption("pred_conf", false);
@@ -484,7 +484,7 @@ Config parseArguments(int argc, char ** argv) {
     if (cnf.predefined_config_id != -1) cnf.setPredefinedConfig(cnf.predefined_config_id);
 
     ap.findAndAssign("time", "int", &cnf.max_time_millis);
-    cnf.max_time_millis *= 1000;
+    if( ap.hasProvidedOption("time") ) cnf.max_time_millis *= 1000;
 
     ap.findAndAssign("mtd", "string", &cnf.metadata_filepath);
     ap.findAndAssign("experiment_name", "string", &cnf.experiment_name);

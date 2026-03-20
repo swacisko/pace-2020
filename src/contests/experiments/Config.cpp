@@ -76,7 +76,7 @@ void Config::setPredefinedConfig(int id) {
         preprocessing_to_use_mask = AllPrepr;
         sep_cr_to_use_mask = FullSepCr;
         sep_minim_to_use_mask = (TotalMinim ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim) ^ (1<<FlowCutterMinim));
-        main_repetitions = 10;
+        main_repetitions = 5;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 500;
         max_rec_depth_for_flowcutter = 5;
         max_estimated_treedepth_for_flowcutter = 500;
@@ -91,7 +91,7 @@ void Config::setPredefinedConfig(int id) {
         preprocessing_to_use_mask = AllPrepr;
         sep_cr_to_use_mask = FullSepCr;
         sep_minim_to_use_mask = (TotalMinim ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim));
-        main_repetitions = 15;
+        main_repetitions = 10;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 1'000;
         max_rec_depth_for_flowcutter = 10;
         max_estimated_treedepth_for_flowcutter = 1'000;
@@ -106,7 +106,7 @@ void Config::setPredefinedConfig(int id) {
         preprocessing_to_use_mask = AllPrepr;
         sep_cr_to_use_mask = FullSepCr;
         sep_minim_to_use_mask = TotalMinim;
-        main_repetitions = 20;
+        main_repetitions = 15;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 3'000;
         max_rec_depth_for_flowcutter = 15;
         max_estimated_treedepth_for_flowcutter = 3'000;

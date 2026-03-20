@@ -73,10 +73,14 @@ struct ExpData {
                 if (i) str << ",";
                 str << f;
             }
+
+            auto entries = cnf.getConfigEntries();
+            for(const auto & k : entries | views::keys) str << "," << k;
+
             str << endl;
         };
 
-        auto writeData = [&]() {
+        auto writeDataInternal = [&]() {
             str << N0 << "," << M0 << "," << N << "," << M << ","
             << tree_heights << ","
 
@@ -94,12 +98,17 @@ struct ExpData {
             << sep_sizes_after_minim << ","
             << estimated_td_before_minim << ","
             << estimated_td_after_minim;
+        };
 
-            str << endl;
+        auto writeCnfInternal = [&]() {
+            auto entries = cnf.getConfigEntries();
+            for(const auto& v : entries | views::values) str << "," << v;
         };
 
         writeHeader();
-        writeData();
+        writeDataInternal();
+        writeCnfInternal();
+        str << endl;
     }
 };
 

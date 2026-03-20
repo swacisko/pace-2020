@@ -78,7 +78,7 @@ public:
 
     bool run_until_time_limit = false;
     int predefined_config_id = -1;
-    int main_repetitions = 10;
+    int main_repetitions = 5;
     bool find_valid_dtree = true;
     double node_scale_factor = -1.0;
 
