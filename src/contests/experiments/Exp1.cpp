@@ -502,8 +502,8 @@ Config parseArguments(int argc, char ** argv) {
     ap.findAndAssign("prepr_mask", "int", &cnf.preprocessing_to_use_mask);
 
 
-    assert( cnf.allowed_experiments.contains(cnf.experiment_name) );
-    if (cnf.experiment_name == "predefined_configs") assert( cnf.predefined_config_id != 0 );
+    // assert( cnf.allowed_experiments.contains(cnf.experiment_name) );
+    // if (cnf.experiment_name == "predefined_configs") assert( cnf.predefined_config_id != 0 );
 
     return cnf;
 }

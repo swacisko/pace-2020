@@ -9,6 +9,7 @@ import timeit
 import time
 import platform
 import argparse
+import numpy as np
 import itertools
 
 # inst_dir = "normalized_with_clouds_single_triangle"
@@ -18,10 +19,10 @@ solver_name = 'extreem'
 
 # results will be printed to a separate file
 
-# this program will run [thread_cnt processes], each running TestsRunner, which runs tests_runner_threads processes,
+# this program will run [thread_cnt] processes, each running TestsRunner, which runs tests_runner_threads processes,
 # each of which calls the solver process...
-thread_cnt = 2
-tests_runner_threads = 4
+thread_cnt = 1
+tests_runner_threads = 8
 
 def getDefaultCommand():
     cmd = 'python3 TestsRunner.py' + \
@@ -61,7 +62,7 @@ separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCr', 'FlowCutterC
 separator_minmizers = [ 'BfsMinim', 'ExpansionMinim', 'FlowCutterMinim', 'FlowCutterDstMinim', 'FlowMinim', 'GNEMinim', 'NeighVCCMinim']
 preprocessing_types = [ 'ArtPointsPrepr', 'IndSet3Prepr', 'IndSet4Prepr', 'DanglingTrees',]
 pivot_types = ['BlockPivots', 'HallSetPivots']
-def_time = 5 * 3600 # default time of 5h
+def_time = 3 * 3600 # default time of 5h
 def parseSepCr(x):
     if x == -1: return 'no'
     if x == len(separator_creators):
@@ -87,7 +88,16 @@ def parsePreprocessing(x):
     return preprocessing_types[x]
 
 
-
+def createMainRepsCommands():
+    for pred_conf in [4, 3, 2, 1]:
+        for main_reps in np.arange(30,4,-5):
+            cmd = getDefaultCommand()
+            cmd += ' --run_name=main_reps_and_pred_conf__' + str(main_reps) + '_' + str(pred_conf)
+            solver_params = '--experiment_name=main_reps_and_pred_conf' + \
+                            ' --time=' + str(5 * def_time) + \
+                            ' --pred_conf=' + str(pred_conf)
+            cmd += ' --solver_params=\'' + solver_params + '\''
+            all_tests_commands.append(cmd)
 
 
 def createPreprocessingCommands():
@@ -100,6 +110,7 @@ def createPreprocessingCommands():
                         ' --init_prepr=true' + \
                         ' --prepr_mask=' + str(y)
         cmd += ' --solver_params=\'' + solver_params + '\''
+        return cmd
 
     for prepr in range(len(preprocessing_types)):
         all_tests_commands.append(getCmd(prepr, 1<<prepr))
@@ -114,7 +125,7 @@ def createInitPreprocessingAndPredefinedConfigsCommands():
             cmd = getDefaultCommand()
             cmd += ' --run_name=init_prepr_and_pred_conf__' + str(init_prepr) + '_' + str(pred_conf)
             solver_params = '--experiment_name=init_prepr_and_pred_conf' + \
-                            ' --time=' + str(def_time) + \
+                            ' --time=' + str(5*def_time) + \
                             ' --pred_conf=' + str(pred_conf) + \
                             ' --init_prepr=' + str(init_prepr)
             cmd += ' --solver_params=\'' + solver_params + '\''
@@ -182,7 +193,7 @@ def createTestsCommands():
     createPivotsCommands()
     createPreprocessingCommands()
     createInitPreprocessingAndPredefinedConfigsCommands()
-
+    createMainRepsCommands()
 
 
 
@@ -195,7 +206,7 @@ print(f'{(platform.system())=}')
 createTestsCommands()
 
 print('#CAUTION! Taking only a fraction of all tests, just to test if it works as intended...')
-all_tests_commands = all_tests_commands[::50]
+all_tests_commands = all_tests_commands[0:5]
 print("All commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
 
 # p = multiprocessing.Pool(thread_cnt)

@@ -51,7 +51,7 @@ file(GLOB SOURCES
 #add_executable(ExTREEm ${SOURCES}  main.cpp )
 
 
-add_executable(exp1 ${SOURCES}
+add_executable(extreem ${SOURCES}
         include/contests/experiments/Exp1.h
         src/CONTESTS/experiments/Exp1.cpp
 )

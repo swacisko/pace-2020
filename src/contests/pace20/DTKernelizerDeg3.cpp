@@ -17,7 +17,7 @@
 #include <graphs/vertex_cover/SolutionVC.h>
 
 VVI DTKernelizerDeg3::kernelize() {
-    cerr << endl << "Before deg3 kernelization, V has " << V->size() << " nodes and " << GraphUtils::countEdges(*V) << " edges" << endl;
+    // cerr << endl << "Before deg3 kernelization, V has " << V->size() << " nodes and " << GraphUtils::countEdges(*V) << " edges" << endl;
 
     VI deg3;
     set<PII> presE;
@@ -113,7 +113,7 @@ VVI DTKernelizerDeg3::kernelize() {
 //    DEBUG(kernelizedV.V.size());
 //    exit(1);
 
-    cerr << "After deg3 kernelization, kernelizedV has " << kernelizedV.V.size() << " nodes and " << GraphUtils::countEdges(kernelizedV.V) << " edges" << endl;
+    // cerr << "After deg3 kernelization, kernelizedV has " << kernelizedV.V.size() << " nodes and " << GraphUtils::countEdges(kernelizedV.V) << " edges" << endl;
 
     return kernelizedV.V;
 

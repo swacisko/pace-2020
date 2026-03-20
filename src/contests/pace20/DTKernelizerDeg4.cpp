@@ -16,7 +16,7 @@
 
 VVI DTKernelizerDeg4::kernelize() {
 
-    cerr << endl << "Before deg4 kernelization, V has " << V->size() << " nodes and " << GraphUtils::countEdges(*V) << " edges" << endl;
+    // cerr << endl << "Before deg4 kernelization, V has " << V->size() << " nodes and " << GraphUtils::countEdges(*V) << " edges" << endl;
 
     VI deg4;
     set<PII> presE;
@@ -130,7 +130,7 @@ VVI DTKernelizerDeg4::kernelize() {
 //    DEBUG(kernelizedV.V.size());
 //    exit(1);
 
-    cerr << "After deg4 kernelization, kernelizedV has " << kernelizedV.V.size() << " nodes and " << GraphUtils::countEdges(kernelizedV.V) << " edges" << endl;
+    // cerr << "After deg4 kernelization, kernelizedV has " << kernelizedV.V.size() << " nodes and " << GraphUtils::countEdges(kernelizedV.V) << " edges" << endl;
 
 
 //    DEBUG(deg4AddedEdges);

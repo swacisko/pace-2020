@@ -107,7 +107,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             DepthTree dt((*V));
             if (cnf.write_logs) clog << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge with recDepth = 1" << endl;
             DepthTreeCreatorLarge dtCL(newV, rec_depth + 1,cnf);
-            dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, Prepr::IndSet3Prepr);
+            dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, 1<<IndSet3Prepr);
 
             dt = dtCL.getDepthTree();
             dt = ker.dekernelize(dt);
@@ -125,7 +125,7 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             DepthTree dt((*V));
             if (cnf.write_logs) clog << "Kernelized degree4 nodes" << endl;
             DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
-            dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, Prepr::IndSet3Prepr | Prepr::IndSet4Prepr);
+            dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, (1<<IndSet3Prepr) | (1<<IndSet4Prepr));
 
             dt = dtCL.getDepthTree();
             dt = ker.dekernelize(dt);

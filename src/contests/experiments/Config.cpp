@@ -116,7 +116,7 @@ void Config::setPredefinedConfig(int id) {
         max_rec_depth_for_flowcutter = 1e9;
         max_estimated_treedepth_for_flowcutter = 10'000;
         max_best_seps_for_minimizers = sep_cr_max_sources;
-        max_best_seps_for_recursion = 4;
+        max_best_seps_for_recursion = 1;
         pivot_balances = pivot_balances_full;
     }
 
