@@ -12,7 +12,7 @@ import argparse
 import numpy as np
 import itertools
 
-RUN_TESTS = True
+RUN_TESTS = False
 
 inst_dir = 'input_small_tests' if RUN_TESTS else 'extreem-instances'
 output_root_dir = 'results_small_tests' if RUN_TESTS else 'results'
@@ -20,7 +20,7 @@ output_root_dir = 'results_small_tests' if RUN_TESTS else 'results'
 # inst_dir = 'input_small_for_tests'
 # output_root_dir = 'results_small_tests'
 # inst_dir = "extreem-instances"
-# output_root_dir = 'results'
+# output_root_dir = 'results_full'
 solver_name = 'extreem'
 
 
@@ -98,7 +98,19 @@ def parsePreprocessing(x):
     return preprocessing_types[x]
 
 
-def createPredConfCommandsCommands():
+def createNSFCommands():
+    for nsf in np.linspace(0.0,1.0,10):
+        cmd = getDefaultCommand()
+        cmd += ' --run_name=nsf__'  + str(f"{nsf:.3f}")
+        solver_params = '--experiment_name=nsf' + \
+                        ' --time=' + str(def_time) + \
+                        ' --nsf=' + str(f"{nsf:.3f}") + \
+                        ' --pred_conf=3' + \
+                        ' --main_reps=3'
+        cmd += ' --solver_params=\'' + solver_params + '\''
+        all_tests_commands.append(cmd)
+
+def createPredConfCommands():
     for pred_conf in [4, 3, 2, 1]:
         cmd = getDefaultCommand()
         cmd += ' --run_name=pred_conf__'  + str(pred_conf)
@@ -212,10 +224,11 @@ def createTestsCommands():
     createSepCrCommands()
     createSepMinimCommands()
     createPivotsCommands()
-    createPredConfCommandsCommands()
+    createPredConfCommands()
     createPreprocessingCommands()
     createInitPreprocessingAndPredefinedConfigsCommands()
     createMainRepsCommands()
+    createNSFCommands()
 
     print(f'\nThere are altogether {len(all_tests_commands)} commands to run in total')
 
@@ -226,7 +239,7 @@ def runTestForCommand(cmd):
 
 if __name__ == '__main__':
     print(f'{(platform.system())=}')
-    print(f'{RUN_THREADS=} {thread_cnt=} {tests_runner_threads=}')
+    print(f'{RUN_TESTS=} {thread_cnt=} {tests_runner_threads=}')
     
     try:
         if not os.path.exists(output_root_dir):
@@ -240,6 +253,7 @@ if __name__ == '__main__':
         print('#CAUTION! Taking only a fraction of all tests, just to test if it works as intended...')
         # all_tests_commands = all_tests_commands[0:5] # take first 5 elements
         all_tests_commands = all_tests_commands[0::11]
+        # all_tests_commands = all_tests_commands[-1:]
 
     print(f"All {len(all_tests_commands)} commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
 

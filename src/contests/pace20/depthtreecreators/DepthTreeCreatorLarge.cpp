@@ -257,10 +257,13 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
                 if (rec_depth == 0 && create_sep_stats) {
                     sep_data.emplace_back(bestSep.stats, bestSep.stats);
-                    if(cnf.write_logs) clog << "\t\t Adding to sep_data bestSep: " << bestSep << endl;
+                    if(cnf.write_logs) clog << "\t\t Adding to sep_data, before minimization, bestSep: " << bestSep << endl;
                 }
                 bestSep = totMin.minimizeSeparator(bestSep);
-                if (rec_depth == 0 && create_sep_stats) sep_data.back().second = bestSep.stats;
+                if (rec_depth == 0 && create_sep_stats) {
+                    sep_data.back().second = bestSep.stats;
+                    if(cnf.write_logs) clog << "\t\t\t Adding to sep_data, after minimization, bestSep: " << bestSep << endl;
+                }
 
                 bestSeps.push_back(bestSep);
             }

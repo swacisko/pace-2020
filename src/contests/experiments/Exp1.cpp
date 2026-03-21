@@ -20,7 +20,9 @@
 
 vector<pair<double, bool>> Exp1::createNSFS() {
     vector<pair<double,bool>> nsfs;
-    for (int i=0; i<cnf.main_repetitions; i++) nsfs.emplace_back(1.0 * i / (cnf.main_repetitions-1), i & 1);
+    if(cnf.main_repetitions > 1) {
+        for (int i=0; i<cnf.main_repetitions; i++) nsfs.emplace_back(1.0 * i / (cnf.main_repetitions-1), i & 1);
+    }else nsfs = {{0.5,true}};
     ranges::sort(nsfs,[&](auto a, auto b){ return abs(0.5 - a.first) < abs(0.5 - b.first); });
     return nsfs;
 }
