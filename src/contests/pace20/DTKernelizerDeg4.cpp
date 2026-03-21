@@ -62,13 +62,10 @@ VVI DTKernelizerDeg4::kernelize() {
         for(int d : (*V)[i]) if( i < d ) presE.insert( {i,d} );
     }
 
-//    DEBUG(deg4);
-
     VI is;
 
     InducedGraph g4 = GraphInducer::induce( *V,deg4 );
     VVI comps = ConnectedComponents::getConnectedComponents( g4.V );
-
 
     for( VI& cmp : comps ){
         InducedGraph g = GraphInducer::induce( g4.V, cmp );
@@ -94,8 +91,6 @@ VVI DTKernelizerDeg4::kernelize() {
 
     assert( VCUtils::isIndependentSet( *V,is ) );
 
-//    DEBUG(is);
-
     set<PII> addedEdges;
 
     for( int p : is ){
@@ -106,13 +101,9 @@ VVI DTKernelizerDeg4::kernelize() {
             int a = v[i];
             for( int k=i+1; k<v.size(); k++ ){
                 int b = v[k];
-
-//                assert( a<b );
-
                 if( presE.count( {a,b} ) == 0 ) addedEdges.insert( {a,b} );
             }
         }
-
     }
 
     deg4AddedEdges = VPII( ALL(addedEdges) );
@@ -127,23 +118,12 @@ VVI DTKernelizerDeg4::kernelize() {
         GraphUtils::addEdge( kernelizedV.V, kernelizedV.perm[a], kernelizedV.perm[b] );
     }
 
-//    DEBUG(kernelizedV.V.size());
-//    exit(1);
-
     // cerr << "After deg4 kernelization, kernelizedV has " << kernelizedV.V.size() << " nodes and " << GraphUtils::countEdges(kernelizedV.V) << " edges" << endl;
 
-
-//    DEBUG(deg4AddedEdges);
-    // DEBUG(deg4RemovedNodes.size());
-
     return kernelizedV.V;
-
-
-
 }
 
 DepthTree DTKernelizerDeg4::dekernelize(DepthTree dt) {
-//    if( deg3AddedEdges.empty() ) return dt;
     if( deg4RemovedNodes.empty() ) return dt;
 
     if( dt.root != -1 ) dt.root = kernelizedV.nodes[ dt.root ];
@@ -162,9 +142,6 @@ DepthTree DTKernelizerDeg4::dekernelize(DepthTree dt) {
         dt.par[a] = b;
     }
 
-//    DEBUG(dt.par);
-
-
     unordered_map<int, VI> stdStruct;
     for( PII p : dt.par ){
         if( p.second != -1 ){
@@ -173,8 +150,6 @@ DepthTree DTKernelizerDeg4::dekernelize(DepthTree dt) {
         }
     }
 
-//    DEBUG(stdStruct);
-
     unordered_map<int,int> nodeDepth;
     function< void(int,int,int) > calcDepthDfs = [ &dt, &stdStruct, &nodeDepth, &calcDepthDfs ]( int num, int par, int depth ){
         nodeDepth[num] = depth;
@@ -182,8 +157,6 @@ DepthTree DTKernelizerDeg4::dekernelize(DepthTree dt) {
     };
 
     calcDepthDfs( dt.root, dt.root, 0 );
-
-//    DEBUG(nodeDepth);
 
     for( int v : deg4RemovedNodes ){
         int lowestNode = -1;
@@ -196,18 +169,12 @@ DepthTree DTKernelizerDeg4::dekernelize(DepthTree dt) {
             }
         }
 
-//        cerr << "setting par of " << v << " to " << lowestNode << endl;
         dt.par[v] = lowestNode;
     }
 
-
-//    DEBUG(dt.par);
-
     dt.height = dt.calculateHeight();
     dt.V = kernelizedV.par;
-//    DEBUG(dt);
     return dt;
-
 }
 
 
@@ -227,7 +194,6 @@ void DTKernelizerDeg4::test(){
     dt.height = newV.size();
     dt.root = 0;
     for( int i=0; i<newV.size(); i++ ) dt.par[i] = i-1;
-
 
     dt = ker.dekernelize(dt);
 

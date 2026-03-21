@@ -34,9 +34,9 @@ enum SepMinim {
 enum Prepr {
     // NoPrepr = 0,
     // ArtPointsPrepr=0,
-    IndSet3Prepr=0,
+    DanglingTrees=0,
+    IndSet3Prepr,
     IndSet4Prepr,
-    DanglingTrees,
     AllPrepr,
     // PathCompressionPrepr,
 };
@@ -78,7 +78,7 @@ public:
 
     bool run_until_time_limit = false;
     int predefined_config_id = -1;
-    int main_repetitions = 5;
+    int main_repetitions = 10;
     bool find_valid_dtree = true;
     double node_scale_factor = -1.0;
 

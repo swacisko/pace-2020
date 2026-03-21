@@ -61,7 +61,8 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
     // if( cnf.preprocessing_to_use_mask != NoPrepr ) {
     if( cnf.preprocessing_to_use_mask != 0 ) {
-        if( V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0) {
+        bool cond = (V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 1, 2) > 0);
+        if( cond) {
             DTKernelizer dtKernelizer(*V,cnf);
             VVI newV;
 
@@ -70,19 +71,21 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             if (use_subgraph_kernelization) newV = dtKernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
             else newV = dtKernelizer.getKernelizedGraph(); // soft kernelization - only dangling trees and paths
 
+            // DEBUG2(V->size(), newV.size());
+            // DEBUG((cnf.preprocessing_to_use_mask & (1<<DanglingTrees)));
+
             if (newV.size() != V->size()) {
                 DepthTree dt((*V));
                 if (!newV.empty()) {
                     DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
                     dt = dtCL.getDepthTree();
+                    if(rec_depth == 0) sep_data = dtCL.sep_data;
                     assert(dt.root >= 0 && dt.root < newV.size());
                 } else dt.root = -1;
-
 
                 DepthTree newDt(*V);
                 if (use_subgraph_kernelization) newDt = dtKernelizer.dekernelizeSubgraphs(dt);
                 else newDt = dtKernelizer.dekernelize(dt);
-
 
                 if (rec_depth == 0 && newDt.height - dt.height > 0) {
                     if (cnf.write_logs) clog << "dt.height:    " << dt.height << endl;
@@ -93,20 +96,18 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
                 newDt.V = V;
                 dt = newDt;
-
                 assert(dt.isCorrect());
-
                 return dt;
             }
 
-
-        } else if ( (cnf.preprocessing_to_use_mask & (1<<Prepr::IndSet3Prepr)) && V->size() >= cnf.min_graph_size_for_kernelization &&
-                    rec_depth == 0 && GraphUtils::countNodesWithDegree(*V, 3, 3) > 0) {
+        } else if ( (cnf.preprocessing_to_use_mask & (1<<Prepr::IndSet3Prepr)) && V->size() >= cnf.min_graph_size_for_kernelization
+            && GraphUtils::countNodesWithDegree(*V, 3, 3) > 0) {
             DTKernelizerDeg3 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
-            if (cnf.write_logs) clog << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge with recDepth = 1" << endl;
-            DepthTreeCreatorLarge dtCL(newV, rec_depth + 1,cnf);
+            if (cnf.write_logs) clog << "Kernelized degree3 nodes, starting new DepthTreeCreatorLarge" << endl;
+            // DepthTreeCreatorLarge dtCL(newV, rec_depth + 1,cnf);
+            DepthTreeCreatorLarge dtCL(newV, rec_depth,cnf);
             dtCL.cnf.disableOptions(dtCL.cnf.preprocessing_to_use_mask, 1<<IndSet3Prepr);
 
             dt = dtCL.getDepthTree();
@@ -116,10 +117,13 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             DepthTreePivotMaker pm(cnf);
             dt = pm.makeAllPivots(dt);
 
-            assert(dt.isCorrect());
+            if(rec_depth == 0) sep_data = dtCL.sep_data;
 
+            assert(dt.isCorrect());
             return dt;
-        } else if( (cnf.preprocessing_to_use_mask & (1<<Prepr::IndSet4Prepr)) && V->size() >= cnf.min_graph_size_for_kernelization && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
+
+        } else if( (cnf.preprocessing_to_use_mask & (1<<Prepr::IndSet4Prepr)) && V->size() >= cnf.min_graph_size_for_kernelization
+            && GraphUtils::countNodesWithDegree(*V, 4,4) > 0 ){
             DTKernelizerDeg4 ker(*V,cnf);
             VVI newV = ker.kernelize();
             DepthTree dt((*V));
@@ -131,11 +135,11 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
             dt = ker.dekernelize(dt);
             dt.V = V;
 
+            if(rec_depth == 0) sep_data = dtCL.sep_data;
+
             DepthTreePivotMaker pm(cnf);
             dt = pm.makeAllPivots(dt);
-
             assert(dt.isCorrect());
-
             return dt;
         }
     }
@@ -251,7 +255,10 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
                 TotalMinimizer totMin(&sepEval, cnf);
                 totMin.cnf.cur_rec_depth = rec_depth;
 
-                if (rec_depth == 0 && create_sep_stats) sep_data.emplace_back(bestSep.stats, bestSep.stats);
+                if (rec_depth == 0 && create_sep_stats) {
+                    sep_data.emplace_back(bestSep.stats, bestSep.stats);
+                    if(cnf.write_logs) clog << "\t\t Adding to sep_data bestSep: " << bestSep << endl;
+                }
                 bestSep = totMin.minimizeSeparator(bestSep);
                 if (rec_depth == 0 && create_sep_stats) sep_data.back().second = bestSep.stats;
 
@@ -260,8 +267,9 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
             for (auto &sp : bestSeps) sp.updatePointers(*V);
         }else {
-            for (auto & bs : bestSeps) {
-                if (rec_depth == 0 && create_sep_stats) sep_data.emplace_back(bs.stats, bs.stats);
+            if (rec_depth == 0 && create_sep_stats) {
+                // clog << "Creating stats" << endl;
+                for (auto & bs : bestSeps) sep_data.emplace_back(bs.stats, bs.stats);
             }
         }
 
@@ -274,13 +282,12 @@ DepthTree DepthTreeCreatorLarge::getDepthTree() {
 
 
 
-
     int est_depth = SeparatorEvaluators::estimateDepthBasedOnEdges(bestSep.stats) + SeparatorEvaluators::estimateDepthBasedOnNodes( bestSep.stats );
     bool flowcutter_cond = ( cnf.sep_cr_to_use_mask & (1<<SepCr::FlowCutterCr) ) && 0.8 * est_depth <= cnf.max_estimated_treedepth_for_flowcutter
         && rec_depth <= cnf.max_rec_depth_for_flowcutter; // && bestSeps[0].stats.size > 1;
     if( flowcutter_cond ){
 
-        if( rec_depth == 0 && cnf.write_logs ){ clog << "\tflow cutter" << endl;  }
+        if( rec_depth == 0 && cnf.write_logs ) clog << "\t creating flow cutter" << endl;
 
         FlowCutter fc(sepEval, cnf);
 

@@ -24,7 +24,7 @@ public:
 
     auto getKernelMode() {
         if ( cnf.preprocessing_to_use_mask & (1<<Prepr::DanglingTrees) ) return DANGLING_TREES;
-        return -1;
+        return 0;
     }
 
     /**
@@ -47,8 +47,8 @@ public:
 
     Config cnf;
 
-    VVI kernelizeDegree3Nodes( VVI& G );
-    void dekernelizeDegree3Nodes( VVI& G );
+    // VVI kernelizeDegree3Nodes( VVI& G );
+    // void dekernelizeDegree3Nodes( VVI& G );
 
 private:
     InducedGraph kernelizedDeg3V;

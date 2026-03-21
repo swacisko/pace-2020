@@ -6,7 +6,7 @@ from itertools import count
 from concurrent.futures import ThreadPoolExecutor
 import time
 
-threads = 16
+threads = 8
 
 
 def readGraphFromFile(f, extension):
@@ -67,8 +67,8 @@ def checkGraph(V):
     max_deg = max(map(lambda v : len(v),V))
     
     
-    max_nodes_allowed = 10**9
-    max_edges_allowed = 10**9
+    max_nodes_allowed = 1e6
+    max_edges_allowed = 1e6
     max_deg_allowed = 10**9
     print(f'\t\t\t{nodes=}, {edge_cnt=}, {avg_deg=}, {max_deg=}  <--->  {max_nodes_allowed=}, {max_edges_allowed=}, {max_deg_allowed=}')
     
@@ -99,7 +99,7 @@ def graphFilter(file_path: Path) -> bool:
     #return 'massive' not in str(file_path)
     #return file_path.stat().st_size < 100e6 #100 MB max size
     
-    #if 'massive' in str(file_path): return False, []
+    if 'massive' in str(file_path): return False, []
     return readAndFilterGraph(file_path)
 
 

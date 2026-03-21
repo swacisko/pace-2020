@@ -22,6 +22,7 @@ DTKernelizer::DTKernelizer(VVI &V,Config c) : cnf(c) {
 }
 
 void DTKernelizer::createDanglingTrees() {
+    clog << "Creating dangling trees!" << endl;
     VI kolejka;
     int N = V->size();
     VI deg(N,0);
@@ -555,6 +556,8 @@ VVI &DTKernelizer::getKernelizedGraphSubgraphs() {
         for( VI& tree : removedSubgraphsNodes ) nodesToRemove.insert( nodesToRemove.end(), ALL(tree) );
 
     }
+
+    // clog << "nodes to remove in getKernelizedGraphSubgraphs: " << nodesToRemove.size() << endl;
 
     VI nodes = GraphUtils::getComplimentaryNodes(*V, nodesToRemove);
 

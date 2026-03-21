@@ -6,6 +6,7 @@
 
 #include <getopt.h>
 #include <ranges>
+#include <components/ConnectedComponents.h>
 
 #include "DepthTreeCreatorLarge.h"
 #include "GraphReader.h"
@@ -221,6 +222,7 @@ void Exp1::runForConfiguration() {
             sep_stats.emplace_back(nsf, creator.sep_data);
 
             clog << ",\t dtree.heigh: " << dtree.height << flush;
+            // clog << "\nsep_stats: " << endl; for (auto [a,b] : creator.sep_data) clog << a << " -> " << b  << endl;
         }
 
         if ( !cnf.run_until_time_limit ) break;
@@ -317,6 +319,7 @@ void Exp1::initPreprocessing() {
     if (cnf.use_init_prepr) {
         V = V0;
         init_kernelizer = DTKernelizer(V0,cnf);
+        init_kernelizer.cnf.preprocessing_to_use_mask |= (1<<DanglingTrees); // we need to set this, otherwise there will be no preprocessing...
         if (cnf.write_logs) clog << "Starting initial kernelization" << endl;
         V = init_kernelizer.getKernelizedGraphSubgraphs(); // harder kernelization
         if (cnf.write_logs)
@@ -509,6 +512,8 @@ Config parseArguments(int argc, char ** argv) {
     if ( cnf.sep_cr_to_use_mask == (1<<ArtPointCr) ) cnf.sep_cr_to_use_mask |= (1<<BfsCr);
     if ( cnf.sep_cr_to_use_mask == (1<<FlowCutterCr) ) cnf.sep_cr_to_use_mask |= (1<<BfsCr);
 
+    if(cnf.preprocessing_to_use_mask == (1<<IndSet4Prepr)) cnf.preprocessing_to_use_mask |= (1<<IndSet3Prepr);
+
     return cnf;
 }
 
@@ -530,6 +535,14 @@ int main(int argc, char* argv[]) {
     // auto V = GraphReader::readGraphDIMACSWunweighed(cin);
     clog << "Graph read, V.size() = " << V.size() << ", edges: " << GraphUtils::countEdges(V) << endl;
 
+    if(!GraphUtils::isConnected(V)) {
+        auto comps = ConnectedComponents::getConnectedComponents(V);
+        clog << "#CAUTION! Input graph is not connected, comps.size(): " << comps.size() << ", connecting it" << endl;
+        for( int i=1; i<comps.size(); i++ ) {
+            int a = comps[i-1][0], b = comps[i][0];
+            GraphUtils::addEdge(V,a,b);
+        }
+    }
     assert(GraphUtils::isConnected(V));
 
     // running experiments
@@ -542,6 +555,8 @@ int main(int argc, char* argv[]) {
     ofstream f(cnf.metadata_filepath);
     data.writeData(f,cnf);
     f.close();
+
+    cnf.writeBasicInfo();
 
     sw.stop("main");
     sw.writeAll();

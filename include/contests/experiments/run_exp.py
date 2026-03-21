@@ -67,9 +67,9 @@ all_tests_commands = []
 # separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCr', 'FlowCutterCr']
 separator_creators = ['ArtPointCr', 'BfsCr', 'CompExpCr', 'FlowCutterCr']
 separator_minmizers = [ 'BfsMinim', 'ExpansionMinim', 'FlowCutterMinim', 'FlowCutterDstMinim', 'FlowMinim', 'GNEMinim', 'NeighVCCMinim']
-preprocessing_types = [ 'ArtPointsPrepr', 'IndSet3Prepr', 'IndSet4Prepr', 'DanglingTrees']
+preprocessing_types = [ 'ArtPointsPrepr', 'DanglingTrees', 'IndSet3Prepr', 'IndSet4Prepr']
 pivot_types = ['BlockPivots', 'HallSetPivots']
-def_time = 3 * 3600 # default time of 5h
+def_time = 5 * 3600 # default time of 5h
 def parseSepCr(x):
     if x == -1: return 'no'
     if x == len(separator_creators):
@@ -143,7 +143,7 @@ def createInitPreprocessingAndPredefinedConfigsCommands():
             cmd = getDefaultCommand()
             cmd += ' --run_name=init_prepr_and_pred_conf__' + str(init_prepr) + '_' + str(pred_conf)
             solver_params = '--experiment_name=init_prepr_and_pred_conf' + \
-                            ' --time=' + str(5*def_time) + \
+                            ' --time=' + str(2*def_time) + \
                             ' --pred_conf=' + str(pred_conf) + \
                             ' --init_prepr=' + str(init_prepr)
             cmd += ' --solver_params=\'' + solver_params + '\''

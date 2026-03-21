@@ -10,6 +10,7 @@ vector<pair<string, string>> Config::getConfigEntries() {
     entries.emplace_back("max_time", to_string(max_time_millis / 1000));
     entries.emplace_back("metadata_filepath", metadata_filepath);
     entries.emplace_back("experiment_name", experiment_name);
+    entries.emplace_back("sep_cr_max_sources", to_string(sep_cr_max_sources));
     entries.emplace_back("run_until_time_limit", to_string(run_until_time_limit));
     entries.emplace_back("main_repetitions", to_string(main_repetitions));
     entries.emplace_back("node_scale_factor", to_string(node_scale_factor));
@@ -76,7 +77,7 @@ void Config::setPredefinedConfig(int id) {
         preprocessing_to_use_mask = (1<<AllPrepr)-1;
         sep_cr_to_use_mask = (1<<FullSepCr)-1;
         sep_minim_to_use_mask = (((1<<TotalMinim)-1) ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim) ^ (1<<FlowCutterMinim));
-        main_repetitions = 5;
+        main_repetitions = 10;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 500;
         max_rec_depth_for_flowcutter = 5;
         max_estimated_treedepth_for_flowcutter = 500;
@@ -91,7 +92,7 @@ void Config::setPredefinedConfig(int id) {
         preprocessing_to_use_mask = (1<<AllPrepr)-1;
         sep_cr_to_use_mask = (1<<FullSepCr)-1;
         sep_minim_to_use_mask = (((1<<TotalMinim)-1) ^ (1<<FlowCutterDstMinim) ^ (1<<FlowMinim));
-        main_repetitions = 10;
+        main_repetitions = 15;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 1'000;
         max_rec_depth_for_flowcutter = 10;
         max_estimated_treedepth_for_flowcutter = 1'000;
@@ -106,7 +107,7 @@ void Config::setPredefinedConfig(int id) {
         preprocessing_to_use_mask = (1<<AllPrepr)-1;
         sep_cr_to_use_mask = (1<<FullSepCr)-1;
         sep_minim_to_use_mask = (1<<TotalMinim)-1;
-        main_repetitions = 15;
+        main_repetitions = 20;
         max_separator_size_for_GNE_minimizer = max_separator_size_for_flow_minimizer = 3'000;
         max_rec_depth_for_flowcutter = 15;
         max_estimated_treedepth_for_flowcutter = 3'000;
