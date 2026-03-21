@@ -535,6 +535,8 @@ int main(int argc, char* argv[]) {
     auto V = GraphReader::readGraphStandardEdges(cin);
     // auto V = GraphReader::readGraphDIMACSWunweighed(cin);
 
+    // need to make the graph simple, as some real-world instance were parsed also from directed graphs,
+    // so parallel arcs might occur in V in such situations
     V = GraphUtils::makeSimple(V);
     assert(GraphUtils::isSimple(V));
 
