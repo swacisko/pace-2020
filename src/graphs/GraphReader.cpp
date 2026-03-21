@@ -18,6 +18,7 @@ namespace GraphReader{
 
             // clog << "CAUTION - changed readGraphStandardEdges()" << endl;
             a++, b++;
+            assert(a != b);
 
             V[a-1].push_back(b-1);
             if( !directed ) V[b-1].push_back(a-1);

@@ -6,6 +6,7 @@
 
 #include <getopt.h>
 #include <ranges>
+#include <StandardUtils.h>
 #include <components/ConnectedComponents.h>
 
 #include "DepthTreeCreatorLarge.h"
@@ -533,6 +534,10 @@ int main(int argc, char* argv[]) {
 
     auto V = GraphReader::readGraphStandardEdges(cin);
     // auto V = GraphReader::readGraphDIMACSWunweighed(cin);
+
+    V = GraphUtils::makeSimple(V);
+    assert(GraphUtils::isSimple(V));
+
     clog << "Graph read, V.size() = " << V.size() << ", edges: " << GraphUtils::countEdges(V) << endl;
 
     if(!GraphUtils::isConnected(V)) {
@@ -544,6 +549,7 @@ int main(int argc, char* argv[]) {
         }
     }
     assert(GraphUtils::isConnected(V));
+    assert(GraphUtils::isSimple(V));
 
     // running experiments
     Exp1 exp_runner(V,cnf);

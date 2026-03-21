@@ -644,7 +644,11 @@ bool GraphUtils::isSimple(VVI V) {
 
      for( int i=0; i<N; i++ ){
          for( int d : V[i] ){
-             if( (d == i) || helper[d] ) return false;
+             if( (d == i) || helper[d] ) {
+                 if(d == i) clog << "LOOP! i: " << i << endl;
+                 else if( helper[d] ) clog << "Parallel arc " << i << " -> " << d << endl;
+                 return false;
+             }
              helper[d] = true;
          }
 

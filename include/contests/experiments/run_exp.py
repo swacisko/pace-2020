@@ -29,6 +29,9 @@ solver_name = 'extreem'
 thread_cnt = 4 if not RUN_TESTS else 4
 tests_runner_threads = 2 if not RUN_TESTS else 5
 
+# thread_cnt = 1
+# tests_runner_threads = 1
+
 def getDefaultCommand():
     cmd = 'python3 TestsRunner.py' + \
           ' --instances_dir=' + inst_dir + \
@@ -223,13 +226,20 @@ def runTestForCommand(cmd):
 
 if __name__ == '__main__':
     print(f'{(platform.system())=}')
+    print(f'{RUN_THREADS=} {thread_cnt=} {tests_runner_threads=}')
+    
+    try:
+        if not os.path.exists(output_root_dir):
+            os.makedirs(output_root_dir)
+    except Exception as e:
+        print(f"Error creating directory: {e}")
 
     createTestsCommands()
 
     if RUN_TESTS:
         print('#CAUTION! Taking only a fraction of all tests, just to test if it works as intended...')
         # all_tests_commands = all_tests_commands[0:5] # take first 5 elements
-        all_tests_commands = all_tests_commands[0::10] # take every fifth element
+        all_tests_commands = all_tests_commands[0::11]
 
     print(f"All {len(all_tests_commands)} commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
 

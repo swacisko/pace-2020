@@ -8,6 +8,9 @@ import time
 
 threads = 8
 
+max_nodes_allowed = 1e6
+max_edges_allowed = 1e6
+max_deg_allowed = 10 ** 9
 
 def readGraphFromFile(f, extension):
     V = []
@@ -65,17 +68,13 @@ def checkGraph(V):
     edge_cnt = countEdges(V)
     avg_deg = 2*edge_cnt / nodes
     max_deg = max(map(lambda v : len(v),V))
-    
-    
-    max_nodes_allowed = 1e6
-    max_edges_allowed = 1e6
-    max_deg_allowed = 10**9
+
     print(f'\t\t\t{nodes=}, {edge_cnt=}, {avg_deg=}, {max_deg=}  <--->  {max_nodes_allowed=}, {max_edges_allowed=}, {max_deg_allowed=}')
     
     return nodes <= max_nodes_allowed and edge_cnt <= max_edges_allowed and max_deg <= max_deg_allowed
 
 
-def readAndFilterGraph(file_path : Path) -> bool:
+def readAndFilterGraph(file_path : Path):
     accept = False
     V = []
     print('\t\tReading graph from file', file_path)
@@ -88,7 +87,7 @@ def readAndFilterGraph(file_path : Path) -> bool:
     
     
 
-def graphFilter(file_path: Path) -> bool:
+def graphFilter(file_path: Path):
     """
     Replace this stub with your real filtering logic.
     Return True if the file should be copied, otherwise False.
