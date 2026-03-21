@@ -11,6 +11,7 @@ import platform
 import argparse
 import numpy as np
 import itertools
+from pathlib import Path
 
 RUN_TESTS = False
 
@@ -236,11 +237,25 @@ def runTestForCommand(cmd):
     print('Running command', cmd)
     os.system(cmd)
 
+def count_files(root_dir, extensions):
+    root = Path(root_dir)
+    extensions = {ext.lower() for ext in extensions}  # normalize
+
+    return sum(
+        1 for f in root.rglob("*")
+        if f.is_file() and f.suffix.lower() in extensions
+    )
+
+# Example
+
 
 if __name__ == '__main__':
+    all_input_files = count_files(inst_dir, ['.txt', '.in', '.mtx', '.edges'])
+    print(all_input_files)
+
     print(f'{(platform.system())=}')
-    print(f'{RUN_TESTS=} {thread_cnt=} {tests_runner_threads=}')
-    
+    print(f'{RUN_TESTS=} {thread_cnt=} {tests_runner_threads=} {all_input_files=}')
+
     try:
         if not os.path.exists(output_root_dir):
             os.makedirs(output_root_dir)
