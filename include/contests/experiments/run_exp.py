@@ -214,7 +214,7 @@ def createTestsCommands():
     createInitPreprocessingAndPredefinedConfigsCommands()
     createMainRepsCommands()
 
-    print(f'\nThere are {len(all_tests_commands)} commands to run')
+    print(f'\nThere are altogether {len(all_tests_commands)} commands to run in total')
 
 def runTestForCommand(cmd):
     print('Running command', cmd)
@@ -231,7 +231,7 @@ if __name__ == '__main__':
         # all_tests_commands = all_tests_commands[0:5] # take first 5 elements
         all_tests_commands = all_tests_commands[0::10] # take every fifth element
 
-    print("All commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
+    print(f"All {len(all_tests_commands)} commands to run:", *all_tests_commands, sep='\n\n', end='\n\n')
 
     p = multiprocessing.Pool(thread_cnt)
     dss = p.map(runTestForCommand, all_tests_commands, chunksize=1)
