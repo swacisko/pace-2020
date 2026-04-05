@@ -190,7 +190,7 @@ void Exp1::runForConfiguration() {
 
         for(auto [nsf, min_node_iter] : nsfs) {
             // clog << "\rRunning for nsf: " << nsf << flush;
-            clog << "\nRunning for nsf: " << nsf << flush;
+            clog << "\nRunning for nsf: " << nsf << ", time since start: " << cnf.sw.getTime("main") / 1000 << flush;
 
             if (cnf.sw.tle("main")) {
                 unordered_map<int,int> par;
