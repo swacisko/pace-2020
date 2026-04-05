@@ -21,14 +21,14 @@ output_root_dir = 'results_small_tests' if RUN_TESTS else 'results'
 # inst_dir = 'input_small_for_tests'
 # output_root_dir = 'results_small_tests'
 # inst_dir = "extreem-instances"
-# output_root_dir = 'results_full'
+# output_root_dir = 'results'
 solver_name = 'extreem'
 
 
 # this program will run [thread_cnt] processes, each running TestsRunner, which runs tests_runner_threads processes,
 # each of which calls the solver process...
-thread_cnt = 4 if not RUN_TESTS else 4
-tests_runner_threads = 2 if not RUN_TESTS else 5
+thread_cnt = 2 if not RUN_TESTS else 4
+tests_runner_threads = 4 if not RUN_TESTS else 5
 
 # thread_cnt = 1
 # tests_runner_threads = 1
@@ -107,7 +107,7 @@ def createNSFCommands():
                         ' --time=' + str(def_time) + \
                         ' --nsf=' + str(f"{nsf:.3f}") + \
                         ' --pred_conf=3' + \
-                        ' --main_reps=3'
+                        ' --main_reps=5'
         cmd += ' --solver_params=\'' + solver_params + '\''
         all_tests_commands.append(cmd)
 
@@ -122,7 +122,8 @@ def createPredConfCommands():
         all_tests_commands.append(cmd)
 
 def createMainRepsCommands():
-    for pred_conf in [3, 2, 1]:
+    # for pred_conf in [3, 2, 1]:
+    for pred_conf in [2]:
         for main_reps in np.arange(30,4,-5):
             cmd = getDefaultCommand()
             cmd += ' --run_name=main_reps_and_pred_conf__' + str(main_reps) + '_' + str(pred_conf)
@@ -227,7 +228,7 @@ def createTestsCommands():
     createPivotsCommands()
     createPredConfCommands()
     createPreprocessingCommands()
-    createInitPreprocessingAndPredefinedConfigsCommands()
+    # createInitPreprocessingAndPredefinedConfigsCommands()
     createMainRepsCommands()
     createNSFCommands()
 

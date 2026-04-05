@@ -80,11 +80,9 @@ vector<Separator> FlowCutter::getSeparatorsForSourcesAndTargets(VVI &V, VVI &exp
 
     vector<Separator> seps;
 
-
-    getFlowCutterExpansionOrder( expV, S, T );
-
     if( cnf.sw.tle("main") ) return seps;
 
+    getFlowCutterExpansionOrder( expV, S, T );
 
 
      {

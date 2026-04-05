@@ -112,6 +112,8 @@ FlowCutterMinimizer::getDistanceMinimizedSeparator(VVI *V, Separator &sep, VVI &
     auto seps = fc.getSeparatorsForSourcesAndTargets( g.V, expV, sources, ends );
     for(auto& sp : seps) sp.updatePointers(g.V);
 
+    if(seps.empty()) return sep;
+
     auto bestSep = *min_element( ALL(seps), *sepEval );
     bestSep.updatePointers(g.V);
 
@@ -190,6 +192,7 @@ Separator FlowCutterMinimizer::getFurthestPointMinimizedSeparator(Separator &sep
 
     auto seps = fc.getSeparatorsForSourcesAndTargets( *V, expV, sources, targets );
     for(auto& sp : seps) sp.updatePointers(*V);
+    if(seps.empty()) return sep;
 
     auto bestSep = *min_element( ALL(seps), *sepEval );
     bestSep.updatePointers(*V);
