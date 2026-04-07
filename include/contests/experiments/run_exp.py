@@ -106,7 +106,7 @@ def createNSFCommands():
         solver_params = '--experiment_name=nsf' + \
                         ' --time=' + str(def_time) + \
                         ' --nsf=' + str(f"{nsf:.3f}") + \
-                        ' --pred_conf=3' + \
+                        ' --pred_conf=1' + \
                         ' --main_reps=5'
         cmd += ' --solver_params=\'' + solver_params + '\''
         all_tests_commands.append(cmd)
@@ -123,8 +123,8 @@ def createPredConfCommands():
 
 def createMainRepsCommands():
     # for pred_conf in [3, 2, 1]:
-    for pred_conf in [2]:
-        for main_reps in np.arange(30,4,-5):
+    for pred_conf in [1]:
+        for main_reps in np.arange(20,1,-2):
             cmd = getDefaultCommand()
             cmd += ' --run_name=main_reps_and_pred_conf__' + str(main_reps) + '_' + str(pred_conf)
             solver_params = '--experiment_name=main_reps_and_pred_conf' + \
